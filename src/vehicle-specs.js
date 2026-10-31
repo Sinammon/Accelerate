@@ -1,5 +1,6 @@
 import { sellerText } from './mileage.js';
 import { CONFIG_FIELDS, MODEL_FIELDS, modelSpecsInput, usableModelFinding, modelFieldValue } from '../shared/model-specs.js';
+import { normalizeTransmission, compatibleTransmission } from '../shared/transmission.js';
 
 export const normalized = value => String(value ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
 const number = value => /^\d+(?:\.\d+)?$/.test(String(value).trim()) ? Number(value) : null;
@@ -40,13 +41,7 @@ function normalize(key, value) {
     if (/\b(?:rwd|rear[- ]wheel)\b/i.test(text)) return 'RWD';
     return null;
   }
-  if (key === 'transmission') {
-    if (/\b(?:cvt|continuously variable)|^AV\d*$/i.test(text)) return 'CVT';
-    if (/dual[- ]clutch|automated manual|^AM\d+$/i.test(text)) return 'Dual-clutch / automated manual';
-    if (/automatic|^A(?:S)?\d+$/i.test(text)) return 'Automatic';
-    if (/manual|^M\d+$/i.test(text)) return 'Manual';
-    return null;
-  }
+  if (key === 'transmission') return normalizeTransmission(text);
   if (key === 'fuelType') {
     if (/gasoline|petrol|^gas$/i.test(text)) return 'Gasoline';
     if (/diesel/i.test(text)) return 'Diesel';
@@ -87,6 +82,28 @@ const aliases = {
   bodyType: ['body type', 'body style'], seats: ['seating capacity', 'seats', 'number of seats'],
 };
 
+function powertrainClaim(key, match, text, structuredKey) {
+  const before = text.slice(0, match.index).split(/[;\n!?]|\.(?!\d)/).at(-1);
+  const after = text.slice(match.index + match[0].length).split(/[;\n!?]|\.(?!\d)/)[0];
+  if (key === 'transmission' && /^manual$/i.test(match[0]) && /^\s+(?:mode|shift|selection|control)\b/i.test(after)) return false;
+  if (structuredKey === key) return true;
+  if (key === 'transmission') {
+    return /CVT|continuously variable|dual[- ]clutch|automated manual|DCT/i.test(match[0])
+      || /\b(?:transmission|gearbox)\s*(?:type\s*)?(?::|=|is)?\s*(?:(?:automatic|manual|CVT|automated manual|dual[- ]clutch)\s*(?:and|or|\/|,)\s*)?$/i.test(before)
+      || /^\s+(?:transmission|gearbox)\b/i.test(after)
+      || /\b\d{1,2}[- ]speed\s*$/i.test(before)
+      || /^automatic$/i.test(match[0]) && /^\s+with\s+(?:a\s+)?manual\s+(?:mode|shift)\b/i.test(after)
+      || /\b(?:car|vehicle|it)\s+(?:is|has|uses)\s+(?:an?\s+)?$/i.test(before) && !/^\s+\w/i.test(after)
+      || !before.trim() && !after.trim();
+  }
+  return /\b(?:fuel(?: type)?|engine(?: fuel)?|powertrain)\s*(?::|=|is)?\s*(?:(?:gasoline|petrol|gas|diesel|electric|ethanol|E85|flex[- ]fuel)\s*(?:and|or|\/|,)\s*)?$/i.test(before)
+    || /\b(?:runs? on|powered by)\s*$/i.test(before)
+    || /\b(?:car|vehicle|it)\s+(?:is|uses)\s*$/i.test(before) && !after.trim()
+    || /^\s*[- ]\s*powered\b/i.test(after)
+    || /^\s+(?:engine|fuel|vehicle|car|powertrain|propulsion)\b/i.test(after)
+    || !before.trim() && !after.trim();
+}
+
 function patterns(text, structuredKey) {
   const values = [];
   const push = (key, value, quote) => { const canonical = normalize(key, value); if (canonical !== null) values.push({ key, value: canonical, quote }); };
@@ -95,8 +112,11 @@ function patterns(text, structuredKey) {
       const before = text.slice(Math.max(0, match.index - 65), match.index).split(/[;\n!?]|\.(?!\d)/).at(-1);
       const after = text.slice(match.index + match[0].length, match.index + match[0].length + 45);
       if (/\b(?:not|no|optional|available|may have)\s*(?:an?\s*)?$/i.test(before) || /\b(?:replacement|swapped|modified|tuned)\b/i.test(before) || /^\s*(?:optional|available|unknown)\b/i.test(after)) continue;
-      if (key === 'transmission' && /^manual$/i.test(match[0]) && /^\s+(?:mode|shift|selection|control)\b/i.test(after)) continue;
-      push(key, convert(match), match[0]);
+      if (['transmission', 'fuelType'].includes(key) && !powertrainClaim(key, match, text, structuredKey)) continue;
+      if (key === 'transmissionSpeeds' && /\b(?:e?CVT|continuously variable|simulated|virtual)\b/i.test(`${before} ${after}`)) continue;
+      const quote = ['transmission', 'fuelType'].includes(key)
+        ? `${before}${match[0]}${after.split(/[;\n!?]|\.(?!\d)/)[0]}`.trim() : match[0];
+      push(key, convert(match), quote);
     }
   };
   addMatches(/(?<![\w.])(\d(?:\.\d{1,3})?)\s*[- ]?(?:litres?|liters?|L)\b/gi, 'displacement');
@@ -116,29 +136,53 @@ function patterns(text, structuredKey) {
   addMatches(/\b(\d{1,2})[- ]?(?:cylinders?|cyl)\b/gi, 'cylinders');
   addMatches(/\b(V[3468]|V10|V12|I[34568]|inline[- ]?[34568]|boxer|rotary|electric motor)\b/gi, 'engineType');
   addMatches(/\b(turbocharged|supercharged|naturally aspirated)\b/gi, 'induction');
-  addMatches(/\b(automatic|manual|CVT|continuously variable|dual[- ]clutch|automated manual)\b/gi, 'transmission');
+  addMatches(/\b(automated manual|dual[- ]clutch|DCT|e?CVT|continuously variable|automatic|manual)\b/gi, 'transmission');
   addMatches(/\b(\d{1,2})[- ]speed\b/gi, 'transmissionSpeeds');
   addMatches(/\b(AWD|FWD|RWD|4WD|4x4|all[- ]wheel drive|front[- ]wheel drive|rear[- ]wheel drive|four[- ]wheel drive)\b/gi, 'drivetrain');
-  addMatches(/\b(gasoline|petrol|diesel|electric|E85|flex[- ]fuel)\b/gi, 'fuelType');
+  addMatches(/\b(gasoline|petrol|gas|diesel|electric|ethanol|E85|flex[- ]fuel)\b/gi, 'fuelType');
   addMatches(/\b(sedan|saloon|coupe|hatchback|convertible|cabriolet|SUV|crossover|station wagon|pickup|minivan)\b/gi, 'bodyType');
   addMatches(/\b(?:seats?\s+(\d{1,2})|(\d{1,2})[- ](?:seats?|seater|passenger))\b/gi, 'seats', m => m[1] || m[2]);
   addMatches(/\b(?:seating capacity|number of seats)\s*(?::|is|=)?\s*(\d{1,2})\b/gi, 'seats');
   if (structuredKey) {
     if (structuredKey === 'horsepower' && /^(?:\d+(?:\.\d+)?)$/.test(text)) return values; // A bare number lacks a trustworthy power unit.
-    if (!['horsepower', 'torque', 'displacement', 'curbWeightKg', 'zeroTo100KphSeconds', 'zeroTo60MphSeconds'].includes(structuredKey)) push(structuredKey, text, text);
-    if (structuredKey === 'transmission' && /^(?:A[SMV]?|M)\d+$/i.test(text)) {
+    if (!['horsepower', 'torque', 'displacement', 'curbWeightKg', 'zeroTo100KphSeconds', 'zeroTo60MphSeconds', 'transmission', 'fuelType'].includes(structuredKey)) push(structuredKey, text, text);
+    if (structuredKey === 'transmission' && /^(?:AV\d*|A[SM]?\d+|M\d+)$/i.test(text)) {
+      push('transmission', text, text);
       push('transmissionCode', text.toUpperCase(), text);
-      push('transmissionSpeeds', text.match(/\d+/)[0], text);
+      if (!/^AV/i.test(text)) push('transmissionSpeeds', text.match(/\d+/)[0], text);
     }
   }
   return values;
 }
 
-function resolve(evidence, tolerance = 0) {
+function resolve(evidence, tolerance = 0, key, constraints = {}) {
   const values = [...new Map(evidence.map(e => [typeof e.value === 'number' ? e.value.toFixed(2) : normalized(e.value), e.value])).values()];
+  if (key === 'transmission' && values.length > 1 && values.every(a => values.every(b => compatibleTransmission(a, b, constraints, constraints)))) {
+    values.splice(0, values.length, ...values.filter(value => value !== 'Automatic'));
+  }
   // Published whole-unit ratings can differ slightly after unit conversion.
   if (values.length > 1 && tolerance && values.every(v => typeof v === 'number') && Math.max(...values) - Math.min(...values) <= tolerance) values.splice(1);
   return { value: values.length === 1 ? values[0] : null, status: !values.length ? 'unknown' : values.length > 1 ? 'conflict' : evidence.some(e => e.type === 'factory-reference') ? evidence.some(e => e.type !== 'factory-reference') ? 'corroborated' : 'factory-reference' : evidence.some(e => e.type === 'vpic') ? evidence.some(e => e.type !== 'vpic') ? 'corroborated' : 'vin-record' : 'seller-reported', evidence };
+}
+
+function resolveSpecs(evidence) {
+  const specs = Object.fromEntries(Object.entries(evidence).map(([key, items]) => [key, resolve(items, ['horsepower', 'torque'].includes(key) ? 0.75 : 0)]));
+  specs.transmission = resolve(evidence.transmission, 0, 'transmission', transmissionConstraints(specs));
+  return specs;
+}
+
+function transmissionConstraints(specs) {
+  return { code: specs.transmissionCode.value, speeds: specs.transmissionSpeeds.value,
+    conventional: specs.transmission.evidence.some(e => /\b(?:torque[- ]converter|conventional automatic)\b/i.test(e.quote)) };
+}
+
+function agreesWithVin(key, seller, fields) {
+  const a = seller[key]?.value, b = normalize(key, fields?.[key]);
+  if (seller[key]?.status === 'conflict') return false;
+  if (key === 'transmission') return compatibleTransmission(a, b,
+    transmissionConstraints(seller),
+    { code: fields?.transmissionCode, speeds: normalize('transmissionSpeeds', fields?.transmissionSpeeds), conventional: /\b(?:torque[- ]converter|conventional automatic)\b/i.test(fields?.transmission) });
+  return a == null || b == null || (key === 'displacement' ? Math.abs(a - b) < 0.06 : normalized(a) === normalized(b));
 }
 
 export function specEvidenceLabel(spec) {
@@ -187,13 +231,15 @@ export function extractVehicleSpecs(car) {
   }
   const vin = car.enrichment?.vin;
   if (vin?.status === 'decoded') {
-    const seller = Object.fromEntries(Object.entries(evidence).map(([key, items]) => [key, resolve(items)]));
-    const agrees = keys => keys.every(key => seller[key]?.status !== 'conflict' && (seller[key]?.value == null || normalize(key, vin.fields?.[key]) == null || normalized(seller[key].value) === normalized(normalize(key, vin.fields[key]))));
+    const seller = resolveSpecs(evidence);
+    const agrees = keys => keys.every(key => agreesWithVin(key, seller, vin.fields));
     const identityAgrees = ['year', 'make', 'model'].every(key => normalize(key, vin.fields?.[key]) != null) && agrees(['year', 'make', 'model']);
-    const powertrainAgrees = agrees(['displacement', 'cylinders', 'engineType', 'induction', 'transmission', 'transmissionSpeeds', 'drivetrain', 'fuelType']);
+    const powertrainAgrees = agrees(['displacement', 'cylinders', 'engineType', 'induction', 'transmission', 'transmissionSpeeds', 'transmissionCode', 'drivetrain', 'fuelType']);
     const bodyAgrees = agrees(['bodyType']);
     for (const [key, value] of Object.entries(vin.fields || {})) {
-      if (!evidence[key] || evidence[key].length || !identityAgrees) continue;
+      const refinesTransmission = key === 'transmission' && seller.transmission.value === 'Automatic'
+        && ['CVT', 'Dual-clutch / automated manual'].includes(normalize(key, value));
+      if (!evidence[key] || (evidence[key].length && !refinesTransmission) || !identityAgrees) continue;
       if (['horsepower', 'torque', 'displacement', 'cylinders', 'engineType', 'induction', 'transmission', 'transmissionSpeeds', 'drivetrain', 'fuelType'].includes(key) && !powertrainAgrees) continue;
       if (['curbWeightKg', 'bodyType', 'seats'].includes(key) && !bodyAgrees) continue;
       if (key === 'curbWeightKg' && !powertrainAgrees) continue;
@@ -210,7 +256,7 @@ export function extractVehicleSpecs(car) {
       if (value != null) evidence[key].push({ value, source: factory.source.publisher, type: 'factory-reference', url: factory.source.url, quote: factory.quotes[key], configuration: factory.configuration });
     }
   }
-  const specs = Object.fromEntries(Object.entries(evidence).map(([key, items]) => [key, resolve(items, ['horsepower', 'torque'].includes(key) ? 0.75 : 0)]));
+  const specs = resolveSpecs(evidence);
   for (const key of ['horsepower', 'torque']) if (specs[key].status === 'unknown') specs[key].reason = factory?.reason || 'Factory specifications need an exact original market and engine/trim match; check the listing or ask the seller.';
   const features = Object.fromEntries(FEATURE_RULES.map(([label, pattern]) => {
     const claims = [];
@@ -248,7 +294,7 @@ export function vinMismatches(car, decoded) {
     const a = seller[key].value, b = normalize(key, decoded.fields?.[key]);
     if (seller[key].status === 'conflict' && b != null) return [{ field: FIELD_LABELS[key], listing: 'Conflicting seller values', vin: b }];
     if (a == null || b == null) return [];
-    const equal = key === 'displacement' ? Math.abs(a - b) < 0.06 : normalized(a) === normalized(b);
+    const equal = agreesWithVin(key, seller, decoded.fields);
     return equal ? [] : [{ field: FIELD_LABELS[key], listing: a, vin: b }];
   });
 }

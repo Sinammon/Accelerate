@@ -6,6 +6,7 @@ import { validateVin, parseVinResponse, decodeVin } from './shared/vin.js';
 import { matchFuelEconomy, annualFuelCost, loadFuelYear } from './src/fuel-data.js';
 import { enrichVehicle } from './src/enrichment.js';
 import { rankDecisionMode } from './src/decision-engine.js';
+import { modelResearchRequest } from './src/model-specs.js';
 import { createHandler } from './backend/handler.mjs';
 import { JSDOM } from 'jsdom';
 
@@ -15,6 +16,110 @@ const decoded = () => parseVinResponse({ Results: [vinRow] }, vin);
 const aspects = values => Object.entries(values).map(([name, value]) => ({ name, value }));
 const listing = (extra = {}) => ({ legacyItemId: 'fixture', year: '2018', make: 'Honda', model: 'Civic', priceCAD: { value: '16000', currency: 'CAD' }, mileage: { raw: '100000', unit: 'km' }, itemSpecifics: aspects({ Engine: '2.0 L I4', Transmission: '6-speed manual', Drivetrain: 'FWD', 'Fuel type': 'Gasoline', 'Body type': 'Sedan', 'Seating capacity': '5' }), ...extra });
 const row = { year: 2018, make: 'Honda', model: 'Civic', displacement: 2, cylinders: 4, transmission: 'M6', fuel: 'X', combined: 7.7, city: 9, highway: 6.3, vehicleClass: 'Compact', sourceIndex: 0 };
+
+test('matching VIN refines a generic automatic to CVT throughout research, fuel matching and ranking', () => {
+  const car = listing({ itemSpecifics: aspects({ Engine: '2.0 L I4', Transmission: 'Automatic', 'Fuel type': 'Gasoline', 'Body type': 'Sedan' }) });
+  const vin = { status: 'decoded', fields: { year: '2018', make: 'HONDA', model: 'Civic', displacement: 2, cylinders: 4, transmission: 'Continuously Variable Transmission (CVT)', fuelType: 'Gasoline', horsepower: 158 } };
+  const before = structuredClone(car);
+  vin.mismatches = vinMismatches(car, vin);
+  assert.deepEqual(vin.mismatches, []);
+  const enriched = { ...car, enrichment: { vin } };
+  const { specs } = extractVehicleSpecs(enriched);
+  assert.equal(specs.transmission.value, 'CVT');
+  assert.equal(specs.transmission.status, 'corroborated');
+  assert.ok(specs.transmission.evidence.some(e => e.value === 'Automatic' && e.type === 'seller-specifics'));
+  assert.ok(specs.transmission.evidence.some(e => e.value === 'CVT' && e.type === 'vpic'));
+  assert.equal(specs.transmission.listingPreferred, undefined);
+  assert.equal(specs.horsepower.value, 158);
+  assert.equal(modelResearchRequest(enriched).transmission, 'CVT');
+  const fuelRow = { ...row, transmission: 'AV' };
+  assert.equal(matchFuelEconomy(enriched, [fuelRow, { ...fuelRow, transmission: 'A6' }]).row, fuelRow);
+  assert.equal(matchFuelEconomy(enriched, [fuelRow, { ...fuelRow, transmission: 'AV7' }]).status, 'unmatched', 'a generic CVT does not select among multiple reference codes');
+  const result = rankDecisionMode([enriched], 'performance');
+  assert.equal(result.best.length, 1);
+  assert.deepEqual(result.best[0].warnings, []);
+  assert.deepEqual(car, before, 'resolution never changes the imported listing');
+});
+
+test('equipment descriptions do not create fuel or transmission conflicts or block Maserati research', () => {
+  const car = listing({ year: '2016', make: 'Maserati', model: 'Gran Turismo',
+    itemSpecifics: aspects({ Transmission: 'Automatic', 'Fuel Type': 'Gasoline' }),
+    description: 'Electric Power-Assist Speed-Sensing Steering. Electric Parking Brake. Mirrors w/Manual Folding. Manual Rear Seat Easy Entry. Automatic Climate Control. Automatic Headlights.',
+  });
+  const vin = { status: 'decoded', fields: { year: '2016', make: 'MASERATI', model: 'Granturismo', fuelType: 'Gasoline', displacement: 4.7, cylinders: 8, horsepower: 454 } };
+  vin.mismatches = vinMismatches(car, vin);
+  assert.deepEqual(vin.mismatches, []);
+  const enriched = { ...car, enrichment: { vin } };
+  assert.equal(extractVehicleSpecs(enriched).specs.fuelType.value, 'Gasoline');
+  assert.equal(extractVehicleSpecs(enriched).specs.transmission.value, 'Automatic');
+  assert.equal(modelResearchRequest(enriched).fuelType, 'Gasoline');
+  assert.equal(modelResearchRequest(enriched).transmission, 'Automatic');
+  const unknown = extractVehicleSpecs({ description: car.description }).specs;
+  assert.equal(unknown.fuelType.status, 'unknown');
+  assert.equal(unknown.transmission.status, 'unknown');
+});
+
+test('powertrain extraction supports explicit prose and resolves compatible transmission terms without losing real contradictions', () => {
+  for (const [description, field, expected] of [
+    ['Transmission: Automatic CVT.', 'transmission', 'CVT'],
+    ['Automatic CVT transmission.', 'transmission', 'CVT'],
+    ['Automated manual transmission.', 'transmission', 'Dual-clutch / automated manual'],
+    ['Dual-clutch automatic transmission.', 'transmission', 'Dual-clutch / automated manual'],
+    ['6-speed manual.', 'transmission', 'Manual'],
+    ['Transmission: Automatic.', 'transmission', 'Automatic'],
+    ['Fuel type: Electric.', 'fuelType', 'Electric'],
+    ['This is an electric vehicle.', 'fuelType', 'Electric'],
+    ['This car is electric.', 'fuelType', 'Electric'],
+    ['Gasoline engine.', 'fuelType', 'Gasoline'],
+    ['Runs on diesel.', 'fuelType', 'Diesel'],
+    ['Petrol-powered car.', 'fuelType', 'Gasoline'],
+    ['Fuel: Gas.', 'fuelType', 'Gasoline'],
+  ]) assert.equal(extractVehicleSpecs({ description }).specs[field].value, expected, description);
+  for (const value of ['Automatic CVT', ['Automatic', 'CVT'], 'Automatic dual-clutch', 'automated manual', 'AV']) {
+    const spec = extractVehicleSpecs({ itemSpecifics: aspects({ Transmission: value }) }).specs.transmission;
+    assert.notEqual(spec.value, null, String(value));
+  }
+  for (const [description, field] of [
+    ['Transmission: Automatic or Manual.', 'transmission'],
+    ['CVT transmission. Dual-clutch transmission.', 'transmission'],
+    ['Fuel type: Gasoline or Diesel.', 'fuelType'],
+  ]) assert.equal(extractVehicleSpecs({ description }).specs[field].status, 'conflict', description);
+  const conflicting = listing({ description: 'Diesel engine. Automatic transmission.' });
+  assert.equal(extractVehicleSpecs(conflicting).specs.fuelType.status, 'conflict');
+  assert.equal(extractVehicleSpecs(conflicting).specs.transmission.status, 'conflict');
+  assert.equal(modelResearchRequest(conflicting), null);
+});
+
+test('specific transmission constraints, genuine fuel and identity differences still block incompatible VIN supplements', () => {
+  const fields = { year: '2018', make: 'Honda', model: 'Civic', displacement: 2, cylinders: 4, transmission: 'CVT', horsepower: 158, fuelType: 'Gasoline' };
+  for (const transmission of ['Manual', 'Dual-clutch', 'A6', '6-speed Automatic', 'Torque-converter automatic']) {
+    const car = listing({ itemSpecifics: aspects({ Transmission: transmission, 'Fuel type': 'Gasoline' }) });
+    const vin = { status: 'decoded', fields };
+    assert.ok(vinMismatches(car, vin).some(m => m.field === 'Transmission'), transmission);
+    const specs = extractVehicleSpecs({ ...car, enrichment: { vin } }).specs;
+    assert.equal(specs.horsepower.value, null, transmission);
+    assert.notEqual(specs.transmission.value, 'CVT', transmission);
+  }
+  const generic = listing({ itemSpecifics: aspects({ Engine: '2.0 L I4', Transmission: 'Automatic', 'Fuel type': 'Gasoline' }) });
+  for (const change of [{ year: '2019' }, { displacement: 3 }, { fuelType: 'Diesel' }, { transmission: 'Manual' }]) {
+    const vin = { status: 'decoded', fields: { ...fields, ...change } };
+    assert.ok(vinMismatches(generic, vin).length);
+    const specs = extractVehicleSpecs({ ...generic, enrichment: { vin } }).specs;
+    assert.equal(specs.transmission.value, 'Automatic');
+    assert.equal(specs.horsepower.value, null);
+  }
+  const cvt = listing({ itemSpecifics: aspects({ Transmission: 'CVT' }) });
+  assert.deepEqual(vinMismatches(cvt, { status: 'decoded', fields: { ...fields, transmission: 'Automatic' } }), []);
+  assert.equal(extractVehicleSpecs({ ...cvt, enrichment: { vin: { status: 'decoded', fields: { ...fields, transmission: 'Automatic' } } } }).specs.transmission.value, 'CVT');
+  const dct = extractVehicleSpecs({ ...generic, enrichment: { vin: { status: 'decoded', fields: { ...fields, transmission: 'Automated manual' } } } }).specs;
+  assert.equal(dct.transmission.value, 'Dual-clutch / automated manual');
+  assert.equal(extractVehicleSpecs({ itemSpecifics: aspects({ Transmission: ['Automatic', 'CVT'], 'Transmission speeds': '6' }) }).specs.transmission.status, 'conflict');
+  assert.equal(extractVehicleSpecs({ itemSpecifics: aspects({ Transmission: ['A6', 'CVT'] }) }).specs.transmission.status, 'conflict');
+  const simulated = extractVehicleSpecs({ itemSpecifics: aspects({ Transmission: 'AV7' }), description: 'CVT with 7-speed simulated shifting.' }).specs;
+  assert.equal(simulated.transmission.value, 'CVT');
+  assert.equal(simulated.transmissionCode.value, 'AV7');
+  assert.equal(simulated.transmissionSpeeds.value, null);
+});
 
 test('extracts explicit engine, power, drivetrain, body and seating from HTML and specifics with provenance', () => {
   const car = listing({ description: '<p>158&nbsp;hp. 138 lb-ft. Heated <b>seats</b>. Leather seats. Navigation. Adaptive cruise control. Dual-zone climate control. Backup camera.</p><script>900 hp; 8.0 L V12</script>' });

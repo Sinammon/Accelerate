@@ -5,6 +5,7 @@ import { createServer } from 'vite';
 import { readFile } from 'node:fs/promises';
 import { DISCRIMINATORS } from './shared/model-specs.js';
 import { comfortReferenceCars } from './test-data/comfort-reference.mjs';
+import { vinMismatches } from './src/vehicle-specs.js';
 
 test('three-page journey preserves imports, supports all modes, removes and replaces cars, and handles unknown data', async () => {
   const dom = new JSDOM('<div id="root"></div>', { url: 'http://localhost', pretendToBeVisual: true });
@@ -412,5 +413,45 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     delete globalThis.requestAnimationFrame;
     delete globalThis.cancelAnimationFrame;
     delete globalThis.IS_REACT_ACT_ENVIRONMENT;
+  }
+});
+
+test('Compare and Decide omit false powertrain warnings while retaining genuine VIN disagreements', async () => {
+  const React = await import('react');
+  const { renderToStaticMarkup } = await import('react-dom/server');
+  const vite = await createServer({ server: { middlewareMode: true, hmr: false }, appType: 'custom' });
+  try {
+    const { default: Comparison } = await vite.ssrLoadModule('/src/VehicleComparison.jsx');
+    const { default: Dashboard } = await vite.ssrLoadModule('/src/DecisionDashboard.jsx');
+    const make = (id, year, make, model, description, fields) => {
+      const car = { legacyItemId: id, year, make, model, description, priceCAD: { value: '20000', currency: 'CAD' },
+        mileage: { raw: '100000', unit: 'km' }, images: [],
+        itemSpecifics: [{ name: 'Transmission', value: 'Automatic' }, { name: 'Fuel type', value: 'Gasoline' }] };
+      const vin = { status: 'decoded', fields: { year, make, model, fuelType: 'Gasoline', ...fields } };
+      return { ...car, enrichment: { vin: { ...vin, mismatches: vinMismatches(car, vin) } } };
+    };
+    const cars = [
+      make('synthetic-accord', '2019', 'Honda', 'Accord', 'Automatic transmission.', { transmission: 'CVT' }),
+      make('synthetic-maserati', '2016', 'Maserati', 'Gran Turismo', 'Electric parking brake. Manual folding mirrors. Automatic climate control.', {}),
+    ];
+    const render = (Component, cars) => new JSDOM(renderToStaticMarkup(React.createElement(Component, { cars, mode: 'cost' })));
+    for (const Component of [Comparison, Dashboard]) {
+      const valid = render(Component, cars);
+      assert.doesNotMatch(valid.window.document.body.textContent, /VIN\/listing mismatch|Conflicting seller values|Review before choosing/);
+      if (Component === Comparison) {
+        assert.match(valid.window.document.body.textContent, /CVT/);
+        assert.match(valid.window.document.body.textContent, /Sources agree/);
+      }
+      valid.window.close();
+      const mismatch = structuredClone(cars[0]);
+      mismatch.enrichment.vin.fields.transmission = 'Manual';
+      mismatch.enrichment.vin.mismatches = vinMismatches(mismatch, mismatch.enrichment.vin);
+      const invalid = render(Component, [mismatch]);
+      assert.match(invalid.window.document.body.textContent, /Review before choosing/);
+      assert.match(invalid.window.document.body.textContent, /VIN\/listing mismatch.*Transmission: listing Automatic; VIN record Manual/);
+      invalid.window.close();
+    }
+  } finally {
+    await vite.close();
   }
 });
