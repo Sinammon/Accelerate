@@ -156,7 +156,7 @@ async function main() {
   if (args.length > 1) throw new Error('Supply one quoted item URL or --test-import.');
   const inputUrl = args[0] && args[0] !== '--test-import' ? args[0] : null;
   if (inputUrl) parseItemUrl(inputUrl); // Reject invalid input before requesting a token.
-  console.log(`Dilemma - eBay Production Browse feasibility test\n\n${LIMITATIONS}\n`);
+  console.log(`Core - eBay Production Browse feasibility test\n\n${LIMITATIONS}\n`);
   try {
     loadEnvFile(new URL('.env', import.meta.url));
   } catch (error) {
@@ -189,7 +189,7 @@ async function main() {
   if (!items.length) {
     if (args[0] === '--test-import') console.log('URL IMPORT NOT TESTED: Search returned no listing to import.');
     console.log('INCONCLUSIVE: No matching vehicles returned. Authentication/search worked, but vehicle inventory feasibility is unproven.');
-    console.log('Check eBay warnings, category support and inventory coverage with eBay before building Dilemma.');
+    console.log('Check eBay warnings, category support and inventory coverage with eBay before building Core.');
     return;
   }
   let detailFailures = 0;

@@ -5,6 +5,7 @@ import DecisionDashboard from './DecisionDashboard.jsx';
 import VehicleComparison from './VehicleComparison.jsx';
 import LandingPreview from './LandingPreview.jsx';
 import Icon from './Icons.jsx';
+import Brand from './Brand.jsx';
 import { enrichVehicle } from './enrichment.js';
 import { mergeResearch } from '../shared/model-specs.js';
 import { modelSpecCache } from './spec-cache.js';
@@ -120,7 +121,7 @@ export default function App() {
       enrichImported(imported);
       setUrl(''); setNotice('Listing imported. Compare the available seller details below.');
       navigate('compare');
-    } catch (err) { setError(err.name === 'TimeoutError' ? 'eBay took too long to respond. Please try again.' : err instanceof TypeError ? 'Could not connect to Dilemma. Please check your connection and try again.' : err.message); }
+    } catch (err) { setError(err.name === 'TimeoutError' ? 'eBay took too long to respond. Please try again.' : err instanceof TypeError ? 'Could not connect to Core. Please check your connection and try again.' : err.message); }
     finally { setLoading(false); }
   }
   const importForm = <form className="url-form" onSubmit={handleSubmit} aria-busy={loading}>
@@ -132,7 +133,7 @@ export default function App() {
   const enter = { initial: { opacity: reduced ? 1 : 0 }, animate: { opacity: 1 }, transition: { duration: reduced ? 0 : 0.18 } };
   return <LazyMotion features={domAnimation} strict><MotionConfig reducedMotion="user"><div className={`site-shell ${page === 'import' ? 'landing-shell' : page === 'decide' ? 'decision-shell' : ''}`}>
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); document.getElementById('main-content')?.focus(); }}>Skip to content</a>
-    <header className="site-header" onKeyDown={event => { if (event.key === 'Escape' && menuOpen) { setMenuOpen(false); menuToggle.current?.focus(); } }}><a className="brand" href="#import" aria-label="Dilemma home"><span className="brand-mark">d.</span>Dilemma<span className="brand-dot">.</span></a><button className="nav-menu-toggle" type="button" ref={menuToggle} aria-expanded={menuOpen} aria-controls="primary-navigation" onClick={() => setMenuOpen(open => !open)}><Icon name={menuOpen ? 'close' : 'menu'} size={22} />{menuOpen ? 'Close' : 'Menu'}</button><nav id="primary-navigation" className={menuOpen ? 'is-open' : ''} aria-label="Main navigation">{[['import', 'Import'], ['compare', 'Compare'], ['decide', 'Help Me Decide']].map(([id, label]) => <a className="nav-link" key={id} href={`#${id}`} aria-current={page === id ? 'page' : undefined} onClick={() => setMenuOpen(false)}>{label}{id === 'compare' && <span className="nav-count" aria-label={`${cars.length} cars in shortlist`}>{cars.length}</span>}</a>)}<button className="nav-button" type="button" onClick={() => { setMenuOpen(false); startImport(); }}>Import a car <Icon name="arrow" size={17} /></button></nav></header>
+    <header className="site-header" onKeyDown={event => { if (event.key === 'Escape' && menuOpen) { setMenuOpen(false); menuToggle.current?.focus(); } }}><Brand /><button className="nav-menu-toggle" type="button" ref={menuToggle} aria-expanded={menuOpen} aria-controls="primary-navigation" onClick={() => setMenuOpen(open => !open)}><Icon name={menuOpen ? 'close' : 'menu'} size={22} />{menuOpen ? 'Close' : 'Menu'}</button><nav id="primary-navigation" className={menuOpen ? 'is-open' : ''} aria-label="Main navigation">{[['import', 'Import'], ['compare', 'Compare'], ['decide', 'Help Me Decide']].map(([id, label]) => <a className="nav-link" key={id} href={`#${id}`} aria-current={page === id ? 'page' : undefined} onClick={() => setMenuOpen(false)}>{label}{id === 'compare' && <span className="nav-count" aria-label={`${cars.length} cars in shortlist`}>{cars.length}</span>}</a>)}<button className="nav-button" type="button" onClick={() => { setMenuOpen(false); startImport(); }}>Import a car <Icon name="arrow" size={17} /></button></nav></header>
     {page !== 'import' && <nav className="workflow" aria-label="Your progress">{[['import', '1', 'Import'], ['compare', '2', 'Compare'], ['decide', '3', 'Decide']].map(([id, n, label]) => <a href={`#${id}`} key={id} aria-current={page === id ? 'step' : undefined}><span>{n}</span>{label}</a>)}</nav>}
     <main id="main-content" tabIndex={-1}><m.div key={page} className="page-transition" {...enter}>
       {page === 'import' && <>
@@ -145,6 +146,6 @@ export default function App() {
       </>}
       {page === 'compare' && <VehicleComparison cars={cars} view={comparisonView} onViewChange={setComparisonView} notice={notice} retryResearch={retryResearch} clearSavedSpecs={() => { modelSpecCache.clear(); setNotice('Saved model specifications cleared. Your current comparison is unchanged.'); }} importForm={importForm} navigate={navigate} removeCar={id => { for (const controller of enrichmentTasks.current) if (controller.vehicleId === id) controller.abort(); const remaining = cars.filter(car => car.legacyItemId !== id); setCars(remaining); setComparisonView(previous => reconcileComparisonView(previous, remaining)); setNotice('Car removed. You can import a replacement.'); }} clearCars={() => { for (const controller of enrichmentTasks.current) controller.abort(); setCars([]); setComparisonView(emptyComparisonView()); setNotice('Comparison cleared.'); }} />}
       {page === 'decide' && <DecisionDashboard cars={cars} retryResearch={retryResearch} mode={mode} setMode={setMode} />}
-    </m.div></main><footer><a className="footer-brand" href="#import">Dilemma<span>.</span></a><span>A clearer road to your next car.</span><span className="prototype-label">Temporary shortlist · Refresh clears your shortlist</span></footer>
+    </m.div></main><footer><Brand className="footer-brand" small /><span>A clearer road to your next car.</span><span className="prototype-label">Temporary shortlist · Refresh clears your shortlist</span></footer>
   </div></MotionConfig></LazyMotion>;
 }

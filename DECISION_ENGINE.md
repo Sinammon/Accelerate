@@ -1,4 +1,4 @@
-# Dilemma decision engine
+# Core decision engine
 
 The latest missing-data and research changes are documented in [ENRICHMENT.md](ENRICHMENT.md). `rankDecisionMode` now returns `basis` and mode-specific `research` guidance as well as numeric results. Model research never enters numeric factors or populates vehicle specifications. When measurements for a selected priority are missing, the UI labels a separate Best Value starting point based on available price/year/mileage. It does not invent a score for the requested priority. See [DECIDE_REDESIGN.md](DECIDE_REDESIGN.md). The fictional demo exercises this path without any external API.
 

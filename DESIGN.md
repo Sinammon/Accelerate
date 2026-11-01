@@ -1,5 +1,5 @@
 ---
-name: Dilemma
+name: Core
 description: Blue-black vehicle comparison with a compact overview and progressive detail.
 colors:
   background: "#080f1a"
@@ -132,11 +132,13 @@ components:
     padding: "20px"
 ---
 
-# Design System: Dilemma
+# Design System: Core
 
 ## Direction
 
-The Clear Comparison Workspace. The approved 31 October 2026 refinement replaces purple fields with blue-black surfaces and makes Compare easier for a first-time shopper. Preserve the Dilemma identity, self-hosted Clash Grotesk headings, Satoshi interface text, honest evidence labels and contained vehicle photography.
+The Clear Comparison Workspace. The approved 31 October 2026 refinement replaces purple fields with blue-black surfaces and makes Compare easier for a first-time shopper. Preserve the Core identity, self-hosted Clash Grotesk headings, Satoshi interface text, honest evidence labels and contained vehicle photography.
+
+The app name is Core. Use the original user-supplied artwork at `public/images/brand/core-logo.png` in the header, footer, product preview, photo-credit page and browser icon. The shared `public/brand.css` frames its central icon without modifying the image pixels. Brand links use the accessible name Core home; the adjacent image is decorative because Core is already visible in text.
 
 Use navy-black ground, quieter navy surfaces and a raised blue surface for selection. Blue actions use dark ink. Near-white primary text and blue-gray secondary text meet normal-text contrast on every main surface. Amber, rose and mint retain their warning, error and success meanings. Thin boundaries establish grouping; no decorative shadows or glass panels. The shared subdued boundary is #2b405a; interactive borders use the stronger named border token.
 

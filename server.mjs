@@ -35,5 +35,5 @@ export function createApp(options) {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const server = createApp();
-  server.listen(Number(process.env.PORT) || 3001, '127.0.0.1', () => console.log('Dilemma API ready at http://127.0.0.1:' + server.address().port));
+  server.listen(Number(process.env.PORT) || 3001, '127.0.0.1', () => console.log('Core API ready at http://127.0.0.1:' + server.address().port));
 }

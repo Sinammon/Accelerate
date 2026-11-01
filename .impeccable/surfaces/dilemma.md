@@ -1,4 +1,4 @@
-# Dilemma refinement direction contract
+# Core refinement direction contract
 
 Confirmed user plan: 31 October 2026. Code-first refinement of the existing application.
 

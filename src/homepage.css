@@ -19,9 +19,7 @@
 .showcase-panel { position: relative; border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--surface); overflow: hidden; }
 .showcase-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 24px 32px; background: var(--surface-raised); border-bottom: 1px solid var(--border); }
 .showcase-brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 22px; }
-.showcase-brand > span { color: var(--accent); font-size: 28px; }
 .showcase-brand b { font-weight: 500; }
-.showcase-brand b span { color: var(--accent); }
 .showcase-steps { display: flex; gap: 12px; }
 .showcase-steps button { color: var(--text-secondary); background: transparent; font-size: 14px; padding: 8px 16px; }
 .showcase-steps button span { font-variant-numeric: tabular-nums; }
