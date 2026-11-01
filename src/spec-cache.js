@@ -1,9 +1,10 @@
+import { CATALOG_VERSION } from '../shared/catalog-version.js';
 import { CONFIG_FIELDS, MODEL_FIELDS, cosmeticTrim, modelKey, modelSpecsInput, usableModelFinding, mergeResearch } from '../shared/model-specs.js';
 
 const STORAGE_KEY = 'dilemma:model-specs:v1';
 const DAY = 86400000;
 const scopeOnly = value => Object.fromEntries(CONFIG_FIELDS.filter(key => value?.[key] != null).map(key => [key, value[key]]));
-export const specCacheKey = input => JSON.stringify(CONFIG_FIELDS.map(key => key === 'trim' && modelKey(input.make) === 'bmw' && cosmeticTrim(input.trim) ? '' : modelKey(input[key])));
+export const specCacheKey = input => JSON.stringify([CATALOG_VERSION, ...CONFIG_FIELDS.map(key => key === 'trim' && modelKey(input.make) === 'bmw' && cosmeticTrim(input.trim) ? '' : modelKey(input[key]))]);
 const short = (value, length) => typeof value === 'string' ? value.slice(0, length) : undefined;
 
 // Explicit allowlist: never serialize a car, listing identifier, VIN, price,
@@ -29,7 +30,7 @@ export function createSpecCache({ storage, now = Date.now, maxEntries = 200 } = 
       const saved = JSON.parse(getStorage()?.getItem(STORAGE_KEY) || '[]');
       for (const entry of Array.isArray(saved) ? saved.slice(-maxEntries) : []) {
         const input = modelSpecsInput({ ...scopeOnly(entry?.input), fields: MODEL_FIELDS });
-        if (input && typeof entry.savedAt === 'number' && entry.savedAt <= now()) entries.set(specCacheKey(input), { input: scopeOnly(input), fields: entry.fields || {}, savedAt: entry.savedAt });
+        if (entry?.catalogVersion === CATALOG_VERSION && input && typeof entry.savedAt === 'number' && entry.savedAt <= now()) entries.set(specCacheKey(input), { catalogVersion: CATALOG_VERSION, input: scopeOnly(input), fields: entry.fields || {}, savedAt: entry.savedAt });
       }
     } catch {}
   };
@@ -61,7 +62,7 @@ export function createSpecCache({ storage, now = Date.now, maxEntries = 200 } = 
         fields[field] = { ...cacheableFinding(raw), cachedAt: reused ? previousField.cachedAt ?? previous.savedAt : now() };
       }
       if (!Object.keys(fields).length) return;
-      entries.delete(key); entries.set(key, { input: scopeOnly(input), fields, savedAt: now() });
+      entries.delete(key); entries.set(key, { catalogVersion: CATALOG_VERSION, input: scopeOnly(input), fields, savedAt: now() });
       while (entries.size > maxEntries) entries.delete(entries.keys().next().value);
       persist();
     },

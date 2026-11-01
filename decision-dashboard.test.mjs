@@ -120,8 +120,8 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(document.querySelector('.mode-grid'), null);
     await add('222222222222', 20000, 2021, 'No heated seats.', null);
     assert.equal(document.querySelectorAll('.car-card').length, 2);
-    assert.match(document.querySelector('tbody').textContent, /unit not stated/);
-    assert.match(document.querySelectorAll('.car-card')[1].textContent, /Check mileage.*unit is not stated/s);
+    assert.match(document.querySelector('tbody').textContent, /km \(assumed\)/);
+    assert.doesNotMatch(document.querySelectorAll('.car-card')[1].textContent, /Check mileage/);
     let calls = 0;
     globalThis.fetch = async () => { calls++; throw new Error('Should not fetch duplicate'); };
     await change('#listing-url', 'https://www.ebay.ca/itm/111111111111');
@@ -190,7 +190,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     globalThis.fetch = async input => {
       if (input === '/api/vehicle-data') return pendingVin;
       if (input === '/api/model-specs') return Response.json({ modelSpecs: { status: 'not-configured', fields: {} } });
-      if (String(input).startsWith('/data/fuel/')) return Response.json({ columns: [], rows: [] });
+      if (String(input).startsWith('/data/')) return Response.json({ columns: [], rows: [] });
       importCount++;
       return Response.json({ vehicle: { legacyItemId: '666666666666', year: importCount === 1 ? '2003' : '2020', make: 'Example', model: importCount === 1 ? 'Original' : 'Replacement', vin: importCount === 1 ? '1HGCM82633A004352' : null, images: [], itemSpecifics: [] } });
     };
@@ -215,7 +215,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     const savedResponses = new Map();
     const researchField = (value, kind = 'value', model = 'Civic') => ({ kind, value: kind === 'value' ? value : null, minimum: 130, maximum: 180, alternatives: [], scope: { year: 2018, make: 'Honda', model }, sharedAcross: DISCRIMINATORS, evidence: [{ type: 'model-reference', source: 'Honda Canada', url: 'https://hondanews.ca/en-CA/specifications', quote: `${value} hp`, configuration: { year: 2018, make: 'Honda', model } }] });
     globalThis.fetch = async (input, init) => {
-      if (String(input).startsWith('/data/fuel/')) return Response.json({ columns: [], rows: [] });
+      if (String(input).startsWith('/data/')) return Response.json({ columns: [], rows: [] });
       if (input === '/api/model-specs') {
         const config = JSON.parse(init.body);
         if (config.phase === 'research') return Response.json(savedResponses.get(config.model) || { modelSpecs: { status: 'unavailable', fields: {} } });
@@ -342,7 +342,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     await tab('sources');
     assert.equal(demoRequests.length, 3);
     assert.match(document.querySelector('.demo-notice').textContent, /fictional/i);
-    assert.match(document.querySelector('.source-status-grid').textContent, /Documented original specifications.*Seller-reported claims.*Typical model information.*Still to verify on this car/s);
+    assert.match(document.querySelector('.source-status-grid').textContent, /Reference specifications and your entries.*Seller-reported claims.*Typical model information.*Still to verify on this car/s);
     assert.ok(document.querySelector('.model-research a[href="https://www.caranddriver.com/honda/civic-2018"]'));
     await tab('specifications');
     assert.equal(document.querySelector('.table-scroll').querySelectorAll('tbody tr').length, 13);
@@ -396,7 +396,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     const references = comfortReferenceCars();
     let referenceIndex = 0;
     globalThis.fetch = async (url, options) => {
-      if (String(url).startsWith('/data/fuel/')) return Response.json({ columns: [], rows: [] });
+      if (String(url).startsWith('/data/')) return Response.json({ columns: [], rows: [] });
       if (url === '/api/model-specs') {
         const input = JSON.parse(options.body);
         const car = references.find(car => car.make === input.make && car.model === input.model);
@@ -477,6 +477,52 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     await clearComparison();
     assert.equal(document.querySelector('#comparison-import').hidden, false, 'empty shortlist teaches importing');
     assert.equal(document.querySelector('[role="tablist"]'), null);
+
+    // Confirm a variant and correct a detail without importing the listing again.
+    let detailImports = 0;
+    const detailRequests = [];
+    const catalogData = { version: 'synthetic-editor-regression', columns: ['id', 'year', 'make', 'model', 'displ', 'cylinders', 'trany', 'drive', 'fuelType1', 'VClass', 'comb08'], rows: [
+      ['1001', '2018', 'Honda', 'Accord', '1.5', '4', 'Automatic (AV-S7)', 'Front-Wheel Drive', 'Regular Gasoline', 'Large Cars', '33'],
+      ['1002', '2018', 'Honda', 'Accord', '2', '4', 'Automatic (S10)', 'Front-Wheel Drive', 'Regular Gasoline', 'Large Cars', '27'],
+    ] };
+    globalThis.fetch = async (url, options) => {
+      if (url.startsWith('/data/catalog/')) return Response.json(catalogData);
+      if (url.startsWith('/data/fuel/')) return Response.json({ columns: [], rows: [] });
+      if (url === '/api/model-specs') { detailRequests.push(JSON.parse(options.body)); return Response.json({ modelSpecs: { status: 'not-configured', fields: {}, reason: 'Synthetic provider unavailable; edit details.' } }); }
+      detailImports++;
+      return Response.json({ vehicle: { legacyItemId: '999999999999', year: 2018, make: 'Honda', model: 'Accord', market: 'US', description: 'Mileage: 154865. Power: 190 hp.', images: [], itemSpecifics: [] } });
+    };
+    await change('#listing-url', 'https://www.ebay.ca/itm/999999999999');
+    await submit();
+    assert.equal(detailRequests.length, 0, 'ambiguous engines cannot silently trigger a base-engine estimate');
+    await act(async () => document.querySelector('.car-card .research-control button').click());
+    assert.equal(document.querySelector('.vehicle-details-editor').open, true);
+    await act(async () => {
+      const select = document.querySelector('#configuration-999999999999');
+      select.value = 'epa:1001';
+      select.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+    });
+    await change('#edit-999999999999-horsepower', '192');
+    await act(async () => {
+      document.querySelector('.vehicle-details-editor form').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
+      await new Promise(resolve => setTimeout(resolve, 20));
+    });
+    assert.equal(detailImports, 1);
+    assert.equal(detailRequests[0].displacement, 1.5);
+    assert.equal(detailRequests[0].transmission, 'CVT');
+    assert.match(document.querySelector('.evidence-specs').textContent, /192.*User-entered/s);
+    assert.match(document.querySelector('.evidence-specs').textContent, /Original imported evidence.*190 hp/s);
+    await go('decide');
+    await go('compare');
+    assert.match(document.querySelector('.evidence-specs').textContent, /192.*User-entered/s);
+    await act(async () => {
+      [...document.querySelectorAll('.vehicle-details-editor button')].find(button => button.textContent === 'Reset to original import').click();
+      await new Promise(resolve => setTimeout(resolve, 20));
+    });
+    assert.equal(detailImports, 1, 'reset also avoids reimporting');
+    assert.equal(document.querySelector('#configuration-999999999999').value, '');
+    assert.match(document.querySelector('.evidence-specs').textContent, /190/);
+    assert.doesNotMatch(document.querySelector('.evidence-specs').textContent, /User-entered/);
 
   } finally {
     await act(async () => root.unmount());

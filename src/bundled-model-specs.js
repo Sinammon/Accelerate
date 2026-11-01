@@ -16,7 +16,7 @@ export function bundledModelSpecs(car) {
     curbWeightKg: [1375, manual, 'Z3 coupe 2.8 curb weight · automatic (kg)', '3,031 (1,375)'], displacement: [2.8, review, 'Displacement (L)', '2.8-liter six-cylinder engine'],
     cylinders: [6, review, 'Engine cylinders', 'six-cylinder engine'], engineType: ['Inline', manual, 'Engine configuration', '6-cylinder inline engine'],
     transmission: ['Automatic', review, 'Transmission option', 'four-speed automatic transmission'], transmissionSpeeds: [4, review, 'Automatic transmission speeds', 'four-speed automatic transmission'] };
-  const fields = Object.fromEntries(CORE_SPEC_FIELDS.map(key => {
+  const fields = Object.fromEntries(CORE_SPEC_FIELDS.filter(key => data[key]).map(key => {
     const [value, url, label, quote] = data[key];
     return [key, { kind: 'value', value, quality: 'typical', origin: 'reviewed-reference', scope: key === 'curbWeightKg' ? { ...scope, year: 2000, market: 'US' } : { ...scope, market: 'US' },
       assumptions: ['North American 2.8 automatic coupe reference; original market is unconfirmed. M Sport is not an M Coupe engine.', ...(key === 'curbWeightKg' ? ['Adjacent model-year manual reference; BMW weight includes one person and a full tank. Actual unladen mass and options can differ.'] : [])],

@@ -6,18 +6,21 @@ import { abortableDelay, transientFailure, retryDelayMilliseconds } from '../sha
 
 function researchConfiguration(car) {
   if (car.demo) return { input: null, reason: 'Fictional demo uses bundled references; no AI request is made.' };
+  if (car.enrichment?.catalog?.status === 'ambiguous') return { input: null, reason: 'Confirm a reference configuration in Edit details before researching variant-specific specifications.' };
   // Listing contradictions still need resolution; decoded VIN differences
   // remain secondary and never veto otherwise consistent model notes.
   const mismatches = researchVinMismatches(car);
   if (mismatches.length) return { input: null, reason: `Resolve conflicting listing details before research: ${mismatches.map(item => item.field).join(', ')}.` };
   const { specs, features } = extractVehicleSpecs({ ...car, enrichment: { ...car.enrichment, modelSpecs: undefined } });
+  if (car.enrichment?.catalog?.lookupAvailable && car.enrichment.catalog.status === 'unmatched' && specs.displacement.value == null && specs.fuelType.value !== 'Electric') return { input: null, reason: 'No reference engine match. Add the engine displacement or choose the correct model in Edit details; no base engine is assumed.' };
   // An unresolved configuration conflict cannot be repaired by choosing a typical variant.
   const conflicts = CONFIG_FIELDS.filter(key => specs[key]?.status === 'conflict');
   if (conflicts.length) return { input: null, reason: `Resolve conflicting vehicle details before research: ${conflicts.map(key => FIELD_LABELS[key]).join(', ')}.` };
   const missing = ['year', 'make', 'model'].filter(key => specs[key]?.value == null);
   if (missing.length) return { input: null, reason: `AI lookup needs these vehicle details: ${missing.map(key => FIELD_LABELS[key]).join(', ')}.` };
   const fields = [...MODEL_SPEC_FIELDS.filter(key => specs[key].status === 'unknown'), ...MODEL_FEATURES.filter(key => features[key].status === 'unknown').map(key => `feature:${key}`)];
-  const input = modelSpecsInput({ ...Object.fromEntries(CONFIG_FIELDS.filter(key => specs[key]?.value != null).map(key => [key, specs[key].value])), fields });
+  const selected = car.enrichment?.catalog?.candidates?.find(candidate => candidate.id === car.enrichment.catalog.selectedId);
+  const input = modelSpecsInput({ ...Object.fromEntries(CONFIG_FIELDS.filter(key => specs[key]?.value != null).map(key => [key, specs[key].value])), ...(selected ? { model: selected.values.model, market: specs.market.value || selected.market } : {}), fields });
   return { input, reason: input ? '' : 'Vehicle configuration is not supported for AI lookup. Check the year, make, model and trim.' };
 }
 
@@ -25,24 +28,26 @@ export const modelResearchRequest = car => researchConfiguration(car).input;
 export const modelResearchBlockReason = car => researchConfiguration(car).reason;
 
 let dailyCooldownUntil = 0;
-export async function loadModelSpecs(car, { fetcher = fetch, signal, phase = 'research', requestedFields, cache, scheduler = specScheduler } = {}) {
+export async function loadModelSpecs(car, { fetcher = fetch, signal, phase = 'research', domain, requestedFields, cache, scheduler = specScheduler } = {}) {
   if (car.demo) return { status: 'skipped', fields: {}, reason: 'Fictional demo uses bundled references; no AI request is made.' };
   const { input, reason } = researchConfiguration(car);
   if (!input) return { status: 'insufficient', fields: {}, reason };
   if (phase === 'quick') input.fields = input.fields.filter(key => CORE_SPEC_FIELDS.includes(key));
   if (requestedFields) input.fields = input.fields.filter(key => requestedFields.includes(key));
+  if (domain === 'specs') input.fields = input.fields.filter(key => !key.startsWith('feature:'));
+  if (domain === 'insights') input.fields = input.fields.filter(key => key.startsWith('feature:'));
   const generation = cache?.generation;
   const fallback = failure => mergeResearch(cache?.read(input, { allowStale: true }) || {}, failure);
   if (Date.now() < dailyCooldownUntil) return fallback({ status: 'quota', fields: {}, dailyQuota: true, reason: 'Daily AI quota is unavailable. Using saved model specifications where available.' });
   try {
-    const key = `${phase}:${specCacheKey(input)}:${input.fields.toSorted().join(',')}`;
+    const key = `${phase}:${domain || 'combined'}:${specCacheKey(input)}:${input.fields.toSorted().join(',')}`;
     const data = await scheduler.schedule(key, phase, async taskSignal => {
       const timeoutMs = phase === 'quick' ? 8000 : 40000, deadline = Date.now() + timeoutMs;
       const requestSignal = AbortSignal.any([taskSignal, AbortSignal.timeout(timeoutMs)]);
       for (let attempt = 0; ; attempt++) {
         try {
           requestSignal.throwIfAborted();
-          const response = await fetcher('/api/model-specs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...input, phase }), signal: requestSignal, cache: 'no-store' });
+          const response = await fetcher('/api/model-specs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...input, phase, ...(domain ? { domain } : {}) }), signal: requestSignal, cache: 'no-store' });
           if (!response.ok) {
             const error = new Error('Specification endpoint unavailable');
             const retryAfter = response.headers.get('retry-after');

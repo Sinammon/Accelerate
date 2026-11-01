@@ -246,7 +246,7 @@ test('enrichment gracefully handles missing VIN, API outages and static-data fai
   const result = await enrichVehicle(car, { fetcher: async url => { calls.push(url); return Response.json(data); } });
   assert.equal(result.vin.status, 'missing');
   assert.equal(result.fuel.status, 'matched');
-  assert.equal(calls.filter(url => url === '/api/model-specs').length, 2);
+  assert.equal(calls.filter(url => url === '/api/model-specs').length, 3);
   assert.ok(calls.includes('/data/fuel/2018.json'));
   assert.deepEqual(car, before);
   const outage = await enrichVehicle({ ...car, vin }, { fetcher: async () => new Response('Unavailable', { status: 503 }) });

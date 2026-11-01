@@ -57,20 +57,22 @@ test('service intervals, warranty limits, fuel economy, range, phone numbers and
   for (const title of ['Warranty 120000 km', 'Fuel economy 6 L/100 km', 'Shipping 500 miles']) assert.equal(resolveMileage({ title }).status, 'unknown', title);
 });
 
-test('missing or ambiguous mileage units are visible and never default to kilometres', () => {
+test('unitless mileage readings use an explicit kilometre assumption', () => {
   for (const car of [{ mileage: { raw: '2000' } }, { description: 'Odometer: 2k.' }, { description: 'Mileage reads 2000' }]) {
     const result = resolveMileage(car);
     assert.equal(result.amount, 2000);
-    assert.equal(result.unit, null);
-    assert.equal(result.status, 'unit-unknown');
-    assert.equal(result.assumedUnit, false);
-    assert.match(mileageDisplay(car), /unit not stated/);
+    assert.equal(result.unit, 'km');
+    assert.equal(result.status, 'known');
+    assert.equal(result.assumedUnit, true);
+    assert.equal(result.evidence[0].unit, null, 'original seller evidence stays unitless');
+    assert.match(mileageDisplay(car), /km \(assumed\)/);
   }
   const maserati = resolveMileage({ mileage: { raw: '15819' }, description: '2016 MASERATI GT 15000 MILES CLEAN CARFAX' });
   assert.equal(maserati.amount, 15819);
-  assert.equal(maserati.unit, null, 'an unlabeled marketing number does not establish odometer units');
-  assert.equal(resolveMileage({ description: 'Mileage in miles or km.', mileage: { raw: '2000' } }).unit, null);
-  assert.equal(resolveMileage({ mileage: { raw: '50000' }, description: 'Odometer: 30000 miles.' }).unit, null, 'a different odometer number cannot establish the unit of the listing value');
+  assert.equal(maserati.unit, 'km');
+  assert.equal(maserati.assumedUnit, true, 'an unlabeled marketing number does not establish odometer units');
+  assert.equal(resolveMileage({ description: 'Mileage in miles or km.', mileage: { raw: '2000' } }).assumedUnit, true);
+  assert.equal(resolveMileage({ mileage: { raw: '50000' }, description: 'Odometer: 30000 miles.' }).assumedUnit, true, 'a different odometer number cannot establish the unit of the listing value');
 });
 
 test('explicit mileage-unit statements and field units can complete a supplied reading', () => {

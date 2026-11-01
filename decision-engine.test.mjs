@@ -47,15 +47,15 @@ test('missing information excludes a criterion for everyone and renormalizes', (
   assert.equal(result.criteria[0].active, false);
   assert.equal(result.best[0].breakdown[0].share, 1);
 });
-test('unitless or conflicting readings stay unscored instead of assuming kilometres', () => {
+test('unitless readings use kilometres while missing and conflicting readings stay unscored', () => {
   for (const mileage of [null, { raw: '100-200' }, { raw: '-5' }]) assert.equal(mileageKm(mileage), null);
-  assert.equal(mileageKm({ raw: '1000' }), null);
+  assert.equal(mileageKm({ raw: '1000' }), 1000);
   assert.equal(mileageKm({ raw: ['1000', '2000'], unit: ['km', 'mi'] }), null);
   assert.equal(mileageKm({ raw: '1,000 miles', unit: 'km' }), null);
-  assert.equal(mileageKm({ raw: 0 }), null);
+  assert.equal(mileageKm({ raw: 0 }), 0);
   assert.equal(mileageKm({ raw: 0, unit: 'km' }), 0);
-  assert.equal(rankCars([pair[0], car('C', 10000, 2020, '1000', null)]).criteria[2].active, false);
-  assert.ok(detectWarnings(car('C', 10000, 2020, '1000', null)).some(warning => warning.label === 'Check mileage'));
+  assert.equal(rankCars([pair[0], car('C', 10000, 2020, '1000', null)]).criteria[2].active, true);
+  assert.ok(!detectWarnings(car('C', 10000, 2020, '1000', null)).some(warning => warning.label === 'Check mileage'));
 });
 
 test('non-CAD prices, conflicting years and invalid numeric data are excluded', () => {

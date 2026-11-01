@@ -1,6 +1,6 @@
 // The browser and backend share the research contract; no credentials or network here.
 export const MODEL_SPEC_FIELDS = ['displacement', 'engineType', 'induction', 'cylinders', 'horsepower', 'torque', 'curbWeightKg', 'zeroTo100KphSeconds', 'zeroTo60MphSeconds', 'transmission', 'transmissionSpeeds', 'drivetrain', 'fuelType', 'bodyType', 'seats'];
-export const CORE_SPEC_FIELDS = ['horsepower', 'torque', 'curbWeightKg', 'displacement', 'cylinders', 'engineType', 'transmission', 'transmissionSpeeds'];
+export const CORE_SPEC_FIELDS = ['horsepower', 'torque', 'curbWeightKg', 'displacement', 'cylinders', 'engineType', 'transmission', 'transmissionSpeeds', 'drivetrain', 'fuelType', 'bodyType', 'seats'];
 export const RATING_DIMENSIONS = ['rideQuality', 'cabinQuietness', 'frontSeatComfort', 'rearSeatComfort', 'frontPassengerSpace', 'rearPassengerSpace', 'cargoSpace'];
 export const RATING_ANCHORS = ['Severe deficiency', 'Poor', 'Basic', 'Good mainstream', 'Premium', 'Exceptional'];
 export const ACCELERATION_FIELDS = ['zeroTo100KphSeconds', 'zeroTo60MphSeconds'];
@@ -93,6 +93,7 @@ export function modelScopeLabel(scope) {
 }
 
 export function usableModelFinding(field, finding, input) {
+  if (['displacement', 'cylinders'].includes(field) && input.fuelType === 'Electric') return false;
   if (finding?.quality === 'estimated') return !(field === 'transmissionSpeeds' && input.transmission === 'CVT') && CORE_SPEC_FIELDS.includes(field) && finding.kind === 'value'
     && finding.origin === 'model-estimate' && Array.isArray(finding.assumptions) && finding.assumptions.length > 0
     && modelFieldValue(field, finding.value) != null && approximateScopeMatches(finding.scope, input)

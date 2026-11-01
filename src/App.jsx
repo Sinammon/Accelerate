@@ -68,9 +68,9 @@ export default function App() {
       setCars(current => current.map(item => {
         if (item !== imported && item.enrichmentToken !== controller) return item;
         const previous = item.enrichment || {};
-        const update = domain === 'vin' || domain === 'complete' ? { vin: enrichment.vin, fuel: enrichment.fuel, factorySpecs: enrichment.factorySpecs }
+        const update = domain === 'vin' || domain === 'catalog' || domain === 'complete' ? { vin: enrichment.vin, fuel: enrichment.fuel, factorySpecs: enrichment.factorySpecs, catalog: enrichment.catalog, catalogRows: enrichment.catalogRows }
           : { modelSpecs: mergeResearch(previous.modelSpecs, enrichment.modelSpecs), specsStatus: enrichment.specsStatus };
-        if (domain === 'initial') { update.factorySpecs = enrichment.factorySpecs; update.vin = enrichment.vin; }
+        if (domain === 'initial') { update.factorySpecs = enrichment.factorySpecs; update.vin = enrichment.vin; update.catalog = enrichment.catalog; }
         if (domain !== 'vin' && domain !== 'complete' && controller.researchController.signal.aborted) return item;
         return { ...item, enrichmentToken: controller, enrichment: { ...previous, ...update, status: domain === 'complete' ? 'complete' : 'loading-model' } };
       }));
@@ -90,6 +90,13 @@ export default function App() {
       setCars(current => current.map(item => (item === car || owner && item.enrichmentToken === owner) ? { ...item, enrichment: { ...item.enrichment, modelSpecs: mergeResearch(item.enrichment?.modelSpecs, enrichment.modelSpecs), specsStatus: enrichment.specsStatus, status: enrichment.specsStatus === 'verifying' || enrichment.specsStatus === 'loading-quick' ? 'loading-model' : 'complete' } } : item));
     };
     void enrichVehicle(car, { signal: controller.signal, onUpdate: apply, skipVin: true, force: true }).then(apply).catch(() => {}).finally(() => enrichmentTasks.current.delete(controller));
+  }
+  function saveVehicleDetails(car, specOverrides, catalogSelection) {
+    for (const controller of enrichmentTasks.current) if (controller.vehicleId === car.legacyItemId) controller.abort();
+    const edited = { ...car, specOverrides, catalogSelection, enrichmentToken: undefined, enrichment: { vin: car.enrichment?.vin, status: 'loading-model' } };
+    setCars(current => current.map(item => item.legacyItemId === car.legacyItemId ? edited : item));
+    setNotice('Details saved. Specifications are being checked for this configuration.');
+    enrichImported(edited);
   }
   function loadDemo() {
     if (cars.length || loading) return;
@@ -144,7 +151,7 @@ export default function App() {
           <section className="final-cta"><h2>Make room for a better decision.</h2><p>Start with a car you already have your eye on.</p><button type="button" onClick={startImport}>Import your first car <Icon name="arrow" size={20} /></button></section>
         </section>
       </>}
-      {page === 'compare' && <VehicleComparison cars={cars} view={comparisonView} onViewChange={setComparisonView} notice={notice} retryResearch={retryResearch} clearSavedSpecs={() => { modelSpecCache.clear(); setNotice('Saved model specifications cleared. Your current comparison is unchanged.'); }} importForm={importForm} navigate={navigate} removeCar={id => { for (const controller of enrichmentTasks.current) if (controller.vehicleId === id) controller.abort(); const remaining = cars.filter(car => car.legacyItemId !== id); setCars(remaining); setComparisonView(previous => reconcileComparisonView(previous, remaining)); setNotice('Car removed. You can import a replacement.'); }} clearCars={() => { for (const controller of enrichmentTasks.current) controller.abort(); setCars([]); setComparisonView(emptyComparisonView()); setNotice('Comparison cleared.'); }} />}
+      {page === 'compare' && <VehicleComparison onSaveDetails={saveVehicleDetails} cars={cars} view={comparisonView} onViewChange={setComparisonView} notice={notice} retryResearch={retryResearch} clearSavedSpecs={() => { modelSpecCache.clear(); setNotice('Saved model specifications cleared. Your current comparison is unchanged.'); }} importForm={importForm} navigate={navigate} removeCar={id => { for (const controller of enrichmentTasks.current) if (controller.vehicleId === id) controller.abort(); const remaining = cars.filter(car => car.legacyItemId !== id); setCars(remaining); setComparisonView(previous => reconcileComparisonView(previous, remaining)); setNotice('Car removed. You can import a replacement.'); }} clearCars={() => { for (const controller of enrichmentTasks.current) controller.abort(); setCars([]); setComparisonView(emptyComparisonView()); setNotice('Comparison cleared.'); }} />}
       {page === 'decide' && <DecisionDashboard cars={cars} retryResearch={retryResearch} mode={mode} setMode={setMode} />}
     </m.div></main><footer><Brand className="footer-brand" small /><span>A clearer road to your next car.</span><span className="prototype-label">Temporary shortlist · Refresh clears your shortlist</span></footer>
   </div></MotionConfig></LazyMotion>;

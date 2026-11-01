@@ -1,6 +1,7 @@
 import { sellerText } from './mileage.js';
 import { CONFIG_FIELDS, MODEL_FIELDS, modelSpecsInput, usableModelFinding, modelFieldValue } from '../shared/model-specs.js';
 import { normalizeTransmission, compatibleTransmission } from '../shared/transmission.js';
+import { inapplicableSpec } from './spec-applicability.js';
 
 export const normalized = value => String(value ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
 const number = value => /^\d+(?:\.\d+)?$/.test(String(value).trim()) ? Number(value) : null;
@@ -186,6 +187,9 @@ function agreesWithVin(key, seller, fields) {
 }
 
 export function specEvidenceLabel(spec) {
+  if (spec.status === 'user-entered') return 'User-entered · not independently verified';
+  if (spec.status === 'catalog-reference') return 'Government configuration reference · confirm applicability';
+  if (spec.status === 'not-applicable') return 'Not applicable';
   if (spec.status === 'model-estimate') return `Estimated model spec · unverified AI${spec.stale ? ' · stale saved value' : ''}`;
   if (spec.quality === 'exact' && spec.status === 'model-reference') return 'Factory reference · sourced manufacturer specification';
   if (spec.quality === 'typical') return `Typical model spec · ${spec.origin === 'reviewed-reference' ? 'reviewed reference' : 'cited source'}${spec.stale ? ' · stale saved value' : ''}`;
@@ -229,6 +233,13 @@ export function extractVehicleSpecs(car) {
       for (const item of patterns(`${match[3]} ${match[2]}`)) if (item.key === key) add(key, item.value, source, type, match[0]);
     }
   }
+  const originals = {};
+  for (const [key, raw] of Object.entries(car.specOverrides || {})) {
+    const value = normalize(key, raw);
+    if (!evidence[key] || value == null) continue;
+    originals[key] = evidence[key];
+    evidence[key] = [{ value, type: 'user-entered', source: 'Your details', quote: String(raw) }];
+  }
   const vin = car.enrichment?.vin;
   if (vin?.status === 'decoded') {
     const seller = resolveSpecs(evidence);
@@ -250,13 +261,24 @@ export function extractVehicleSpecs(car) {
   if (factory?.status === 'matched') {
     for (const key of Object.keys(factory.values || {})) {
       if (!evidence[key]) continue;
-      if (evidence[key].some(e => e.type.startsWith('seller'))) continue;
+      if (evidence[key].some(e => e.type.startsWith('seller') || e.type === 'user-entered')) continue;
       evidence[key] = evidence[key].filter(e => e.type !== 'vpic');
       const value = normalize(key, factory.values?.[key]);
       if (value != null) evidence[key].push({ value, source: factory.source.publisher, type: 'factory-reference', url: factory.source.url, quote: factory.quotes[key], configuration: factory.configuration });
     }
   }
   const specs = resolveSpecs(evidence);
+  for (const key of Object.keys(originals)) Object.assign(specs[key], { status: 'user-entered', originalEvidence: originals[key] });
+  const catalog = car.enrichment?.catalog;
+  for (const [key, value] of Object.entries(catalog?.values || {})) {
+    const target = specs[key];
+    const refines = key === 'transmission' && target.value === 'Automatic' && ['CVT', 'Dual-clutch / automated manual'].includes(value);
+    if (target && (target.status === 'unknown' || refines && target.status !== 'user-entered')) Object.assign(target, { value, status: 'catalog-reference', evidence: [...target.evidence, ...(catalog.evidence?.[key] || [])] });
+  }
+  for (const [key, target] of Object.entries(specs)) {
+    const reason = inapplicableSpec(key, specs);
+    if (reason && target.status === 'unknown') Object.assign(target, { status: 'not-applicable', reason });
+  }
   for (const key of ['horsepower', 'torque']) if (specs[key].status === 'unknown') specs[key].reason = factory?.reason || 'Factory specifications need an exact original market and engine/trim match; check the listing or ask the seller.';
   const features = Object.fromEntries(FEATURE_RULES.map(([label, pattern]) => {
     const claims = [];
@@ -272,9 +294,12 @@ export function extractVehicleSpecs(car) {
     return [label, result];
   }));
   const research = car.enrichment?.modelSpecs;
-  if (['matched', 'partial'].includes(research?.status) && !researchVinMismatches(car).length && !CONFIG_FIELDS.some(key => specs[key]?.status === 'conflict')) {
-    const input = modelSpecsInput({ ...Object.fromEntries(CONFIG_FIELDS.filter(key => specs[key]?.value != null).map(key => [key, specs[key].value])), fields: MODEL_FIELDS });
+  const unresolvedEngine = catalog?.lookupAvailable && catalog.status === 'unmatched' && specs.displacement.value == null && specs.fuelType.value !== 'Electric';
+  if (!unresolvedEngine && catalog?.status !== 'ambiguous' && ['matched', 'partial'].includes(research?.status) && !researchVinMismatches(car).length && !CONFIG_FIELDS.some(key => specs[key]?.status === 'conflict')) {
+    const selected = catalog?.candidates?.find(candidate => candidate.id === catalog.selectedId);
+    const input = modelSpecsInput({ ...Object.fromEntries(CONFIG_FIELDS.filter(key => specs[key]?.value != null).map(key => [key, specs[key].value])), ...(selected ? { model: selected.values.model, market: specs.market.value || selected.market } : {}), fields: MODEL_FIELDS });
     if (input) for (const [field, finding] of Object.entries(research.fields || {})) {
+      if (catalog?.status === 'loading' && finding.quality === 'estimated') continue;
       const target = field.startsWith('feature:') ? features[field.slice(8)] : specs[field];
       if (!target || target.status !== 'unknown' || !usableModelFinding(field, finding, input)) continue;
       Object.assign(target, finding, { referenceValue: finding.kind === 'configuration' ? finding.value : undefined, value: finding.kind === 'value' ? finding.value : null, status: finding.kind === 'value' ? finding.quality === 'estimated' ? 'model-estimate' : 'model-reference' : 'model-context' });

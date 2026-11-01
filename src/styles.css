@@ -50,3 +50,11 @@
   .table-scroll th:first-child { width: 140px; }
   th, td { padding: 16px; }
 }
+.vehicle-details-editor { margin-block: 20px; border-block: 1px solid var(--border); }
+.vehicle-details-editor summary { cursor: pointer; min-height: 44px; padding: 12px 0; font-weight: 600; }
+.details-editor-content { padding-block: 4px 20px; }
+.details-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 16px; margin-block: 20px; }
+.details-fields > div, .configuration-choice { display: grid; gap: 8px; min-width: 0; }
+.details-fields input, .details-fields select, .configuration-choice select { width: 100%; min-width: 0; min-height: 44px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-control); padding: 10px; font: inherit; }
+.details-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.configuration-choice small, .details-editor-content small { color: var(--text-secondary); }

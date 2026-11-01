@@ -169,3 +169,7 @@ Use the existing Motion library for short opacity transitions between tabs and o
 ## Verification record
 
 The browser connection was unavailable. Native Chrome inspection was then stopped by the computer-use runtime because it could not determine the current URL confidently enough to enforce policy. No desktop, tablet, mobile or 200% zoom screenshot approval is claimed. Rendered React interaction checks cover the journey, tab keyboard controls, correct evidence focus, pair switching, persistence, import errors, removal and async safety. All 144 regression tests, contrast checks and the production build passed. Existing Motion bundler directive warnings remain. The Impeccable scan raised type-ramp advisories; compact sizes were consolidated and the retained roles documented. Visual verification remains a recapture item.
+
+### Completing vehicle details
+
+Sources & checks contains an inline Edit details & confirm configuration disclosure, opened when materially different references remain. A labeled native select presents reference market, model, engine, transmission, drive and record ID. Responsive labeled fields state numeric units and keep imported values as placeholders. Save refreshes enrichment without reimporting; Reset restores the original import. User-entered, government-reference and unverified-estimate labels retain distinct provenance. The compact overview includes supported fuel/energy use with its test source; no new dashboard panels or persistent listings are introduced. Unitless mileage displays km (assumed).
