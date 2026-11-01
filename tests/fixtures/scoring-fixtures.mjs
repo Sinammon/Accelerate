@@ -1,4 +1,4 @@
-import { DISCRIMINATORS, RATING_DIMENSIONS } from '../shared/model-specs.js';
+import { DISCRIMINATORS, RATING_DIMENSIONS } from '../../shared/model-specs.js';
 // Synthetic evidence below exercises arithmetic and validation, not real specs.
 export function ratedCar(id, rating = 3, description = '200 hp. 300 Nm. Curb weight: 1500 kg.', price = 20000) {
   const scope = { year: 2018, make: 'Honda', model: 'Civic' };

@@ -1,16 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { extractVehicleSpecs, vinMismatches } from './src/vehicle-specs.js';
-import { modelResearchRequest, loadModelSpecs } from './src/model-specs.js';
-import { enrichVehicle } from './src/enrichment.js';
-import { bundledModelSpecs } from './src/bundled-model-specs.js';
-import { createSpecCache } from './src/spec-cache.js';
-import { createSpecScheduler } from './src/spec-scheduler.js';
-import { rankDecisionMode } from './src/decision-engine.js';
-import { estimateModelSpecs, parseModelFindings } from './backend/model-specs.mjs';
-import { researchCaller } from './backend/research-request.mjs';
-import { createHandler } from './backend/handler.mjs';
-import { CORE_SPEC_FIELDS, mergeResearch, validatedResearch } from './shared/model-specs.js';
+import { extractVehicleSpecs, vinMismatches } from '../src/vehicle-specs.js';
+import { modelResearchRequest, loadModelSpecs } from '../src/model-specs.js';
+import { enrichVehicle } from '../src/enrichment.js';
+import { bundledModelSpecs } from '../src/bundled-model-specs.js';
+import { createSpecCache } from '../src/spec-cache.js';
+import { createSpecScheduler } from '../src/spec-scheduler.js';
+import { rankDecisionMode } from '../src/decision-engine.js';
+import { estimateModelSpecs, parseModelFindings } from '../backend/model-specs.mjs';
+import { researchCaller } from '../backend/research-request.mjs';
+import { createHandler } from '../backend/handler.mjs';
+import { CORE_SPEC_FIELDS, mergeResearch, validatedResearch } from '../shared/model-specs.js';
 
 const input = { year: 1999, make: 'BMW', model: 'Z3', trim: 'm sport', displacement: 2.8, cylinders: 6, bodyType: 'Coupe', transmission: 'Automatic', drivetrain: 'RWD', fuelType: 'Gasoline', fields: CORE_SPEC_FIELDS };
 const bmw = () => ({ legacyItemId: 'fictional-bmw', year: '1999', make: 'BMW', model: 'Z3', itemSpecifics: Object.entries({ Trim: 'm sport', Engine: '2.8 L I6', 'Body type': 'Coupe', Transmission: 'Automatic', Drivetrain: 'RWD', 'Fuel type': 'Gasoline' }).map(([name, value]) => ({ name, value })) });

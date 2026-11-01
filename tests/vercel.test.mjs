@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import deployedImport from './api/import.js';
-import deployedHealth from './api/health.js';
-import { createHandler } from './backend/handler.mjs';
+import deployedImport from '../api/import.js';
+import deployedHealth from '../api/health.js';
+import { createHandler } from '../backend/handler.mjs';
 
 const listingUrl = 'https://www.ebay.ca/itm/123456789012';
 const vehicle = { legacyItemId: '123456789012', title: 'Synthetic vehicle', images: [], itemSpecifics: [], mileage: { raw: '100000', unit: null }, returnedPrice: { value: '10', currency: 'USD' }, description: '<style>bad</style><script>bad</script><p>Seller &amp; text</p>' };

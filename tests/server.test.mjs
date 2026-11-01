@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createApp } from './server.mjs';
-import { authenticate, importListing } from './ebay-feasibility.mjs';
+import { createApp } from '../server.mjs';
+import { authenticate, importListing } from '../backend/ebay-feasibility.mjs';
 
 const url = 'https://www.ebay.ca/itm/123456789012';
 const fixture = { legacyItemId: '123456789012', categoryIdPath: '6000|6001', condition: 'Used', images: [], itemSpecifics: [], description: '<script>alert(1)</script><p>Hello &amp; welcome</p>' };

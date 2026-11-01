@@ -1,7 +1,7 @@
 // Live checks keep all eBay data in memory; print only status and field counts.
-import { createApp } from './server.mjs';
-import { authenticate } from './ebay-feasibility.mjs';
-import vercelImport from './api/import.js';
+import { createApp } from '../server.mjs';
+import { authenticate } from '../backend/ebay-feasibility.mjs';
+import vercelImport from '../api/import.js';
 const token = await authenticate();
 const searchUrl = new URL('https://api.ebay.com/buy/browse/v1/item_summary/search');
 searchUrl.search = new URLSearchParams({ category_ids: '6001', filter: 'conditions:{USED},itemLocationCountry:CA', limit: '5' });

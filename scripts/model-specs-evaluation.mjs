@@ -1,10 +1,10 @@
 import { readFile } from 'node:fs/promises';
 import { loadEnvFile } from 'node:process';
 import { pathToFileURL } from 'node:url';
-import { researchModelSpecs } from './backend/model-specs.mjs';
-import { sameConfigurationValue, CORE_SPEC_FIELDS } from './shared/model-specs.js';
-import { FACTORY_SPECS } from './src/factory-specs.js';
-import { MODEL_PROFILES } from './src/model-profiles.js';
+import { researchModelSpecs } from '../backend/model-specs.mjs';
+import { sameConfigurationValue, CORE_SPEC_FIELDS } from '../shared/model-specs.js';
+import { FACTORY_SPECS } from '../src/factory-specs.js';
+import { MODEL_PROFILES } from '../src/model-profiles.js';
 
 export const powerReferenceCases = () => FACTORY_SPECS.map(row => ({
   id: row.id,
@@ -31,7 +31,7 @@ export function gradeResearch(cases, results, { approximate = false } = {}) {
 }
 
 async function main() {
-  const benchmark = JSON.parse(await readFile(new URL('./test-data/model-specs-benchmark.json', import.meta.url), 'utf8'));
+  const benchmark = JSON.parse(await readFile(new URL('../tests/fixtures/model-specs-benchmark.json', import.meta.url), 'utf8'));
   const power = powerReferenceCases();
   const quick = process.argv.includes('--quick');
   const bmw = { id: '1999-bmw-z3-2.8-auto-coupe', input: { year: 1999, make: 'BMW', model: 'Z3', trim: 'm sport', displacement: 2.8, cylinders: 6, bodyType: 'Coupe', transmission: 'Automatic' },
@@ -43,7 +43,7 @@ async function main() {
     console.log(`Reference benchmark: ${benchmark.cases.length} NRCan configurations plus ${power.length} manufacturer power configurations and reviewed model-observation references. Run npm run test:model-specs:live to measure accuracy and coverage.`);
     return;
   }
-  try { loadEnvFile(new URL('.env', import.meta.url)); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  try { loadEnvFile(new URL('../.env', import.meta.url)); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   if (!process.env.GEMINI_API_KEY) {
     console.error('Live accuracy evaluation not run: GEMINI_API_KEY is missing. Configure a free-tier project with billing unlinked.');
     process.exitCode = 2;

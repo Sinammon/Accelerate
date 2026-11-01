@@ -1,14 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { epaCandidate, nrcanCandidate, matchSpecCatalog } from './src/spec-catalog.js';
-import { extractVehicleSpecs } from './src/vehicle-specs.js';
-import { modelResearchRequest } from './src/model-specs.js';
-import { validateOverrides } from './src/vehicle-overrides.js';
-import { evaluateCatalog } from './spec-catalog-evaluation.mjs';
-import { enrichVehicle } from './src/enrichment.js';
-import { createSpecCache } from './src/spec-cache.js';
-import { createHandler } from './backend/handler.mjs';
+import { epaCandidate, nrcanCandidate, matchSpecCatalog } from '../src/spec-catalog.js';
+import { extractVehicleSpecs } from '../src/vehicle-specs.js';
+import { modelResearchRequest } from '../src/model-specs.js';
+import { validateOverrides } from '../src/vehicle-overrides.js';
+import { evaluateCatalog } from '../scripts/spec-catalog-evaluation.mjs';
+import { enrichVehicle } from '../src/enrichment.js';
+import { createSpecCache } from '../src/spec-cache.js';
+import { createHandler } from '../backend/handler.mjs';
 
 const rows = async year => { const data = JSON.parse(await readFile(`public/data/catalog/${year}.json`)); return data.rows.map(row => epaCandidate(Object.fromEntries(data.columns.map((field, index) => [field, row[index]])), data.version)); };
 const match = (car, list, selection) => matchSpecCatalog(extractVehicleSpecs(car).specs, list, selection);

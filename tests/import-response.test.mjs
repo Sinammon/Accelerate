@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readImportResponse } from './src/import-response.js';
+import { readImportResponse } from '../src/import-response.js';
 
 test('platform 404 and HTML fallback produce useful errors without exposing bodies', async () => {
   for (const [status, expected] of [[404, /not deployed/], [200, /API is unavailable/], [504, /API is unavailable/]]) {

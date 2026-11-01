@@ -1,15 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { rankDecisionMode } from './src/decision-engine.js';
-import { decisionSummary, entrySummary, PRIMARY_MODES } from './src/decision-summary.js';
-import { extractVehicleSpecs } from './src/vehicle-specs.js';
-import { supportedPowerToWeight } from './src/capability-scoring.js';
-import { DISCRIMINATORS, RATING_DIMENSIONS, modelSpecsInput, validatedResearch } from './shared/model-specs.js';
-import { parseModelResearch, parseModelFindings } from './backend/model-specs.mjs';
-import { comfortReferenceCars } from './test-data/comfort-reference.mjs';
-import { dimensionRatingsForCar } from './src/model-research.js';
+import { rankDecisionMode } from '../src/decision-engine.js';
+import { decisionSummary, entrySummary, PRIMARY_MODES } from '../src/decision-summary.js';
+import { extractVehicleSpecs } from '../src/vehicle-specs.js';
+import { supportedPowerToWeight } from '../src/capability-scoring.js';
+import { DISCRIMINATORS, RATING_DIMENSIONS, modelSpecsInput, validatedResearch } from '../shared/model-specs.js';
+import { parseModelResearch, parseModelFindings } from '../backend/model-specs.mjs';
+import { comfortReferenceCars } from './fixtures/comfort-reference.mjs';
+import { dimensionRatingsForCar } from '../src/model-research.js';
 
-import { ratedCar, addAcceleration } from './test-data/scoring-fixtures.mjs';
+import { ratedCar, addAcceleration } from './fixtures/scoring-fixtures.mjs';
 
 test('reviewed Maybach refinement outranks mainstream cars despite seating discrepancy, price and gadgets', () => {
   const cars = comfortReferenceCars();

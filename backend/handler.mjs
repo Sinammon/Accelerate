@@ -1,4 +1,4 @@
-import { authenticate, importListing, parseItemUrl } from '../ebay-feasibility.mjs';
+import { authenticate, importListing, parseItemUrl } from './ebay-feasibility.mjs';
 import { decodeVin, validateVin } from '../shared/vin.js';
 import { fetchModelRecalls, recallIdentity } from '../shared/recalls.js';
 import { modelSpecsInput } from '../shared/model-specs.js';

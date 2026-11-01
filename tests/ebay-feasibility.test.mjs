@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseItemUrl, extractVehicle, importListing } from './ebay-feasibility.mjs';
+import { parseItemUrl, extractVehicle, importListing } from '../backend/ebay-feasibility.mjs';
 
 // Synthetic fixtures only. No live eBay responses are stored in this file.
 test('parses item URLs and strips tracking without accepting lookalike hosts', () => {

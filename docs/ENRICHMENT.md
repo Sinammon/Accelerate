@@ -62,7 +62,7 @@ Power extraction supports horsepower prose, kW/PS, common lb-ft/Nm spellings, an
 
 Initial reviewed coverage: Canadian 2018 Civic sedan 2.0 manual/CVT and 1.5 CVT (excluding Si/Type R); Canadian 2019 Corolla CE/LE/SE and LE ECO CVT sedans; Canadian 2017 Mazda3 sedan/Sport 2.0 and 2.5; US 2002 Thunderbird 3.9 automatic and 2005 Dodge Sprinter 2.7 diesel automatic. Other markets, years and configurations remain unsupported. Manufacturer references and document locators are recorded beside each row. The fictional demo now explicitly specifies Canadian market and Corolla LE trim, so all three cars receive factory power references after enrichment. Comfort remains a sparse-data fallback; Performance can use factory power and torque.
 
-Regression coverage is in `basic-specs.test.mjs` and the full rendered Import/Compare/Decide test. Browser visual verification for this update was blocked by Computer Use's browser-URL validation; no new desktop/mobile visual claim is made.
+Regression coverage is in `tests/basic-specs.test.mjs` and the full rendered Import/Compare/Decide test. Browser visual verification for this update was blocked by Computer Use's browser-URL validation; no new desktop/mobile visual claim is made.
 
 ## Research coverage and source review
 

@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { fetchModelRecalls, recallIdentity } from './shared/recalls.js';
-import { createHandler } from './backend/handler.mjs';
-import deployed from './api/recalls.js';
+import { fetchModelRecalls, recallIdentity } from '../shared/recalls.js';
+import { createHandler } from '../backend/handler.mjs';
+import deployed from '../api/recalls.js';
 const identity = { year: 2002, make: 'Ford', model: 'Thunderbird' };
 const campaign = { Make: 'FORD', Model: 'THUNDERBIRD', ModelYear: '2002', NHTSACampaignNumber: '06E056000', Component: 'FUEL SYSTEM', Summary: 'Certain aftermarket filters may leak.', Remedy: 'Replace affected filters.', Notes: 'Aftermarket filters only; not factory equipment.' };
 

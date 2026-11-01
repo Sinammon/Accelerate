@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { MODEL_PROFILES } from './src/model-profiles.js';
-import { supportedClaims, researchForCar, RESEARCH_CATEGORIES } from './src/model-research.js';
-import { extractVehicleSpecs } from './src/vehicle-specs.js';
-import { rankDecisionMode } from './src/decision-engine.js';
-import { enrichVehicle } from './src/enrichment.js';
-import { makeDemoCars } from './src/demo-cars.js';
-import { matchFuelEconomy } from './src/fuel-data.js';
+import { MODEL_PROFILES } from '../src/model-profiles.js';
+import { supportedClaims, researchForCar, RESEARCH_CATEGORIES } from '../src/model-research.js';
+import { extractVehicleSpecs } from '../src/vehicle-specs.js';
+import { rankDecisionMode } from '../src/decision-engine.js';
+import { enrichVehicle } from '../src/enrichment.js';
+import { makeDemoCars } from '../src/demo-cars.js';
+import { matchFuelEconomy } from '../src/fuel-data.js';
 
 const [civic, corolla, mazda] = makeDemoCars();
 const noSpecs = car => ({ ...car, itemSpecifics: [] });

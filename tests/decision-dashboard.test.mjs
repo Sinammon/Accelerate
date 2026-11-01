@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
 import { createServer } from 'vite';
 import { readFile } from 'node:fs/promises';
-import { DISCRIMINATORS } from './shared/model-specs.js';
-import { comfortReferenceCars } from './test-data/comfort-reference.mjs';
-import { vinMismatches } from './src/vehicle-specs.js';
+import { DISCRIMINATORS } from '../shared/model-specs.js';
+import { comfortReferenceCars } from './fixtures/comfort-reference.mjs';
+import { vinMismatches } from '../src/vehicle-specs.js';
 
 test('three-page journey preserves imports, supports all modes, removes and replaces cars, and handles unknown data', async () => {
   const dom = new JSDOM('<div id="root"></div>', { url: 'http://localhost', pretendToBeVisual: true });

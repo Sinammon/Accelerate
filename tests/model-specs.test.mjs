@@ -1,17 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { DISCRIMINATORS, modelSpecsInput } from './shared/model-specs.js';
-import { researchModelSpecs, parseModelFindings, retrievedSources, candidateSources, parseModelResearch, EXTRACTION_SCHEMA, sourceIdentity, seedSources } from './backend/model-specs.mjs';
-import { extractVehicleSpecs } from './src/vehicle-specs.js';
-import { loadModelSpecs, modelResearchRequest } from './src/model-specs.js';
-import { enrichVehicle } from './src/enrichment.js';
-import { rankDecisionMode } from './src/decision-engine.js';
-import { createHandler } from './backend/handler.mjs';
-import vercelHandler from './api/model-specs.js';
+import { DISCRIMINATORS, modelSpecsInput } from '../shared/model-specs.js';
+import { researchModelSpecs, parseModelFindings, retrievedSources, candidateSources, parseModelResearch, EXTRACTION_SCHEMA, sourceIdentity, seedSources } from '../backend/model-specs.mjs';
+import { extractVehicleSpecs } from '../src/vehicle-specs.js';
+import { loadModelSpecs, modelResearchRequest } from '../src/model-specs.js';
+import { enrichVehicle } from '../src/enrichment.js';
+import { rankDecisionMode } from '../src/decision-engine.js';
+import { createHandler } from '../backend/handler.mjs';
+import vercelHandler from '../api/model-specs.js';
 import { readFile } from 'node:fs/promises';
-import { gradeResearch } from './model-specs-evaluation.mjs';
-import { entrySummary, decisionSummary } from './src/decision-summary.js';
-import { liveResearchForCar } from './src/model-research.js';
+import { gradeResearch } from '../scripts/model-specs-evaluation.mjs';
+import { entrySummary, decisionSummary } from '../src/decision-summary.js';
+import { liveResearchForCar } from '../src/model-research.js';
 
 const input = { year: 2018, make: 'Honda', model: 'Civic', fields: ['horsepower', 'torque', 'seats', 'feature:Heated seats', 'feature:Sunroof'] };
 const scope = { year: 2018, make: 'Honda', model: 'Civic' };
@@ -339,7 +339,7 @@ test('enrichment publishes VIN and fuel before model research completes; cancell
 });
 
 test('30-configuration independent reference benchmark reports accuracy separately from coverage', async () => {
-  const benchmark = JSON.parse(await readFile(new URL('./test-data/model-specs-benchmark.json', import.meta.url), 'utf8'));
+  const benchmark = JSON.parse(await readFile(new URL('./fixtures/model-specs-benchmark.json', import.meta.url), 'utf8'));
   assert.equal(benchmark.cases.length, 30);
   assert.equal(new Set(benchmark.cases.map(c => c.id)).size, 30);
   assert.match(benchmark.source.url, /^https:\/\/open.canada.ca\//);

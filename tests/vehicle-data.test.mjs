@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveMileage, mileageDisplay, vehicleName, specification, unknown, listedFeatures, powerHp } from './src/vehicle-data.js';
+import { resolveMileage, mileageDisplay, vehicleName, specification, unknown, listedFeatures, powerHp } from '../src/vehicle-data.js';
 
 const vehicle = (description, unit = null, raw = '100000', extra = {}) => ({ description, mileage: { raw, unit }, ...extra });
 test('structured names never fall back to seller headlines; missing specifications are Unknown', () => {

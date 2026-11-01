@@ -4,6 +4,18 @@ Formerly Dilemma. The app is now Core; its GitHub repository and existing deploy
 
 A temporary, in-memory eBay.ca used-car comparison for a Grade 12 CS demo. React + JavaScript + CSS, Vite, and a minimal Node.js API. Import up to four cars, view real photos, compare available fields and specifications, and read seller descriptions as safe plain text.
 
+## Project layout
+
+- `src/`: React frontend and browser logic.
+- `api/`: Vercel API entry points; `backend/`: server logic and eBay integration.
+- `shared/`: modules used by both the frontend and backend.
+- `public/`: static images, fonts and reference datasets.
+- `tests/`: regression tests, with fixtures and benchmarks in `tests/fixtures/`.
+- `scripts/`: data updates, evaluations and smoke checks.
+- `docs/`: product, design and architecture documentation.
+
+Run commands from the repository root. `npm test` discovers all `tests/*.test.mjs` files. `server.mjs` starts the local API; build and deployment configuration stay at the root. `node_modules/` and `dist/` are generated and Git-ignored.
+
 ## Reliable model specifications (31 October 2026)
 
 Listing details are authoritative. VIN differences stay visible; VIN values fill missing fields only when identity and relevant configuration agree. Contradictions within the seller listing still remain unresolved. Model specifications use reviewed references, compatible single-source typical values and explicitly unverified estimates. Approximate power/weight can contribute to provisional rankings; review-based Comfort and acceleration comparability rules remain unchanged.
@@ -39,15 +51,15 @@ After changing `.env`, restart the backend. **Retry research**, **Refresh resear
 
 Source labels distinguish **Seller-reported**, **VIN supplement**, **Factory reference**, **Typical model spec** and **Estimated model spec**. Approximate references retain actual source year/configuration and assumptions; estimates never fabricate citations. Ranges, optional equipment and incompatible variants remain context only. The 1999 BMW Z3 2.8 automatic coupe has a reviewed offline core-spec reference: M Sport is treated as a cosmetic package, with original-market and adjacent-year weight assumptions visible.
 
-Run `node model-specs-evaluation.mjs --live --quick` for a small independent-reference check of missing-core coverage and numeric agreement. Its approximation tolerance is explicit and it does not establish general accuracy. See [SPEC_RELIABILITY.md](SPEC_RELIABILITY.md) for architecture, validation and the measured limitations.
+Run `node scripts/model-specs-evaluation.mjs --live --quick` for a small independent-reference check of missing-core coverage and numeric agreement. Its approximation tolerance is explicit and it does not establish general accuracy. See [docs/SPEC_RELIABILITY.md](docs/SPEC_RELIABILITY.md) for architecture, validation and the measured limitations.
 
 ## Decision engine
 
-See [DECIDE_REDESIGN.md](DECIDE_REDESIGN.md) for the simplified decision screen and category evidence and provisional results. See [ENRICHMENT.md](ENRICHMENT.md) for the current source layers, five scoped research profiles, honest missing-spec fallbacks, remaining integrations and the repeatable **Try fictional demo** path. The demo requires no eBay credentials. Model review opinions use a curated reference library with identifiable claim-level sources; optional AI web lookup supplies typical-model specifications, and a free on-demand NHTSA model recall lookup is available.
+See [docs/DECIDE_REDESIGN.md](docs/DECIDE_REDESIGN.md) for the simplified decision screen and category evidence and provisional results. See [docs/ENRICHMENT.md](docs/ENRICHMENT.md) for the current source layers, five scoped research profiles, honest missing-spec fallbacks, remaining integrations and the repeatable **Try fictional demo** path. The demo requires no eBay credentials. Model review opinions use a curated reference library with identifiable claim-level sources; optional AI web lookup supplies typical-model specifications, and a free on-demand NHTSA model recall lookup is available.
 
-Vehicle evidence now includes optional NHTSA vPIC VIN decoding and strict matching against a bundled official NRCan fuel-consumption snapshot. Source badges distinguish seller claims, original VIN records, corroboration and unknown/conflicting values. See [REVIEW.md](REVIEW.md) for the current scoring rules, source limits, Java comparisons, worked example and four-minute demo outline. User comparisons remain temporary and in memory.
+Vehicle evidence now includes optional NHTSA vPIC VIN decoding and strict matching against a bundled official NRCan fuel-consumption snapshot. Source badges distinguish seller claims, original VIN records, corroboration and unknown/conflicting values. See [docs/REVIEW.md](docs/REVIEW.md) for the current scoring rules, source limits, Java comparisons, worked example and four-minute demo outline. User comparisons remain temporary and in memory.
 
-The app now follows Import ? Compare ? Decide, with a dedicated comparison page, mileage-unit evidence and five primary decision priorities and one additional mode. Recommendations use transparent scoring, missing-data exclusions and mechanical-warning safeguards. See [DECISION_ENGINE.md](DECISION_ENGINE.md) for the scoring example, three key files, Java comparisons, demonstration steps and review limitations.
+The app now follows Import ? Compare ? Decide, with a dedicated comparison page, mileage-unit evidence and five primary decision priorities and one additional mode. Recommendations use transparent scoring, missing-data exclusions and mechanical-warning safeguards. See [docs/DECISION_ENGINE.md](docs/DECISION_ENGINE.md) for the scoring example, three key files, Java comparisons, demonstration steps and review limitations.
 
 ## Run locally
 
@@ -104,7 +116,7 @@ The checked-in `api/health.js` and `api/import.js` are beside `package.json` and
 Check the actual Vercel project (these dashboard settings are not stored in this checkout):
 
 1. Settings → Git: connected repository must be `Sinammon/Dilemma`; production branch must be `main`. The deployment adapter has been merged into GitHub main at `370b578`. A redeploy of an older deployment may still rebuild its old commit; create a deployment from the latest main instead.
-2. Settings → Build and Deployment: Root Directory must be the repository root (blank or `.`), **not `dist`, `src` or `api`**. That directory must contain `package.json`, `vercel.json`, `api/`, `backend/`, and `ebay-feasibility.mjs` together. Framework: Vite; install: `npm ci`; build: `npm run build`; output: `dist`; Node: 24.x. `npm run server` is only for local use.
+2. Settings → Build and Deployment: Root Directory must be the repository root (blank or `.`), **not `dist`, `src` or `api`**. That directory must contain `package.json`, `vercel.json`, `api/`, `backend/`, and `backend/ebay-feasibility.mjs` together. Framework: Vite; install: `npm ci`; build: `npm run build`; output: `dist`; Node: 24.x. `npm run server` is only for local use.
 3. Keep the existing server-side Production variables `EBAY_CLIENT_ID` and `EBAY_CLIENT_SECRET`. No `VITE_` prefix. Do not print values or add them to Git. They are not needed for health checks.
 4. Deploy the latest main from the full repository, then inspect that deployment's build output/resources. It must list **both** `/api/health` and `/api/import` as Node functions as well as static assets. A deployment containing only `index.html` and assets is incomplete. If using CLI, run it from the repository root, never from `dist`; do not use a static-only or incomplete prebuilt upload.
 5. Test the new deployment's exact HTTPS URL first, then the public production domain. If only the latter fails, check which project/deployment the domain is assigned to. Preserve deployment protection; an authenticated test is needed for protected deployments.
@@ -175,13 +187,13 @@ React state is similar to an object held in a Java program's memory. Updating it
 
 The app preserves raw mileage and explicit units, currency, missing fields and seller values. It does not infer year/make/model from titles. Known categories outside Cars & Trucks, New listings, and titles explicitly containing accessories are rejected. Seller categorization can still be inaccurate; confirm complete-vehicle identity with the seller. eBay coverage and listing completeness vary. The decision dashboard uses only these imported fields and explicit seller text; no chatbot, accounts or saved comparisons are included.
 
-## Importer architecture files (see DECISION_ENGINE.md for the three decision-engine files)
+## Importer architecture files (see docs/DECISION_ENGINE.md for the three decision-engine files)
 
 1. src/App.jsx: React components, temporary car state, URL form, loading/errors, remove actions and comparison table. Components are functions returning JSX (HTML-like markup). useState is the temporary data React watches.
 2. backend/handler.mjs: the shared HTTP controller. Validates requests, calls eBay, returns safe errors and no-store JSON, and turns seller HTML into inert text. server.mjs adapts local Node requests to it; api/import.js exposes the same handler on Vercel.
-3. ebay-feasibility.mjs: shared Production authentication, strict eBay.ca URL parsing and vehicle field extraction. Its standalone CLI still works; the backend passes quiet: true to suppress listing diagnostics.
+3. backend/ebay-feasibility.mjs: shared Production authentication, strict eBay.ca URL parsing and vehicle field extraction. Its standalone CLI still works; the backend passes quiet: true to suppress listing diagnostics.
 
-Shared visual tokens and foundations live in src/theme.css, with scoped stylesheets for site chrome, homepage, comparison, decision and evidence. DESIGN.md records the Uizard-inspired dark system, PRODUCT.md records product constraints, and .impeccable/design.json holds machine-readable rules. Vite's /api proxy lives in vite.config.js. All existing Git history is retained. The original app is on codex/dilemma-functional; Vercel preparation is on codex/vercel-deployment. The initial homepage was checkpointed before functional changes.
+Shared visual tokens and foundations live in src/theme.css, with scoped stylesheets for site chrome, homepage, comparison, decision and evidence. docs/DESIGN.md records the Uizard-inspired dark system, docs/PRODUCT.md records product constraints, and .impeccable/design.json holds machine-readable rules. Vite's /api proxy lives in vite.config.js. All existing Git history is retained. The original app is on codex/dilemma-functional; Vercel preparation is on codex/vercel-deployment. The initial homepage was checkpointed before functional changes.
 
 ## Your tiny code change
 
@@ -208,7 +220,7 @@ A standalone Node.js probe for eBay's **Production** Browse API. No web app, dep
 3. From this directory run:
 
    ```powershell
-   node .\ebay-feasibility.mjs
+   node .\backend\ebay-feasibility.mjs
    ```
 
 No `npm install` is needed. A run makes one client-credentials token request, one search, and up to five item detail requests. Each request times out after 30 seconds. Tokens remain in memory and are never printed.
@@ -216,7 +228,7 @@ No `npm install` is needed. A run makes one client-credentials token request, on
 ## Import a pasted eBay.ca URL
 
 ```powershell
-node .\ebay-feasibility.mjs "https://www.ebay.ca/itm/PASTE_REAL_ITEM_ID_HERE"
+node .\backend\ebay-feasibility.mjs "https://www.ebay.ca/itm/PASTE_REAL_ITEM_ID_HERE"
 ```
 
 Replace the example with a real listing URL. Both `/itm/ID` and `/itm/title/ID` formats work; tracking parameters are discarded. A numeric `var` parameter is passed through as the variation ID. Unsupported hosts and malformed URLs are rejected before authentication. This mode requests a token and retrieves that listing directly, without running a search or fetching the webpage.
@@ -226,7 +238,7 @@ The URL contains a **legacy item ID**. The script uses Browse's `getItemByLegacy
 To repeat the five-result search and automatically import the first returned eBay.ca URL:
 
 ```powershell
-node .\ebay-feasibility.mjs --test-import
+node .\backend\ebay-feasibility.mjs --test-import
 ```
 
 The JSON output contains title, CAD price, year, make, model, raw mileage and any explicit unit, VIN, condition, location, image URLs and full API description. Missing scalars are `null`; missing images are `[]`. All returned item specifics are preserved. Multiple conflicting aspect values are preserved as an array, not silently resolved. No vehicle values are inferred from the title or description. Description HTML is printed as a JSON string, never rendered; images are URLs, not downloaded files.
@@ -244,7 +256,7 @@ Listing data is held only in process memory and printed to the console. There ar
 Run the offline regression checks (synthetic data only):
 
 ```powershell
-node --test .\ebay-feasibility.test.mjs
+node --test .\tests\ebay-feasibility.test.mjs
 ```
 
 ## What it tests

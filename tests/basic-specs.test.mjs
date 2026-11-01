@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { resolveMileage, mileageDisplay, missingDetails } from './src/vehicle-data.js';
-import { extractVehicleSpecs } from './src/vehicle-specs.js';
-import { FACTORY_SPECS, matchFactorySpecs } from './src/factory-specs.js';
-import { enrichVehicle } from './src/enrichment.js';
-import { rankDecisionMode } from './src/decision-engine.js';
-import { makeDemoCars } from './src/demo-cars.js';
+import { resolveMileage, mileageDisplay, missingDetails } from '../src/vehicle-data.js';
+import { extractVehicleSpecs } from '../src/vehicle-specs.js';
+import { FACTORY_SPECS, matchFactorySpecs } from '../src/factory-specs.js';
+import { enrichVehicle } from '../src/enrichment.js';
+import { rankDecisionMode } from '../src/decision-engine.js';
+import { makeDemoCars } from '../src/demo-cars.js';
 
 test('power and torque accept prose, structured unit labels, unicode units and original evidence', () => {
   for (const description of ['158 horsepower', 'Horsepower: 158', 'Power (hp): 158', '158-hp engine']) {

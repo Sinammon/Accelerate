@@ -1,18 +1,18 @@
 import { readFile } from 'node:fs/promises';
 import { loadEnvFile } from 'node:process';
 import { pathToFileURL } from 'node:url';
-import { epaCandidate, matchSpecCatalog } from './src/spec-catalog.js';
-import { extractVehicleSpecs } from './src/vehicle-specs.js';
-import { modelResearchRequest } from './src/model-specs.js';
-import { estimateModelSpecs } from './backend/model-specs.mjs';
-import { ESSENTIAL_SPEC_FIELDS } from './src/spec-applicability.js';
+import { epaCandidate, matchSpecCatalog } from '../src/spec-catalog.js';
+import { extractVehicleSpecs } from '../src/vehicle-specs.js';
+import { modelResearchRequest } from '../src/model-specs.js';
+import { estimateModelSpecs } from '../backend/model-specs.mjs';
+import { ESSENTIAL_SPEC_FIELDS } from '../src/spec-applicability.js';
 
 export async function evaluateCatalog({ live = false, onProgress = () => {} } = {}) {
-  const fixture = JSON.parse(await readFile(new URL('./test-data/spec-catalog-benchmark.json', import.meta.url)));
+  const fixture = JSON.parse(await readFile(new URL('../tests/fixtures/spec-catalog-benchmark.json', import.meta.url)));
   const totals = { configurations: fixture.cases.length, applicableEssentials: 0, sourced: 0, estimates: 0, manual: 0, missing: 0, recoverable: 0, auditedNumericFields: 0, numericMismatches: [], providerStatuses: {}, aiAttempts: 0 };
   let stopped;
   for (const entry of fixture.cases) {
-    const data = JSON.parse(await readFile(new URL(`./public/data/catalog/${entry.year}.json`, import.meta.url)));
+    const data = JSON.parse(await readFile(new URL(`../public/data/catalog/${entry.year}.json`, import.meta.url)));
     const rows = data.rows.map(row => epaCandidate(Object.fromEntries(data.columns.map((field, index) => [field, row[index]])), data.version));
     const car = { year: entry.year, make: entry.make, model: entry.model, market: 'US', catalogSelection: entry.id };
     const catalog = matchSpecCatalog(extractVehicleSpecs(car).specs, rows, entry.id);
@@ -53,6 +53,6 @@ export async function evaluateCatalog({ live = false, onProgress = () => {} } = 
     limitations: 'Confirmed US reference configurations without VINs. Numeric audit covers EPA displacement/cylinders, not AI power, torque, seats or weight. Manual entries are not pre-populated. This measures availability separately from correctness; unverified estimates are provisional.' };
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  try { loadEnvFile(new URL('.env', import.meta.url)); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  try { loadEnvFile(new URL('../.env', import.meta.url)); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   console.log(JSON.stringify(await evaluateCatalog({ live: process.argv.includes('--live'), onProgress: console.log }), null, 2));
 }

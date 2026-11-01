@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { decisionSummary, entrySummary, keyFacts } from './src/decision-summary.js';
-import { ratedCar } from './test-data/scoring-fixtures.mjs';
-import { makeDemoCars } from './src/demo-cars.js';
-import { researchForCar } from './src/model-research.js';
+import { decisionSummary, entrySummary, keyFacts } from '../src/decision-summary.js';
+import { ratedCar } from './fixtures/scoring-fixtures.mjs';
+import { makeDemoCars } from '../src/demo-cars.js';
+import { researchForCar } from '../src/model-research.js';
 const cars = makeDemoCars();
 
 test('sparse comfort and performance retain their category with guidance and no substitute score', () => {

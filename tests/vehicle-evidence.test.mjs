@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { extractVehicleSpecs, vinMismatches } from './src/vehicle-specs.js';
-import { validateVin, parseVinResponse, decodeVin } from './shared/vin.js';
-import { matchFuelEconomy, annualFuelCost, loadFuelYear } from './src/fuel-data.js';
-import { enrichVehicle } from './src/enrichment.js';
-import { rankDecisionMode } from './src/decision-engine.js';
-import { modelResearchRequest } from './src/model-specs.js';
-import { createHandler } from './backend/handler.mjs';
+import { extractVehicleSpecs, vinMismatches } from '../src/vehicle-specs.js';
+import { validateVin, parseVinResponse, decodeVin } from '../shared/vin.js';
+import { matchFuelEconomy, annualFuelCost, loadFuelYear } from '../src/fuel-data.js';
+import { enrichVehicle } from '../src/enrichment.js';
+import { rankDecisionMode } from '../src/decision-engine.js';
+import { modelResearchRequest } from '../src/model-specs.js';
+import { createHandler } from '../backend/handler.mjs';
 import { JSDOM } from 'jsdom';
 
 const vin = '1HGCM82633A004352'; // Public NHTSA example, not a user listing.

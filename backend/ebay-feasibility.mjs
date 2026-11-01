@@ -149,7 +149,7 @@ export async function authenticate({ timeoutMs = 30000, quiet = false } = {}) {
 async function main() {
   const args = process.argv.slice(2);
   if (args.includes('--help')) {
-    console.log('Usage: node ebay-feasibility.mjs ["https://www.ebay.ca/itm/ITEM_ID" | --test-import]');
+    console.log('Usage: node backend/ebay-feasibility.mjs ["https://www.ebay.ca/itm/ITEM_ID" | --test-import]');
     console.log('No argument: search five listings. --test-import: search, then import the first returned eBay.ca URL.');
     return;
   }
@@ -158,7 +158,7 @@ async function main() {
   if (inputUrl) parseItemUrl(inputUrl); // Reject invalid input before requesting a token.
   console.log(`Core - eBay Production Browse feasibility test\n\n${LIMITATIONS}\n`);
   try {
-    loadEnvFile(new URL('.env', import.meta.url));
+    loadEnvFile(new URL('../.env', import.meta.url));
   } catch (error) {
     if (error.code === 'ENOENT') throw new Error('Missing .env. Copy .env.example to .env and add Production credentials.');
     throw error;

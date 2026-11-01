@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ratedCar } from './test-data/scoring-fixtures.mjs';
-import { rankCars, mileageKm, detectWarnings, rankDecisionMode, DECISION_MODES } from './src/decision-engine.js';
+import { ratedCar } from './fixtures/scoring-fixtures.mjs';
+import { rankCars, mileageKm, detectWarnings, rankDecisionMode, DECISION_MODES } from '../src/decision-engine.js';
 
 // All fixtures are fictional; no eBay listing data is saved.
 const car = (id, price, year, raw = '100000', unit = 'km', extra = {}) => ({ legacyItemId: id, title: `Fictional car ${id}`, priceCAD: { value: String(price), currency: 'CAD' }, year: String(year), mileage: { raw, unit }, ...extra });
