@@ -1,15 +1,15 @@
 :root {
   color-scheme: dark;
-  --background: #100820;
-  --surface: #22113f;
-  --surface-raised: #301169;
-  --surface-hover: #321e52;
-  --border: #493467;
-  --text: #f8f5ff;
-  --text-secondary: #bdb2d2;
+  --background: #080f1a;
+  --surface: #101c2d;
+  --surface-raised: #182a42;
+  --surface-hover: #20354f;
+  --border: #526f90;
+  --text: #f3f7fd;
+  --text-secondary: #afc1d7;
   --action: #339cfc;
   --accent: #5cb4fc;
-  --ink: #100820;
+  --ink: #080f1a;
   --warning: #f4c66c;
   --warning-surface: #332613;
   --error: #ff9ca9;
@@ -32,6 +32,8 @@
   --space-24: 96px;
   --space-32: 128px;
   --content-width: 1440px;
+  --header-height: 88px;
+  --border-subtle: #2b405a;
   font-family: var(--font-body);
   color: var(--text);
   background: var(--background);
@@ -40,7 +42,7 @@
   -webkit-font-smoothing: antialiased;
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 112px; scrollbar-color: var(--border) var(--background); }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-height) + 80px); scrollbar-color: var(--border) var(--background); }
 body { margin: 0; min-width: 320px; font-size: 16px; line-height: 1.55; }
 button, input, select, textarea { font: inherit; }
 button, a, input, select, summary { -webkit-tap-highlight-color: transparent; }

@@ -1,24 +1,24 @@
 ---
 name: Dilemma
-description: Dark purple vehicle comparison with clear actions and readable evidence.
+description: Blue-black vehicle comparison with a compact overview and progressive detail.
 colors:
-  background: "#100820"
-  surface: "#22113f"
-  surface-raised: "#301169"
-  surface-hover: "#321e52"
-  border: "#493467"
-  text: "#f8f5ff"
-  text-secondary: "#bdb2d2"
+  background: "#080f1a"
+  surface: "#101c2d"
+  surface-raised: "#182a42"
+  surface-hover: "#20354f"
+  border: "#526f90"
+  text: "#f3f7fd"
+  text-secondary: "#afc1d7"
   action: "#339cfc"
   accent: "#5cb4fc"
-  ink: "#100820"
+  ink: "#080f1a"
   warning: "#f4c66c"
   warning-surface: "#332613"
   error: "#ff9ca9"
   error-surface: "#381626"
   success: "#86d9b7"
   success-surface: "#12322c"
-  photo-mat: "#e8e5ed"
+  photo-mat: "#e5ebf2"
 typography:
   display:
     fontFamily: "Clash Grotesk, sans-serif"
@@ -53,6 +53,26 @@ typography:
     fontSize: "14px"
     fontWeight: 400
     lineHeight: 1.7
+  section:
+    fontFamily: "Clash Grotesk, sans-serif"
+    fontSize: "22px"
+    fontWeight: 540
+  card:
+    fontFamily: "Clash Grotesk, sans-serif"
+    fontSize: "20px"
+    fontWeight: 540
+  compact-card:
+    fontFamily: "Clash Grotesk, sans-serif"
+    fontSize: "18px"
+    fontWeight: 540
+  price:
+    fontFamily: "Satoshi, sans-serif"
+    fontSize: "28px"
+    fontWeight: 700
+  photo-caption:
+    fontFamily: "Satoshi, sans-serif"
+    fontSize: "12px"
+    fontWeight: 400
 rounded:
   control: "8px"
   card: "12px"
@@ -114,123 +134,36 @@ components:
 
 # Design System: Dilemma
 
-## Overview
+## Direction
 
-**Creative North Star: "The Purple Component Playground"**
+The Clear Comparison Workspace. The approved 31 October 2026 refinement replaces purple fields with blue-black surfaces and makes Compare easier for a first-time shopper. Preserve the Dilemma identity, self-hosted Clash Grotesk headings, Satoshi interface text, honest evidence labels and contained vehicle photography.
 
-Dilemma adapts the user-supplied Uizard reference into a dark purple system for Canadian car comparison. Clear blue actions and geometric display type establish the identity; solid surfaces and legible evidence support sustained reading. The reference is inspiration, not a copied product identity.
+Use navy-black ground, quieter navy surfaces and a raised blue surface for selection. Blue actions use dark ink. Near-white primary text and blue-gray secondary text meet normal-text contrast on every main surface. Amber, rose and mint retain their warning, error and success meanings. Thin boundaries establish grouping; no decorative shadows or glass panels. The shared subdued boundary is #2b405a; interactive borders use the stronger named border token.
 
-The system uses tonal layering and thin boundaries rather than shadows. Car photographs remain uncropped against neutral mats, while labels distinguish facts, sources, warnings and uncertainty. The photo-credit page carries the same palette and self-hosted typefaces in a narrower reading layout.
+## Compare hierarchy
 
-**Key Characteristics:**
-- Purple tonal surfaces with one blue action hierarchy.
-- Clash Grotesk headings with Satoshi interface text.
-- Readable source labels, status text and tabular vehicle values.
-- Contained car photography and manual preview interactions.
+A compact heading and shortlist controls precede a sticky tab toolbar. Overview is the default; Specifications and Sources & checks reveal deeper material. Help me decide remains in the desktop toolbar and a safe-area-aware mobile bottom bar. Only one of these action locations is displayed at each breakpoint.
 
-Source authority: the approved user plan and supplied [Uizard reference](https://uizard.io), adapted in the current implementation. Product truth is in `PRODUCT.md`; route strategy is in `.impeccable/surfaces/dilemma.md`.
+Add car opens an inline import form and focuses its input. Empty comparisons show the form immediately. Successful additions collapse it, select Overview and reveal the new contender. Four-car shortlists explain how to make room. Clearing and saved-reference maintenance live in Comparison options. Notices remain visible when the import form is collapsed.
 
-Verification: this record was extracted from source on 30 October 2026. The mechanical UI detector returned no findings. The finish-review disposition is **recapture**: browser connection, activation and input-geometry failures prevented screenshots. Desktop, tablet, mobile, expanded-state and 200% zoom appearance are **not visually verified**; source documentation is not visual approval.
+Compact summaries show uncropped photos, name, price, mileage, location, research status, removal and View details. Important warnings remain visible alongside selected cars. A shortlist-wide concern count also accounts for cars outside the mobile pair. Do not turn a missing value into zero, installed equipment or a verified claim.
 
-## Colors
+Overview compares only available transmission, fuel, seating, body and verified fuel-consumption details. Compact source links lead to the relevant vehicle's evidence. Specifications retains complete supported fields, source labels, assumptions, estimates and context exclusions. Sources & checks selects one vehicle and exposes original evidence, model research, raw seller specifics, description and mileage reasoning, with detailed material expandable. Nested evidence does not repeat the source-status/research-control block.
 
-### Primary
+## Responsive behavior
 
-- **Action Blue:** primary buttons and active workflow steps.
-- **Clear Sky Accent:** links, focus, selected priorities and primary hover states.
+Use 32px outer gutters on desktop and 20px below 768px. The existing content cap is 1440px. All contenders appear on desktop and tablet. Phones show two selected cars side by side, with First car and Second car selectors for larger shortlists; choosing the other selected car swaps the pair. One-car lists use one column.
 
-### Neutral
+The table and summaries use the same selected pair. Keep table semantics explicit when rows adopt a mobile grid. Long names wrap. Horizontal overflow must stay local to a labeled region; the page itself must not scroll sideways. Preserve the existing larger photo presentation in Decide and model previews on Import.
 
-- **Deep Purple Ground:** the page ground, dark button ink and quiet inset regions.
-- **Purple Surface:** cards, forms and workspaces; **Raised Violet:** selected structural regions and table headers.
-- **Purple Hover:** secondary hover feedback; **Plum Boundary:** thin boundaries and dividers.
-- **Near-White Text:** primary content; **Lavender Secondary:** descriptive copy, metadata and unselected controls.
-- **Neutral Photo Mat:** a pale, quiet backing for contained source photographs; it is imagery support, not a light theme.
+Sticky offsets derive from the actual header height. Reserve space for the mobile action bar and device safe area. Evidence scrolling clears both the header and Compare toolbar. Keep primary controls at least 44px high and retain visible keyboard focus and usability at 200% zoom.
 
-### Status
+## Interaction and motion
 
-Amber warning, rose error and mint success roles have matching dark state surfaces. Every status retains a visible label or explanation. No separate decorative accent palette is introduced.
+Tabs support arrow keys, Home, End, roving focus, selected state and linked panels. Keep tab, evidence vehicle and mobile pair in React memory across stage navigation. Removal reconciles selected IDs to remaining contenders; clearing resets the workspace. No new browser storage is introduced.
 
-**The Dark Ink Rule.** Bright blue action and selected-state fills use dark ink, never white button text.
+Use the existing Motion library for short opacity transitions between tabs and on card insertion/removal. Target 150-250ms and avoid repeated animation when background data updates. The landing preview remains manual. Native smooth scrolling serves deliberate in-page navigation; route changes start immediately at the top. Reduced motion suppresses spatial movement and scrolling animation while keeping state and completion feedback visible.
 
-**The Evidence Rule.** State is expressed in words as well as color; source provenance and unresolved values remain readable.
+## Verification record
 
-## Typography
-
-**Display Font:** Clash Grotesk, with sans-serif fallback. **Body Font:** Satoshi, with sans-serif fallback. Both are self-hosted variable WOFF2 files from Fontshare with original Free Font License notices; `font-display: swap` is used, and the primary body font is preloaded.
-
-The display role is reserved for large invitations; the headline and title roles serve workspace and section headings. Body text has comfortable leading. Evidence and metadata stay at the smaller evidence scale, rather than the tiny labels of the previous interface. Display weights use the variable font's intermediate weight; controls use a firmer weight.
-
-Vehicle prices, mileage, specifications and scores use tabular numerals. Headings balance their wraps, permit long names to break, and use restrained negative tracking. The standalone credit page uses slightly looser prose leading (1.65) for reading.
-
-**The Two Voices Rule.** Clash Grotesk carries headings; Satoshi carries controls, prose, labels and vehicle values.
-
-## Layout
-
-The app's usable content width is capped at 1440px inside a shell with 32px side gutters. Below 768px, gutters become 20px and the navigation becomes a disclosure. Between 768px and 1000px, navigation gaps compact. The sticky header has an 88px desktop minimum and a 72px mobile minimum.
-
-The spacing scale begins at 4px. Workspaces use compact 20?32px groups, separated by larger section intervals. Homepage sections use the widest rhythm; their mobile intervals contract. Long explanatory introductions are limited to approximately 65?70 characters per line where the component permits.
-
-Vehicle collections use one column per contender at wide widths, two columns at or below 1100px, and one below 768px. Five primary decision priorities use five columns, then two; Practicality remains in More priorities. Comfort and performance evidence use two columns, stacking to one on mobile. Evidence coverage and provisional labels stay beside the result. Photo/text decision results stack on mobile. Research grids use automatic columns with minimum widths that collapse to the available width.
-
-Comparison tables retain a sticky first column inside a labelled local scrolling region, with a scroll hint. Source strings and names wrap. Preview slides share a CSS-grid area and grow naturally for taller content; minimum heights provide a steady frame without fixing a clipping height. Horizontal preview overflow remains local to the slide.
-
-The credit page uses a narrower 960px reading container. These are implemented responsive rules, not a claim that screenshots or zoom behavior have passed visual review.
-
-## Elevation & Depth
-
-The interface is flat at rest. Thin borders, solid purple surface steps and inset ground colors distinguish regions. There is no drop-shadow vocabulary. The homepage alone has a restrained radial purple illumination, bounded horizontally to its hero. The photo dialog uses an opaque dark-tinted backdrop to separate the focused task.
-
-**The Tonal Depth Rule.** Resting surfaces use solid color and thin borders, without drop shadows.
-
-## Shapes
-
-Controls, cards and broad panels use the named radius scale. Evidence badges have a smaller radius; circular workflow numerals and preview progress dots are functional exceptions. Images are clipped only to their frame corners: photographs use `object-fit: contain` and centered positioning, so the vehicle is not cropped. One-pixel borders establish boundaries without accent side stripes.
-
-## Components
-
-### Buttons
-
-Primary buttons pair Action Blue with dark ink, shift to Clear Sky Accent on hover and keep a minimum 44px target. Default padding and typography are in the tokens. Import submit buttons are taller. Secondary buttons use a transparent ground, a plum boundary, near-white text and a purple hover surface. Disabled controls dim and use a not-allowed cursor.
-
-Keyboard focus uses a 3px accent outline with a 4px offset. Background and border transitions are brief (160ms). Reduced-motion preferences suppress nonessential transitions and animation.
-
-### Inputs / Fields
-
-Fields use the deep ground, primary text and a thin plum boundary. Placeholders retain the secondary text role. Fields have a minimum 48px height; error borders use the error role, accompanied by an alert message. The import field sits in a bordered purple group; its submit action moves to a full row on mobile. Focus strengthens the group boundary and preserves an explicit outline.
-
-### Navigation
-
-A solid, sticky header carries the brand and three routes. The active route uses near-white text and a blue underline; the comparison link includes a labelled shortlist count. Mobile Menu/Close controls expose an expandable navigation region, with Escape returning focus to the trigger. Workspace step indicators share one visual language and mark the current step with blue fill and dark ink.
-
-### Cards / Containers
-
-Vehicle cards have solid purple surfaces, one-pixel boundaries, contained photo mats and compact content padding. The recommendation panel uses the broader panel radius and separates its photographic, explanatory, fact and footer regions with thin dividers. Cards do not need an additional shadow. The preview frame uses the same surface grammar with a raised-violet header.
-
-### Priorities and Evidence Badges
-
-Unselected priorities use purple surfaces and secondary text; the selected priority is accent-filled with dark ink. Evidence badges are compact outlined labels. Factory, VIN and agreeing-source labels use the accent role, conflicts use warning text, and reported presence uses success. Words communicate the distinction alongside color.
-
-### Disclosures and State Panels
-
-Native details/summary controls carry research, provenance, seller descriptions and scoring details. Summaries have a minimum 48px target, an accent marker and a divider when open. Warning panels use an amber boundary, warning surface and explicit concern text. Source and progress notices use readable secondary text; error and success messages retain their named roles.
-
-Comparison cards show detected condition and identity warnings directly; collapsing source details must not hide those warnings. The table's scroll hint is limited to mobile widths.
-
-### Photography and Motion
-
-Preview controls are manual and keyboard operable. The current preview slide enters and exits with brief position/opacity motion; outgoing content is hidden from interaction. The larger-photo dialog preserves contained imagery and has an explicit close action. No imagery is generated for this redesign: existing model photographs retain source credits and embedded origins.
-
-## Do's and Don'ts
-
-### Do:
-- **Do** use the named color and type roles across all screens.
-- **Do** keep car photographs contained and source labels close to their facts.
-- **Do** preserve keyboard focus, reduced motion and explicit state wording.
-- **Do** treat comparison-table scrolling as local, not permission for page overflow.
-
-### Don't:
-- **Don't** replace dark ink with white on blue action fills.
-- **Don't** turn absent specifications into visual certainty or remove visible warnings.
-- **Don't** crop vehicle photographs to fill a frame.
-- **Don't** introduce autoplay, decorative eyebrow labels or invented proof.
+The browser connection was unavailable. Native Chrome inspection was then stopped by the computer-use runtime because it could not determine the current URL confidently enough to enforce policy. No desktop, tablet, mobile or 200% zoom screenshot approval is claimed. Rendered React interaction checks cover the journey, tab keyboard controls, correct evidence focus, pair switching, persistence, import errors, removal and async safety. All 144 regression tests, contrast checks and the production build passed. Existing Motion bundler directive warnings remain. The Impeccable scan raised type-ramp advisories; compact sizes were consolidated and the retained roles documented. Visual verification remains a recapture item.

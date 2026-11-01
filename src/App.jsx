@@ -9,12 +9,14 @@ import { enrichVehicle } from './enrichment.js';
 import { mergeResearch } from '../shared/model-specs.js';
 import { modelSpecCache } from './spec-cache.js';
 import { makeDemoCars } from './demo-cars.js';
+import { emptyComparisonView, reconcileComparisonView } from './comparison-view.js';
 
 const route = () => ['compare', 'decide'].includes(window.location.hash.slice(1)) ? window.location.hash.slice(1) : 'import';
 export default function App() {
   const reduced = useReducedMotion();
   // One owner keeps imported data in memory across all three pages.
   const [cars, setCars] = useState([]);
+  const [comparisonView, setComparisonView] = useState(emptyComparisonView);
   const [page, setPage] = useState(route);
   const [mode, setMode] = useState('value');
   const [url, setUrl] = useState('');
@@ -33,8 +35,16 @@ export default function App() {
   useEffect(() => {
     setMenuOpen(false);
     document.querySelector('main h1')?.focus({ preventScroll: true });
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }, [page]);
+  useEffect(() => {
+    const header = document.querySelector('.site-header');
+    const update = () => document.documentElement.style.setProperty('--header-height', `${header.getBoundingClientRect().height}px`);
+    update();
+    const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(update) : null;
+    observer?.observe(header);
+    return () => observer?.disconnect();
+  }, []);
   function navigate(next) { window.location.hash = next; setPage(next); }
   function startImport() {
     navigate('import');
@@ -84,6 +94,7 @@ export default function App() {
     if (cars.length || loading) return;
     const demo = makeDemoCars().map(car => ({ ...car, enrichment: { status: 'loading' } }));
     setCars(demo);
+    setComparisonView(reconcileComparisonView(emptyComparisonView(), demo));
     demo.forEach(enrichImported);
     setError(''); setNotice('Fictional demo loaded. No eBay request was made.');
     navigate('compare');
@@ -105,6 +116,7 @@ export default function App() {
       const data = await readImportResponse(response);
       const imported = { ...data.vehicle, enrichment: { status: 'loading' } };
       setCars(previous => previous.some(car => car.legacyItemId === imported.legacyItemId) ? previous : [...previous, imported].slice(0, 4));
+      setComparisonView(previous => reconcileComparisonView(previous, [...cars, imported].slice(0, 4), imported.legacyItemId));
       enrichImported(imported);
       setUrl(''); setNotice('Listing imported. Compare the available seller details below.');
       navigate('compare');
@@ -117,7 +129,7 @@ export default function App() {
     <p id="input-note" className="input-note"><Icon name="check" size={14} /> No account needed <span>·</span> {cars.length ? `${cars.length}/4 cars added` : '4 cars at a time'}</p><p id="import-error" role="alert" className="error-message">{error}</p><p role="status" className="form-message">{loading ? 'Connecting to eBay and bringing in listing details…' : notice}</p>
     {!cars.length && <div className="demo-entry"><button type="button" className="text-button" onClick={loadDemo} disabled={loading}>Try fictional demo</button>{page !== 'import' && <p>Three example cars, real sourced research. Works without eBay credentials or internet research.</p>}</div>}
   </form>;
-  const enter = { initial: { opacity: reduced ? 1 : 0, y: reduced ? 0 : 14 }, animate: { opacity: 1, y: 0 }, transition: { duration: reduced ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] } };
+  const enter = { initial: { opacity: reduced ? 1 : 0 }, animate: { opacity: 1 }, transition: { duration: reduced ? 0 : 0.18 } };
   return <LazyMotion features={domAnimation} strict><MotionConfig reducedMotion="user"><div className={`site-shell ${page === 'import' ? 'landing-shell' : page === 'decide' ? 'decision-shell' : ''}`}>
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); document.getElementById('main-content')?.focus(); }}>Skip to content</a>
     <header className="site-header" onKeyDown={event => { if (event.key === 'Escape' && menuOpen) { setMenuOpen(false); menuToggle.current?.focus(); } }}><a className="brand" href="#import" aria-label="Dilemma home"><span className="brand-mark">d.</span>Dilemma<span className="brand-dot">.</span></a><button className="nav-menu-toggle" type="button" ref={menuToggle} aria-expanded={menuOpen} aria-controls="primary-navigation" onClick={() => setMenuOpen(open => !open)}><Icon name={menuOpen ? 'close' : 'menu'} size={22} />{menuOpen ? 'Close' : 'Menu'}</button><nav id="primary-navigation" className={menuOpen ? 'is-open' : ''} aria-label="Main navigation">{[['import', 'Import'], ['compare', 'Compare'], ['decide', 'Help Me Decide']].map(([id, label]) => <a className="nav-link" key={id} href={`#${id}`} aria-current={page === id ? 'page' : undefined} onClick={() => setMenuOpen(false)}>{label}{id === 'compare' && <span className="nav-count" aria-label={`${cars.length} cars in shortlist`}>{cars.length}</span>}</a>)}<button className="nav-button" type="button" onClick={() => { setMenuOpen(false); startImport(); }}>Import a car <Icon name="arrow" size={17} /></button></nav></header>
@@ -131,7 +143,7 @@ export default function App() {
           <section className="final-cta"><h2>Make room for a better decision.</h2><p>Start with a car you already have your eye on.</p><button type="button" onClick={startImport}>Import your first car <Icon name="arrow" size={20} /></button></section>
         </section>
       </>}
-      {page === 'compare' && <VehicleComparison cars={cars} retryResearch={retryResearch} clearSavedSpecs={() => { modelSpecCache.clear(); setNotice('Saved model specifications cleared. Your current comparison is unchanged.'); }} importForm={importForm} navigate={navigate} removeCar={id => { for (const controller of enrichmentTasks.current) if (controller.vehicleId === id) controller.abort(); setCars(previous => previous.filter(car => car.legacyItemId !== id)); setNotice('Car removed. You can import a replacement.'); }} clearCars={() => { for (const controller of enrichmentTasks.current) controller.abort(); setCars([]); setNotice('Comparison cleared.'); }} />}
+      {page === 'compare' && <VehicleComparison cars={cars} view={comparisonView} onViewChange={setComparisonView} notice={notice} retryResearch={retryResearch} clearSavedSpecs={() => { modelSpecCache.clear(); setNotice('Saved model specifications cleared. Your current comparison is unchanged.'); }} importForm={importForm} navigate={navigate} removeCar={id => { for (const controller of enrichmentTasks.current) if (controller.vehicleId === id) controller.abort(); const remaining = cars.filter(car => car.legacyItemId !== id); setCars(remaining); setComparisonView(previous => reconcileComparisonView(previous, remaining)); setNotice('Car removed. You can import a replacement.'); }} clearCars={() => { for (const controller of enrichmentTasks.current) controller.abort(); setCars([]); setComparisonView(emptyComparisonView()); setNotice('Comparison cleared.'); }} />}
       {page === 'decide' && <DecisionDashboard cars={cars} retryResearch={retryResearch} mode={mode} setMode={setMode} />}
     </m.div></main><footer><a className="footer-brand" href="#import">Dilemma<span>.</span></a><span>A clearer road to your next car.</span><span className="prototype-label">Temporary shortlist · Refresh clears your shortlist</span></footer>
   </div></MotionConfig></LazyMotion>;

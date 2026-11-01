@@ -9,10 +9,10 @@
 .empty-state p { color: var(--text-secondary); }
 .car-grid { display: grid; grid-template-columns: repeat(var(--columns), minmax(0, 1fr)); gap: 20px; align-items: stretch; }
 .car-card { min-width: 0; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--surface); overflow: hidden; }
-.vehicle-image { position: relative; height: 230px; width: 100%; min-width: 0; flex-shrink: 0; overflow: hidden; background: #e8e5ed; }
+.vehicle-image { position: relative; height: 230px; width: 100%; min-width: 0; flex-shrink: 0; overflow: hidden; background: #e5ebf2; }
 .vehicle-image img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center; }
 .image-placeholder { display: flex; height: 100%; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: var(--surface); color: var(--text-secondary); font-size: 14px; }
-.source-pill { position: absolute; top: 12px; left: 12px; max-width: calc(100% - 24px); padding: 6px 10px; border-radius: var(--radius-control); background: #100820ed; color: var(--text); font-size: 14px; }
+.source-pill { position: absolute; top: 12px; left: 12px; max-width: calc(100% - 24px); padding: 6px 10px; border-radius: var(--radius-control); background: #080f1aed; color: var(--text); font-size: 14px; }
 .photo-next { position: absolute; bottom: 12px; right: 12px; min-width: 44px; padding: 8px; }
 .car-card-body { padding: 20px; }
 .card-topline { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 14px; color: var(--text-secondary); }
@@ -33,32 +33,20 @@
 .table-scroll tbody tr:nth-child(even) th { background: var(--surface); }
 .table-scroll .spec-value { min-width: 120px; }
 .table-scroll table:has(thead tr > :nth-child(5)) { min-width: 1000px; }
-.scroll-hint { display: none; color: var(--text-secondary); font-size: 14px; margin: 0 0 12px; }
 .shared-gaps { margin: 16px 0; }
 .source-status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 20px; }
-.vehicle-review { border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--surface); }
-.vehicle-review > summary { font-family: var(--font-display); font-size: 22px; }
-.vehicle-review .vehicle-summary { padding: 0 20px 20px; }
-.specifics, .description-grid details { margin-top: 20px; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--surface); }
-.description-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
-.description-heading { margin-top: 48px; }
+.specifics { margin-top: 20px; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--surface); }
 .seller-context { padding: 0 20px 20px; color: var(--text-secondary); font-size: 14px; }
 .seller-context p { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 360px; overflow: auto; }
-.decide-cta { display: flex; justify-content: space-between; align-items: center; gap: 32px; padding: 32px; margin: 48px 0 24px; border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--surface-raised); }
-.decide-cta p { color: var(--text-secondary); margin: 0; max-width: 65ch; }
-.decide-cta button { flex-shrink: 0; }
 .data-note { margin: 24px 0 0; }
 .inline-description { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 300px; overflow: auto; }
 @media(max-width: 1100px) { .car-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media(max-width: 767px) {
-  .scroll-hint { display: block; }
   .page-section { padding-top: 32px; }
   .section-heading, .decision-heading { flex-direction: column; gap: 20px; }
   .comparison-import { padding: 16px; }
-  .car-grid, .description-grid { grid-template-columns: 1fr; }
+  .car-grid { grid-template-columns: 1fr; }
   .vehicle-image { height: 240px; }
   .table-scroll th:first-child { width: 140px; }
   th, td { padding: 16px; }
-  .decide-cta { padding: 24px; align-items: flex-start; flex-direction: column; gap: 24px; }
-  .decide-cta button { width: 100%; }
 }

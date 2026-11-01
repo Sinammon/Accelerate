@@ -1,45 +1,37 @@
-# Dilemma redesign direction contract
+# Dilemma refinement direction contract
 
-Confirmed user plan: 30 October 2026. Code-first build; no image comp required.
+Confirmed user plan: 31 October 2026. Code-first refinement of the existing application.
 
 ## Direction contract
 
-THESIS: Make a temporary car shortlist understandable through supported evidence and priorities. Replace the prior split light-blue hero with a centered invitation and wide product playground.
+THESIS: Give a new shopper an understandable first comparison, then offer deeper specifications and sources on request.
 
-OWN-WORLD: Dark purple fields, blue actions with dark ink, Clash Grotesk headings and Satoshi interface text. Quiet workspace surfaces preserve the hierarchy of car photographs, values, evidence and warnings.
+OWN-WORLD: Blue-black ground and navy surfaces, clear blue actions with dark ink, existing Clash Grotesk and Satoshi typography. Preserve contained car photography and factual source labels.
 
-STORY: Shoppers import an eBay.ca find, compare up to four cars and choose a priority to understand a recommendation with trade-offs. Fictional examples remain separate.
+STORY: Import up to four eBay.ca finds, compare essentials, inspect supporting evidence and choose priorities in Decide. Fictional examples stay explicit.
 
-FIRST VIEWPORT: An 88px sticky header, centered 40–72px two-line heading, 620px explanation and 760px import form. The blue import button is the primary action; the demo is secondary. A wide framed preview follows.
+FIRST VIEWPORT: Compact Compare heading, shortlist controls, sticky Overview / Specifications / Sources & checks toolbar, persistent decision action and compact vehicle summaries. The import form opens on demand after the first car.
 
-FORM: User-pinned Uizard component-playground direction and approved layouts take precedence over assignment 3; seed:0cced5c18ab2460a. The assignment is acknowledged; the user specified the world and composition explicitly, leaving no direction choice to reopen.
+FORM: The approved blue-black refinement supersedes the former purple palette. Keep the existing brand, task flow and product safeguards.
 
-FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+FINISH: Verify functional paths, contrast and responsive source rules; record the actual visual verification limit rather than asserting screenshot approval.
 
 ## Modes
 
-Import homepage: Persuade. Compare and Help Me Decide: Operate. Photo credits: Read.
-
-## Visual world
-
-The user's supplied Uizard reference pins a dark purple component playground, bright blue actions, Clash Grotesk display typography and Satoshi interface typography. This explicit reference and the approved page composition take precedence over other concept assignments. Keep the reference's confident scale and negative space, adapting its content to Canadian car shopping; no copied logos, social proof or invented claims.
-
-## First viewport and visitor path
-
-Sticky shared navigation. Centered homepage headline and import form, then a wide interactive product preview. Import is primary; fictional demo is secondary. The three-stage preview remains manual and separate from the real shortlist. A clear three-step explanation and final import CTA follow.
+Import: Persuade. Compare and Decide: Operate. Photo credits: Read.
 
 ## Workspaces
 
-Compact import toolbar above uncropped vehicle photographs and a scrollable comparison table. Six visible decision priorities above a photo-led, evidence-labelled recommendation, reasons, trade-off and visible warnings. Detailed research, arithmetic and scenario controls remain expandable.
+Overview gives price and mileage in compact vehicle summaries and a short key-detail comparison. Specifications retains the complete supported table. Sources & checks selects one vehicle for deeper evidence and expandable original details. Mobile uses two selected contenders, with all four retained in the shortlist. Keep serious concerns visible and account for all contenders in the review count.
 
-## Signature and cross-surface system
+## Motion and continuity
 
-Large restrained typography, purple framed product surfaces and a single blue action hierarchy. Purple illumination is restricted to the landing hero; workspaces use solid quiet surfaces. Shared badges, disclosures, fields, buttons and notices carry the system through every state and the photo-credit page.
+Use short, responsive feedback and native smooth scrolling for deliberate in-page navigation. Do not animate every research update or add scroll hijacking. Respect reduced motion. Preserve Compare selections across navigation and reconcile them when cars change.
 
 ## Hard constraints
 
-Preserve all product behavior and data safeguards. No page-level horizontal overflow; only labelled table regions scroll. Uncropped images. Dark ink on bright blue buttons. Readable provenance and uncertainty. No decorative eyebrow labels. No autoplay. No new backend/schema APIs.
+Preserve hash routes, import and async cancellation, four-car limit, all six priorities, VIN compatibility fixes, evidence and warnings. No new backend/schema APIs, persistence or deployment settings. No page-level horizontal overflow, cropped car photos, invented claims, autoplay or decorative eyebrow labels.
 
-## Honest risk and verification
+## Verification
 
-Dark dense data can lose hierarchy; verify contrast and expanded evidence. Test 390, 768 and 1440px, long titles, four cars, keyboard and 200% zoom. If browser URL policy prevents screenshots, report visual QA as incomplete and keep the review disposition qualified.
+Functional and contrast checks run locally. Browser inspection was unavailable and the native fallback stopped because the runtime could not confidently determine Chrome's current URL. Screenshots at 390, 768 and 1440px and 200% zoom remain unverified and must be reported as such.

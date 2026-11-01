@@ -28,7 +28,7 @@ React/Vite web app with stateless import, VIN, recall and optional free-tier Gem
 
 ## Brand Commitments
 
-Keep the Dilemma name and existing honest, plain product language. The user chose a complete dark purple/blue redesign inspired by the supplied Uizard design system, code first. Preserve functionality while replacing the prior visual presentation.
+Keep the Dilemma name and existing honest, plain product language. The approved refinement uses blue-black surfaces, clear blue actions, and the existing self-hosted fonts. Compare starts with an overview, with specifications and sources available in tabs. Phones compare two selected contenders at a time; all four remain in the shortlist. Keep motion subtle and responsive.
 
 ## Evidence on Hand
 

@@ -13,7 +13,7 @@
 .mode-card:hover { background: var(--surface-hover); }
 .mode-card.selected { color: var(--ink); background: var(--accent); border-color: var(--accent); }
 .decision-match { display: grid; grid-template-columns: minmax(0,.95fr) minmax(0,1.05fr); border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--surface); overflow: hidden; }
-.decision-photo { position: relative; min-width: 0; background: #e8e5ed; }
+.decision-photo { position: relative; min-width: 0; background: #e5ebf2; }
 .decision-photo .vehicle-image { height: 100%; min-height: 440px; }
 .view-photo { position: absolute; bottom: 20px; left: 20px; background: var(--background); color: var(--text); border-color: var(--border); }
 .view-photo:hover { background: var(--surface-hover); }
@@ -45,7 +45,7 @@
 .decision-arrow.previous svg { transform: rotate(180deg); }
 .decision-arrow:hover { background: var(--surface-hover); }
 .decision-photo-dialog { padding: 20px; width: min(1100px, calc(100% - 32px)); max-height: calc(100dvh - 32px); border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--surface); color: var(--text); }
-.decision-photo-dialog::backdrop { background: #100820e8; }
+.decision-photo-dialog::backdrop { background: #080f1ae8; }
 .decision-photo-dialog > button { display: flex; margin: 0 0 16px auto; }
 .decision-photo-dialog .vehicle-image { height: min(70dvh,700px); }
 .decision-photo-dialog .source-pill, .decision-photo-dialog .photo-next { position: absolute; }

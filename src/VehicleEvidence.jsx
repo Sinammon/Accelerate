@@ -15,12 +15,13 @@ export function ModelSpecAttribution({ car }) {
   // Google attribution is isolated: no scripts, same-origin access or top navigation.
   return typeof html === 'string' && html.length <= 50000 ? <iframe className="search-attribution" title="Google Search suggestions for vehicle specifications" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerPolicy="no-referrer" srcDoc={html} /> : null;
 }
-export function SpecValue({ spec }) {
-  if (!spec || spec.status === 'unknown') return spec?.reason ? <span className="spec-value">Unresolved<small className="spec-reason">{spec.reason}</small></span> : 'Unknown';
+export function SpecValue({ spec, compact = false, onViewEvidence }) {
+  if (!spec || spec.status === 'unknown') return !compact && spec?.reason ? <span className="spec-value">Unresolved<small className="spec-reason">{spec.reason}</small></span> : 'Unknown';
   const value = spec.kind === 'configuration' ? formatted(spec.referenceValue ?? spec.value) : spec.kind === 'range' ? `${formatted(spec.minimum)}–${formatted(spec.maximum)}` : spec.kind === 'alternatives' ? spec.alternatives.map(formatted).join(' / ') : spec.kind === 'optional' ? 'Optional' : spec.value == null ? 'Unknown' : formatted(spec.value);
+  if (compact) return <span className="spec-value compact-spec">{value}{onViewEvidence && <button type="button" className={`evidence-link ${spec.status}`} onClick={onViewEvidence}>{spec.kind !== 'value' && spec.kind ? 'Varies · see source' : spec.status === 'seller-reported' ? 'Seller' : spec.status === 'vin-record' ? 'VIN record' : spec.status === 'model-estimate' ? 'Estimate · unverified' : spec.status === 'corroborated' ? 'Sources agree' : spec.status === 'factory-reference' || spec.quality === 'exact' ? 'Factory source' : statusLabel[spec.status]}</button>}{spec.stale && <small>Older saved value</small>}</span>;
   return <span className="spec-value">{value}<small className={`evidence-badge ${spec.status}`}>{spec.kind === 'configuration' ? 'Reference version · unconfirmed' : spec.quality === 'exact' ? 'Factory reference' : statusLabel[spec.status]}</small>{spec.listingPreferred && <small>Listing preferred over VIN</small>}{spec.stale && <small>Older saved value · source verification unavailable</small>}{spec.assumptions?.map((assumption, index) => <small className="spec-reason" key={index}>{assumption}</small>)}{spec.status === 'model-context' && <small className="spec-reason">{spec.contextReason || `Configuration varies${modelScopeLabel(spec.scope) ? ` · ${modelScopeLabel(spec.scope)}` : ''}`} · excluded from scoring</small>}</span>;
 }
-export function ResearchAction({ car, retryResearch }) {
+export function ResearchAction({ car, retryResearch, compact = false, onViewResults }) {
   if (car.demo || !retryResearch) return null;
   const busy = car.enrichment?.specsStatus ? ['loading-quick', 'verifying'].includes(car.enrichment.specsStatus) : ['loading', 'loading-model'].includes(car.enrichment?.status);
   const quickPending = car.enrichment?.specsStatus === 'loading-quick';
@@ -34,25 +35,27 @@ export function ResearchAction({ car, retryResearch }) {
   const ready = specs + notes + dimensions > 0;
   const failed = research && !['matched', 'partial', 'complete', 'loading'].includes(research.status);
   function showResults() {
+    if (onViewResults) { onViewResults(); return; }
     const target = [...document.querySelectorAll('.vehicle-summary[data-research-car]')].find(element => element.dataset.researchCar === String(car.legacyItemId));
     if (!target) return;
     for (let parent = target.parentElement; parent; parent = parent.parentElement) if (parent.tagName === 'DETAILS') parent.open = true;
     if (notes || dimensions) { const details = target.querySelector('.model-research'); if (details) details.open = true; }
     target.focus({ preventScroll: true });
-    target.scrollIntoView?.({ block: 'start', behavior: 'instant' });
+    target.scrollIntoView?.({ block: 'start', behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
   }
   const action = busy ? 'Restart research' : ready ? 'Refresh research' : failed ? 'Retry research' : 'Research model';
+  if (compact) return <div className="research-control research-compact"><small className="spec-coverage">{coveredCore.length} of {CORE_SPEC_FIELDS.length} key details found{estimated > 0 ? ` · ${estimated} unverified estimates` : ''}</small><small role="status">{busy ? car.enrichment?.vin?.status === 'valid' ? 'Checking VIN and model details…' : 'Looking up model details…' : ready ? `Research ready: ${specs} specifications` : failed ? 'Some details could not be checked.' : 'Seller details available.'}</small><button type="button" className="inline-button" data-action="model-research" onClick={() => retryResearch(car)} aria-label={`${action} for ${car.year || ''} ${car.make || ''} ${car.model || ''}`}>{action}</button>{research?.lastAttempt && <small>Previous research is still available.</small>}</div>;
   return <div className="research-control"><small className="spec-coverage">{coveredCore.length}/{CORE_SPEC_FIELDS.length} core specs present | {typical} typical | {estimated} estimated</small>{busy ? <small role="status">{quickPending ? 'Finding missing core specifications. Existing values remain available.' : 'Verifying sources in the background. Existing values remain available.'}</small> : ready && <small role="status">Research ready: {specs} specifications · {notes} sourced notes | {dimensions} dimension ratings</small>}<div>{ready && <button type="button" className="text-button" onClick={showResults}>View results</button>}<button type="button" data-action="model-research" className="text-button" onClick={() => retryResearch(car)} aria-label={`${action} for ${car.year || ''} ${car.make || ''} ${car.model || ''}`}>{action}</button></div>{!busy && failed && <small>{research.reason}</small>}{research?.lastAttempt && <small>{research.lastAttempt.reason} Previous research is still available.</small>}</div>;
 }
-export function SourceStatus({ car, retryResearch }) {
+export function SourceStatus({ car, retryResearch, onViewResults }) {
   const enrichment = car.enrichment;
   if (enrichment?.status === 'loading') return <p className="source-status" role="status">Checking VIN and Canadian fuel data… Seller details are ready.</p>;
   if (!enrichment) return null;
   const { vin, fuel, factorySpecs, modelSpecs } = enrichment;
   const specsBusy = enrichment.specsStatus ? ['loading-quick', 'verifying'].includes(enrichment.specsStatus) : enrichment.status === 'loading-model' || modelSpecs?.status === 'loading';
-  return <div className="source-status"><p>{vin?.mismatches?.length ? 'VIN differs; listing details are preferred — review before deciding.' : vin?.status === 'valid' ? 'Checking VIN; listing details are already in use.' : vin?.status === 'decoded' ? 'VIN decoded · Original vehicle specifications available' : vin?.reason || 'VIN data unavailable.'}</p>{factorySpecs && <p>{factorySpecs.status === 'matched' ? `Factory power reference matched · ${factorySpecs.configuration.market} market · Original ratings, not measured output` : factorySpecs.reason}</p>}<p>{fuel?.status === 'matched' ? `${fuel.combined.toFixed(1)} L/100 km combined · NRCan configuration match` : fuel?.reason || 'No verified fuel configuration match.'}</p>{modelSpecs && <p role={specsBusy ? 'status' : undefined}>{specsBusy ? 'Looking up model specifications and category insights… Existing details are ready.' : modelSpecs.reason}</p>}<ResearchAction car={car} retryResearch={retryResearch} /></div>;
+  return <div className="source-status"><p>{vin?.mismatches?.length ? 'VIN differs; listing details are preferred — review before deciding.' : vin?.status === 'valid' ? 'Checking VIN; listing details are already in use.' : vin?.status === 'decoded' ? 'VIN decoded · Original vehicle specifications available' : vin?.reason || 'VIN data unavailable.'}</p>{factorySpecs && <p>{factorySpecs.status === 'matched' ? `Factory power reference matched · ${factorySpecs.configuration.market} market · Original ratings, not measured output` : factorySpecs.reason}</p>}<p>{fuel?.status === 'matched' ? `${fuel.combined.toFixed(1)} L/100 km combined · NRCan configuration match` : fuel?.reason || 'No verified fuel configuration match.'}</p>{modelSpecs && <p role={specsBusy ? 'status' : undefined}>{specsBusy ? 'Looking up model specifications and category insights… Existing details are ready.' : modelSpecs.reason}</p>}<ResearchAction car={car} retryResearch={retryResearch} onViewResults={onViewResults} /></div>;
 }
-export default function VehicleEvidence({ car, scenario, retryResearch }) {
+export default function VehicleEvidence({ car, scenario, retryResearch, showStatus = true }) {
   const { specs, features } = extractVehicleSpecs(car);
   const knownSpecs = Object.entries(FIELD_LABELS).filter(([key]) => key !== 'transmissionCode' && specs[key].status !== 'unknown');
   const unknownSpecs = Object.entries(FIELD_LABELS).filter(([key]) => key !== 'transmissionCode' && specs[key].status === 'unknown').map(([, label]) => label);
@@ -60,7 +63,7 @@ export default function VehicleEvidence({ car, scenario, retryResearch }) {
   const vin = car.enrichment?.vin, fuel = car.enrichment?.fuel;
   const cost = scenario && annualFuelCost(fuel, scenario);
   return <details className="vehicle-evidence"><summary>Specifications, amenities &amp; sources</summary><div className="evidence-content">
-    <SourceStatus car={car} retryResearch={retryResearch} />
+    {showStatus && <SourceStatus car={car} retryResearch={retryResearch} />}
     {!!vin?.mismatches?.length && <div className="warning-details"><strong>Listing details used for results</strong>{vin.mismatches.map(item => <p key={item.field}>{item.field}: seller lists {String(item.listing)}; VIN record lists {String(item.vin)}. The listing value is used. Incompatible VIN supplements are ignored.</p>)}</div>}
     <p className="evidence-legend">Seller-reported = a listing claim. VIN supplement = a manufacturer-submitted value used only when the listing has no value and the configuration agrees. Factory reference = published original ratings for the matched configuration. Typical model spec = an approximate sourced reference. Estimated model spec = an unverified AI estimate with assumptions. Approximate values make affected rankings provisional. Sources agree = the cited values agree. None verifies current condition, measured output or installed equipment.</p>
     <dl className="evidence-specs">{knownSpecs.map(([key, label]) => <div key={key}><dt>{label}</dt><dd><SpecValue spec={specs[key]} /><SpecCitations evidence={specs[key].evidence} sourceUrl={car.sourceUrl} /></dd></div>)}</dl>
