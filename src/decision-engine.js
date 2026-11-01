@@ -38,6 +38,8 @@ export function detectWarnings(car) {
     return evidence ? [{ label, evidence: evidence.trim() }] : [];
   });
   for (const mismatch of car.enrichment?.vin?.mismatches || []) warnings.push({ label: 'VIN/listing mismatch', evidence: `${mismatch.field}: listing ${mismatch.listing}; VIN record ${mismatch.vin}` });
+  const mileage = resolveMileage(car);
+  if (['conflict', 'unit-unknown'].includes(mileage.status)) warnings.push({ label: 'Check mileage', evidence: mileage.reason });
   return warnings;
 }
 

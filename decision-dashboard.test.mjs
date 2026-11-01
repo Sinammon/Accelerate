@@ -120,7 +120,8 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(document.querySelector('.mode-grid'), null);
     await add('222222222222', 20000, 2021, 'No heated seats.', null);
     assert.equal(document.querySelectorAll('.car-card').length, 2);
-    assert.match(document.querySelector('tbody').textContent, /km assumed/);
+    assert.match(document.querySelector('tbody').textContent, /unit not stated/);
+    assert.match(document.querySelectorAll('.car-card')[1].textContent, /Check mileage.*unit is not stated/s);
     let calls = 0;
     globalThis.fetch = async () => { calls++; throw new Error('Should not fetch duplicate'); };
     await change('#listing-url', 'https://www.ebay.ca/itm/111111111111');
