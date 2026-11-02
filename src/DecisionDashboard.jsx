@@ -9,6 +9,7 @@ import Icon from './Icons.jsx';
 import { DIMENSION_LABELS } from './capability-scoring.js';
 import { FIELD_LABELS, specEvidenceLabel } from './vehicle-specs.js';
 import { SpecCitations } from './VehicleEvidence.jsx';
+import OwnershipCosts from './OwnershipCosts.jsx';
 
 function CategoryDetails({ entry, mode }) {
   const rows = mode === 'comfort' ? ['rideQuality', 'cabinQuietness', 'seatComfort', 'passengerSpace'].map(key => ({ key, label: DIMENSION_LABELS[key], value: entry.values[key] == null ? 'Unknown' : `${entry.values[key]} / 5`, evidence: entry.evidence[key] }))
@@ -65,6 +66,7 @@ function MatchCard({ summary }) {
 
 export default function DecisionDashboard({ cars, mode = 'value', setMode, retryResearch }) {
   const [scenario, setScenario] = useState(DEFAULT_SCENARIO);
+  const scenarioPanel = useRef(null);
   const summary = decisionSummary(cars, mode, new Date().getFullYear(), scenario);
   const result = summary.requested;
   const missing = result.criteria.filter(c => c.weight > 0 && !c.active);
@@ -80,6 +82,13 @@ export default function DecisionDashboard({ cars, mode = 'value', setMode, retry
         : <MatchCard key={`${mode}:${JSON.stringify(scenario)}`} summary={summary} />}
     </div>
     {!!cars.length && <>
+      {mode === 'cost' && <OwnershipCosts cars={cars} scenario={scenario} research={result.research} onAdjustFuel={() => {
+        const panel = scenarioPanel.current;
+        if (!panel) return;
+        panel.open = true;
+        panel.querySelector('input')?.focus({ preventScroll: true });
+        panel.scrollIntoView?.({ block: 'start', behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+      }} />}
       <div className="decision-actions"><a className="decision-primary" href="#compare">Compare Your Cars <Icon name="arrow" size={21} /></a></div>
       <details className="decision-details"><summary>Why this result? Sources &amp; checks</summary><div className="decision-detail-content">
         <p>{result.limitation}</p>
@@ -88,7 +97,7 @@ export default function DecisionDashboard({ cars, mode = 'value', setMode, retry
         <div className="ranking-list">{summary.ranking.ranked.map(entry => <article className="ranking-row" key={entry.car.legacyItemId}><div className="ranking-main"><div><h3>{vehicleName(entry.car)}</h3><p>{priceDisplay(entry.car)}</p></div><strong className="ranking-score">{entry.score == null ? 'Unscored' : `${entry.score.toFixed(2)} / 100`}</strong></div><p className="score-basis">{`Preference score | ${(result.evidenceCoverage * 100).toFixed(0)}% evidence coverage${result.provisional ? ' | provisional' : ''}. Not a market valuation or condition rating.`}</p><div className="score-parts">{entry.breakdown.map(c => <span key={c.key}>{c.label}: {c.points.toFixed(1)} × {(c.share * 100).toFixed(1)}% = {c.contribution.toFixed(2)} · {c.evidenceLabel}</span>)}</div><CapabilityComponents entry={entry} result={result} /><ListingWarnings entry={entry} /><VehicleEvidence car={entry.car} scenario={scenario} retryResearch={retryResearch} /><details><summary>Original seller description</summary><p className="inline-description">{entry.car.description || 'No description supplied.'}</p><ListingLink car={entry.car} /></details></article>)}</div>
         <p className="evidence-legend">Model reviews describe tested or typical configurations. They do not verify equipment, condition, accident history or recall completion on these cars.</p>
       </div></details>
-      <details className="decision-details scenario-panel"><summary>Adjust fuel assumptions &amp; practical needs</summary><div className="scenario-fields"><label>Annual driving (km)<input type="number" min="1" max="200000" value={scenario.annualKm || ''} onChange={e => setScenario({ ...scenario, annualKm: Number(e.target.value) })} /></label><label>Fuel price (CAD/L)<input type="number" min="0.01" max="10" step="0.01" value={scenario.pricePerLitre || ''} onChange={e => setScenario({ ...scenario, pricePerLitre: Number(e.target.value) })} /></label><label>Seats needed<select value={scenario.minSeats} onChange={e => setScenario({ ...scenario, minSeats: Number(e.target.value) })}>{[2, 4, 5, 6, 7, 8].map(n => <option key={n}>{n}</option>)}</select></label><label>Preferred body<select value={scenario.bodyType} onChange={e => setScenario({ ...scenario, bodyType: e.target.value })}><option value="">No preference</option>{['Sedan', 'Hatchback', 'SUV', 'Wagon', 'Coupe', 'Convertible', 'Pickup', 'Van'].map(body => <option key={body}>{body}</option>)}</select></label></div><p>Editable assumptions, not current pump prices or total ownership cost. Fuel cost uses a unique NRCan configuration match and the same fuel grade for every car.</p></details>
+      <details className="decision-details scenario-panel" ref={scenarioPanel}><summary>Adjust fuel assumptions &amp; practical needs</summary><div className="scenario-fields"><label>Annual driving (km)<input type="number" min="1" max="200000" value={scenario.annualKm || ''} onChange={e => setScenario({ ...scenario, annualKm: Number(e.target.value) })} /></label><label>Fuel price (CAD/L)<input type="number" min="0.01" max="10" step="0.01" value={scenario.pricePerLitre || ''} onChange={e => setScenario({ ...scenario, pricePerLitre: Number(e.target.value) })} /></label><label>Seats needed<select value={scenario.minSeats} onChange={e => setScenario({ ...scenario, minSeats: Number(e.target.value) })}>{[2, 4, 5, 6, 7, 8].map(n => <option key={n}>{n}</option>)}</select></label><label>Preferred body<select value={scenario.bodyType} onChange={e => setScenario({ ...scenario, bodyType: e.target.value })}><option value="">No preference</option>{['Sedan', 'Hatchback', 'SUV', 'Wagon', 'Coupe', 'Convertible', 'Pickup', 'Van'].map(body => <option key={body}>{body}</option>)}</select></label></div><p>Editable assumptions, not current pump prices or total ownership cost. Fuel cost uses a unique NRCan configuration match and the same fuel grade for every car.</p></details>
     </>}
     <details className="decision-details more-priorities"><summary>How the scoring works</summary><p>{result.limitation}</p><p>Only supported comparable factors receive points. Unknown is never zero or an assumed middle rating. Eligible cars share the same factors; cars without category evidence remain unranked. Comfort and Performance never switch to a price-based winner. Coverage is the share of intended scoring weight, not an accuracy estimate. Under 80% of the intended evidence, an unranked contender or a single contender makes the comparison provisional.</p><p>Comfort uses one cross-class professional-review scale: 0 severe deficiency, 1 poor, 2 basic, 3 good mainstream, 4 premium, 5 exceptional. Front and rear occupants count equally within seating and space. Brand, price, marketing and gadget counts do not establish refinement. Broad review sentiment adds no bonus points.</p><p>Category scores and purchase warnings are separate. Seating discrepancies do not demote comfort; serious mechanical concerns mark a category leader review required. Identity/configuration conflicts remain excluded. Optional equipment, ranges and unconfirmed configurations are context only. Scores are neither market valuations nor condition inspections.</p></details>
     <p className="decision-footnote">Confirm seller claims and arrange an independent inspection before buying.</p>

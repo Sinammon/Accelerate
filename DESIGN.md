@@ -264,3 +264,7 @@ The landing preview demonstrates Import → Compare → Decide using fictional e
 - **Don't** use pale support colors as small-text foregrounds or action-label substitutes.
 - **Don't** turn missing specifications into certainty or remove visible purchase warnings.
 - **Don't** crop vehicle photographs, add autoplay or invent testimonials or performance claims.
+
+### Affordability ownership context
+
+Affordability places a compact Beyond the asking price section after the result. Each contender shows the seller asking price, an available NRCan fuel scenario with an explicitly labeled monthly average, and the need for a personal insurance quote. Other ownership factors and model-specific sourced notes use native disclosures. Keep the score's purchase-price/fuel scope visible, and distinguish missing costs from zero. The fuel-adjustment action opens the existing assumptions and focuses its first input, respecting reduced motion. Use existing text, border and spacing roles; the vehicle list collapses to one column below 768px.

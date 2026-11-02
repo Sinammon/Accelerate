@@ -26,7 +26,11 @@ Browser access was unavailable during implementation. Rendered interaction regre
 
 The final local catalog-only run populated 373/660 essentials (56.5%). Both reported live eBay imports still resolve without fuel/transmission mismatches: Accord CVT/Gasoline, 154,865 km with seller unit evidence; Maserati Automatic/Gasoline, 15,819 km with the requested unit assumption. Both retain a reference-configuration choice rather than silently choosing a source market. The Impeccable file detector reported no findings, but ran regex rules only; browser-based contrast/layout rules were unavailable.
 
-## Next: true ownership costs (not implemented in this release)
+## Ownership context added on 2 November 2026
+
+Affordability now explains insurance, servicing and repairs, taxes and purchase fees, financing, parking/charging, and depreciation/resale. Each contender shows its asking price and any supported NRCan fuel scenario, including an explicitly labeled monthly average. Insurance requires a personal quote; missing costs stay unavailable. Applicable model-level ownership notes retain citations and condition limits. A direct action opens and focuses the existing editable fuel assumptions. General guidance links to FSRA (Ontario insurance), CAA and FCAC. This adds budgeting context without inventing premiums or repair forecasts or changing ranking weights.
+
+## Next: full ownership-cost calculator (not implemented)
 
 Start with an editable country/province, currency, ownership horizon, annual distance, purchase price and fuel/energy scenario. Keep each assumption and its date/source visible. Show low/central/high scenarios instead of false precision. Include acquisition taxes/fees, fuel or electricity, user-entered insurance or an explicitly labeled estimate, scheduled maintenance, a repair reserve and estimated resale proceeds. Do not treat an insurance estimate as a quote or a generic maintenance assumption as a model-specific failure forecast.
 

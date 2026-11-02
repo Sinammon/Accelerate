@@ -155,7 +155,16 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     await act(async () => document.querySelector('.mode-card[data-mode="cost"]').click());
     assert.equal(document.querySelector('.best-match h2').textContent, '2025 Example 3');
     assert.equal(document.querySelectorAll('.best-match .warning-details b').length, 3);
+    assert.match(document.querySelector('.ownership-costs').textContent, /Insurance.*Personal quote needed/s);
+    assert.match(document.querySelector('.ownership-scope').textContent, /not estimated or included in the ranking/);
+    await act(async () => document.querySelector('.ownership-scenario button').click());
+    assert.equal(document.querySelector('.scenario-panel').open, true);
+    assert.equal(document.activeElement, document.querySelector('.scenario-panel input'));
+    await change('.scenario-panel input', '10000');
+    assert.match(document.querySelector('.ownership-scenario').textContent, /10,000 km\/year/);
+    await change('.scenario-panel input', '15000');
     await act(async () => document.querySelector('.mode-card[data-mode="value"]').click());
+    assert.equal(document.querySelector('.ownership-costs'), null, 'ownership context appears under Affordability');
     assert.equal(document.querySelector('.best-match'), null);
     assert.equal(document.querySelector('.ranking-row:last-child h3').textContent, '2025 Example 3');
     await act(async () => document.querySelector('.mode-card[data-mode="balanced"]').click());

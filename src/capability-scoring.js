@@ -138,5 +138,5 @@ export function rankCapabilities(cars, mode, year, scenario, detectWarnings) {
         : mode.id === 'value' ? 'Capability 50%, asking price 35%, age 10%, mileage 5%. Capability combines Comfort 40%, Performance 35% and Practicality 25%. A preference score, not a market valuation.'
           : mode.id === 'balanced' ? 'Capability 75%, affordability 15%, age 5%, mileage 5%. Affordability uses price and comparable fuel scenarios. Capability combines Comfort 40%, Performance 35% and Practicality 25%.'
             : mode.id === 'practical' ? 'Supported seating-needs fit, preferred body style, passenger space and usable cargo capacity. Missing evidence is excluded, never treated as absent capability.'
-              : 'Asking price 80%, comparable fuel scenario 20%. Not total ownership cost; no invented repair or insurance costs. Purchase warnings remain separate from category scores.' };
+              : 'Asking price 80%, comparable fuel scenario 20%. Insurance, servicing, repairs, taxes, financing and resale value also affect ownership cost; they are not estimated or scored. Review the ownership guide and obtain personal quotes. Purchase warnings remain separate from category scores.' };
 }
