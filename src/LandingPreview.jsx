@@ -1,4 +1,4 @@
-import { CoreLogo } from './Brand.jsx';
+import { Wordmark } from './Brand.jsx';
 import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, m, useIsPresent, useReducedMotion } from 'motion/react';
 import Icon from './Icons.jsx';
@@ -57,7 +57,7 @@ export default function LandingPreview({ onStart }) {
   const choice = priorities.find(item => item.id === priority);
   return <aside className="showcase" id="features" aria-label="Interactive, illustrative product preview">
     <div className="showcase-panel">
-      <div className="showcase-header"><span className="showcase-brand"><CoreLogo small /><b>Core</b></span>
+      <div className="showcase-header"><span className="showcase-brand"><Wordmark /></span>
         <div className="showcase-steps" role="tablist" aria-label="Preview steps" onKeyDown={onStepKey}>{stages.map((label, index) => <button type="button" role="tab" id={`preview-step-${index}`} aria-controls={`preview-panel-${index}`} aria-selected={stage === index} tabIndex={stage === index ? 0 : -1} ref={el => { tabs.current[index] = el; }} key={label} onClick={() => go(index)}><span>{index + 1}</span>{label}</button>)}</div>
       </div>
       <div className="showcase-window"><AnimatePresence initial={false} custom={direction}><PreviewSlide key={stage} stage={stage} direction={direction} reduced={reduced}>

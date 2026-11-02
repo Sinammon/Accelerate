@@ -1,37 +1,39 @@
-# Core refinement direction contract
+# Accelerate redesign direction contract
 
-Confirmed user plan: 31 October 2026. Code-first refinement of the existing application.
+Pinned user-approved direction, implemented 2 November 2026. The historic filename is retained; the current product name is Accelerate. Code-led implementation; no comp artifact. The approved Aerotime reference supersedes the previous Core blue-black refinement and provisional concept seed `seed:dc39d1b894f0064b`.
 
 ## Direction contract
 
-THESIS: Give a new shopper an understandable first comparison, then offer deeper specifications and sources on request.
+THESIS: Give Canadian car shoppers an open invitation to import real listings, then a clear comparison workspace with evidence and explainable priorities.
 
-OWN-WORLD: Blue-black ground and navy surfaces, clear blue actions with dark ink, existing Clash Grotesk and Satoshi typography. Preserve contained car photography and factual source labels.
+OWN-WORLD: Light editorial Swiss/SaaS rhythm, deep indigo reading text, restrained blue actions, broad pale fields and flat tonal grouping. Retain self-hosted Clash Grotesk and Satoshi. The slanted Accelerate wordmark is the identity; no separate logo or icon. [Root DESIGN.md](../../DESIGN.md) captures the adapted implementation tokens.
 
-STORY: Import up to four eBay.ca finds, compare essentials, inspect supporting evidence and choose priorities in Decide. Fictional examples stay explicit.
+STORY: Import up to four eBay.ca finds, compare essentials, inspect supporting evidence and choose priorities in Decide. Keep the real car-shopping workflow prominent. Fictional examples remain explicit and secondary to import.
 
-FIRST VIEWPORT: Compact Compare heading, shortlist controls, sticky Overview / Specifications / Sources & checks toolbar, persistent decision action and compact vehicle summaries. The import form opens on demand after the first car.
+FIRST VIEWPORT: Centered editorial invitation and listing-import form on a full-width pale hero field, followed by the blue-tinted working-preview band. Supporting demo access stays visible. Explain three steps below and provide a concluding import action. This composition is landing-specific.
 
-FORM: The approved blue-black refinement supersedes the former purple palette. Keep the existing brand, task flow and product safeguards.
+FORM: Restrained large headings, generous landing space, 1312px content cap, 32px desktop/20px mobile gutters, 8px control/card/panel corners and contained vehicle photography. Compare and Decide remain compact operational workspaces.
 
-FINISH: Verify functional paths, contrast and responsive source rules; record the actual visual verification limit rather than asserting screenshot approval.
+FINISH: Preserve functioning controls, sources, warnings, keyboard focus, reduced motion and responsive source rules. Distinguish source/test verification from rendered inspection.
+
+## Reference authority
+
+User-supplied extraction captured 27 May 2026: [Aerotime](https://aerotime.com/), via [Inspo](https://github.com/Nutlope/inspo), MIT / Together AI; [refetch extraction](https://inspomcp.dev/d/aerotime-com/DESIGN.md). Reference colors: `#4c4ccc`, `#b4ccfc`, `#1d1d67`, `#8f64ae`, `#ada3d2`. System type with an 80px/600 headline, 4px spacing base, 0/8px corners and 1312px cap informed the reference. Adapt its rhythm: implemented accessible colors and retained fonts take precedence. The source was supplied rather than freshly fetched.
 
 ## Modes
 
 Import: Persuade. Compare and Decide: Operate. Photo credits: Read.
 
-## Workspaces
+## Workspaces and continuity
 
-Overview gives price and mileage in compact vehicle summaries and a short key-detail comparison. Specifications retains the complete supported table. Sources & checks selects one vehicle for deeper evidence and expandable original details. Mobile uses two selected contenders, with all four retained in the shortlist. Keep serious concerns visible and account for all contenders in the review count.
+Overview is the default; Specifications preserves supported fields and Sources & checks reveals selected-vehicle evidence. Compact summaries retain photos, name, price, mileage, location, status, removal and View details. Serious concerns remain visible, including a shortlist-wide count for cars outside the phone pair. Phones use two selected contenders; all four remain in the shortlist. Only the desktop or mobile decision action is displayed at its breakpoint.
 
-## Motion and continuity
-
-Use short, responsive feedback and native smooth scrolling for deliberate in-page navigation. Do not animate every research update or add scroll hijacking. Respect reduced motion. Preserve Compare selections across navigation and reconcile them when cars change.
+Preserve keyboard tabs, focus behavior, inline import completion, pair switching, memory across navigation and reconciliation after removal. Retain configuration confirmation and editable details with save/reset and provenance. Use brief feedback, manual preview transitions and deliberate in-page smooth scrolling. Respect reduced motion; do not replay movement on every research update.
 
 ## Hard constraints
 
-Preserve hash routes, import and async cancellation, four-car limit, all six priorities, VIN compatibility fixes, evidence and warnings. No new backend/schema APIs, persistence or deployment settings. No page-level horizontal overflow, cropped car photos, invented claims, autoplay or decorative eyebrow labels.
+Preserve hash routes, import validation and async cancellation, four-car limit, removal/replacement, all six priorities, VIN compatibility, factory power enrichment, supported evidence and purchase warnings. Missing data stays unknown. No new backend/schema APIs, paid fallback, persistence or deployment changes. No page-level horizontal overflow, cropped vehicle photos, autoplay, invented proof or unsupported claims.
 
 ## Verification
 
-Functional and contrast checks run locally. Browser inspection was unavailable and the native fallback stopped because the runtime could not confidently determine Chrome's current URL. Screenshots at 390, 768 and 1440px and 200% zoom remain unverified and must be reported as such.
+Source review returned ship at SOURCE-ONLY scope, with no material findings. All 157 tests and the production build passed; existing Motion use-client and bundle-size advisories remain. Contrast regression covers text, actions, links and semantic state foregrounds across landing and workspace fields. Browser-host inspection and native `@oai/sky` were unavailable. No desktop/mobile screenshot approval or verified responsive rendering is claimed. Rendered checks at desktop, tablet, phone and 200% zoom remain a recapture item.

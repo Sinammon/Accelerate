@@ -128,7 +128,7 @@ export default function App() {
       enrichImported(imported);
       setUrl(''); setNotice('Listing imported. Compare the available seller details below.');
       navigate('compare');
-    } catch (err) { setError(err.name === 'TimeoutError' ? 'eBay took too long to respond. Please try again.' : err instanceof TypeError ? 'Could not connect to Core. Please check your connection and try again.' : err.message); }
+    } catch (err) { setError(err.name === 'TimeoutError' ? 'eBay took too long to respond. Please try again.' : err instanceof TypeError ? 'Could not connect to Accelerate. Please check your connection and try again.' : err.message); }
     finally { setLoading(false); }
   }
   const importForm = <form className="url-form" onSubmit={handleSubmit} aria-busy={loading}>
@@ -147,7 +147,7 @@ export default function App() {
         <section className="landing-layout" aria-label="Find your next car">
           <div className="landing-copy"><h1 tabIndex={-1}>Find the right car.<br /><span>Without the guesswork.</span></h1><p className="hero-intro">Your shortlist. A clearer picture. Bring your eBay.ca finds together and see which car fits what matters to you.</p>{importForm}{!!cars.length && <a className="source-link" href="#compare">Return to your comparison →</a>}<button className="how-link text-button" type="button" onClick={showSteps}>How it works <Icon name="chevron" size={16} /></button></div>
           <div className="landing-preview"><div className="preview-intro"><h2>From a few tabs to a clear choice.</h2><p>Explore the workflow with fictional examples.</p></div><LandingPreview onStart={startImport} /></div>
-          <section id="how-it-works" className="how-section" aria-labelledby="steps-heading"><h2 id="steps-heading">Less back and forth.<br />More perspective.</h2><div className="landing-steps">{[['link', 'Import your finds', 'Paste an eBay.ca vehicle link. Keep up to four contenders together in one shortlist.'], ['compare', 'See the full picture', 'Compare asking prices, mileage and supported specifications, with sources close at hand.'], ['spark', 'Choose your priorities', 'Find your match on value, cost, comfort and more. Understand the reasons and the trade-off.']].map(([icon, title, text], index) => <div key={title}><span className="landing-step-icon"><Icon name={icon} size={28} /></span><span className="step-label">Step {index + 1}</span><h3>{title}</h3><p>{text}</p></div>)}</div></section>
+          <section id="how-it-works" className="how-section" aria-labelledby="steps-heading"><h2 id="steps-heading">Less back and forth.<br />More perspective.</h2><div className="landing-steps">{[['link', 'Import your finds', 'Paste an eBay.ca vehicle link. Keep up to four contenders together in one shortlist.'], ['compare', 'See the full picture', 'Compare asking prices, mileage and supported specifications, with sources close at hand.'], ['spark', 'Choose your priorities', 'Find your match on value, cost, comfort and more. Understand the reasons and the trade-off.']].map(([icon, title, text]) => <div key={title}><span className="landing-step-icon"><Icon name={icon} size={28} /></span><h3>{title}</h3><p>{text}</p></div>)}</div></section>
           <section className="final-cta"><h2>Make room for a better decision.</h2><p>Start with a car you already have your eye on.</p><button type="button" onClick={startImport}>Import your first car <Icon name="arrow" size={20} /></button></section>
         </section>
       </>}

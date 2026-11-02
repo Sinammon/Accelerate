@@ -1,259 +1,343 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-30T14:10:57.513750+00:00",
-  "title": "Design System: Core",
+  "generatedAt": "2026-11-02T14:27:34.599711+00:00",
+  "title": "Design System: Accelerate",
   "extensions": {
     "colorMeta": {
       "background": {
         "role": "neutral",
-        "displayName": "Deep Purple Ground",
+        "displayName": "Near-White Ground",
         "tonalRamp": [
-          "oklch(15% 0.0134 296.01)",
-          "oklch(25% 0.0223 296.01)",
-          "oklch(35% 0.0312 296.01)",
-          "oklch(45% 0.0402 296.01)",
-          "oklch(60% 0.0446 296.01)",
-          "oklch(72% 0.0339 296.01)",
-          "oklch(84% 0.0232 296.01)",
-          "oklch(95% 0.0134 296.01)"
+          "oklch(15% 0.0008 286.35)",
+          "oklch(25% 0.0013 286.35)",
+          "oklch(35% 0.0018 286.35)",
+          "oklch(45% 0.0024 286.35)",
+          "oklch(60% 0.0026 286.35)",
+          "oklch(72% 0.0020 286.35)",
+          "oklch(84% 0.0014 286.35)",
+          "oklch(95% 0.0008 286.35)"
         ]
       },
       "surface": {
         "role": "neutral",
-        "displayName": "Purple Surface",
+        "displayName": "Cool Surface",
         "tonalRamp": [
-          "oklch(15% 0.0228 296.25)",
-          "oklch(25% 0.0380 296.25)",
-          "oklch(35% 0.0532 296.25)",
-          "oklch(45% 0.0684 296.25)",
-          "oklch(60% 0.0760 296.25)",
-          "oklch(72% 0.0577 296.25)",
-          "oklch(84% 0.0395 296.25)",
-          "oklch(95% 0.0228 296.25)"
+          "oklch(15% 0.0032 286.20)",
+          "oklch(25% 0.0053 286.20)",
+          "oklch(35% 0.0074 286.20)",
+          "oklch(45% 0.0096 286.20)",
+          "oklch(60% 0.0106 286.20)",
+          "oklch(72% 0.0081 286.20)",
+          "oklch(84% 0.0055 286.20)",
+          "oklch(95% 0.0032 286.20)"
         ]
       },
       "surface-raised": {
         "role": "neutral",
-        "displayName": "Raised Violet",
+        "displayName": "Raised Surface",
         "tonalRamp": [
-          "oklch(15% 0.0379 291.03)",
-          "oklch(25% 0.0631 291.03)",
-          "oklch(35% 0.0884 291.03)",
-          "oklch(45% 0.1137 291.03)",
-          "oklch(60% 0.1263 291.03)",
-          "oklch(72% 0.0960 291.03)",
-          "oklch(84% 0.0657 291.03)",
-          "oklch(95% 0.0379 291.03)"
+          "oklch(15% 0.0064 285.98)",
+          "oklch(25% 0.0107 285.98)",
+          "oklch(35% 0.0150 285.98)",
+          "oklch(45% 0.0193 285.98)",
+          "oklch(60% 0.0215 285.98)",
+          "oklch(72% 0.0163 285.98)",
+          "oklch(84% 0.0112 285.98)",
+          "oklch(95% 0.0064 285.98)"
         ]
       },
       "surface-hover": {
         "role": "neutral",
-        "displayName": "Purple Hover",
+        "displayName": "Hover Surface",
         "tonalRamp": [
-          "oklch(15% 0.0249 298.24)",
-          "oklch(25% 0.0416 298.24)",
-          "oklch(35% 0.0582 298.24)",
-          "oklch(45% 0.0748 298.24)",
-          "oklch(60% 0.0832 298.24)",
-          "oklch(72% 0.0632 298.24)",
-          "oklch(84% 0.0432 298.24)",
-          "oklch(95% 0.0249 298.24)"
+          "oklch(15% 0.0085 285.82)",
+          "oklch(25% 0.0142 285.82)",
+          "oklch(35% 0.0199 285.82)",
+          "oklch(45% 0.0256 285.82)",
+          "oklch(60% 0.0284 285.82)",
+          "oklch(72% 0.0216 285.82)",
+          "oklch(84% 0.0148 285.82)",
+          "oklch(95% 0.0085 285.82)"
         ]
       },
       "border": {
         "role": "neutral",
-        "displayName": "Plum Boundary",
+        "displayName": "Interactive Boundary",
         "tonalRamp": [
-          "oklch(15% 0.0238 301.30)",
-          "oklch(25% 0.0397 301.30)",
-          "oklch(35% 0.0556 301.30)",
-          "oklch(45% 0.0714 301.30)",
-          "oklch(60% 0.0794 301.30)",
-          "oklch(72% 0.0603 301.30)",
-          "oklch(84% 0.0413 301.30)",
-          "oklch(95% 0.0238 301.30)"
+          "oklch(15% 0.0158 284.91)",
+          "oklch(25% 0.0264 284.91)",
+          "oklch(35% 0.0369 284.91)",
+          "oklch(45% 0.0475 284.91)",
+          "oklch(60% 0.0528 284.91)",
+          "oklch(72% 0.0401 284.91)",
+          "oklch(84% 0.0274 284.91)",
+          "oklch(95% 0.0158 284.91)"
+        ]
+      },
+      "border-subtle": {
+        "role": "neutral",
+        "displayName": "Subtle Divider",
+        "tonalRamp": [
+          "oklch(15% 0.0073 285.90)",
+          "oklch(25% 0.0122 285.90)",
+          "oklch(35% 0.0171 285.90)",
+          "oklch(45% 0.0220 285.90)",
+          "oklch(60% 0.0244 285.90)",
+          "oklch(72% 0.0186 285.90)",
+          "oklch(84% 0.0127 285.90)",
+          "oklch(95% 0.0073 285.90)"
         ]
       },
       "text": {
-        "role": "neutral",
-        "displayName": "Near-White Text",
+        "role": "primary",
+        "displayName": "Reading Indigo",
         "tonalRamp": [
-          "oklch(15% 0.0037 299.80)",
-          "oklch(25% 0.0062 299.80)",
-          "oklch(35% 0.0086 299.80)",
-          "oklch(45% 0.0111 299.80)",
-          "oklch(60% 0.0124 299.80)",
-          "oklch(72% 0.0094 299.80)",
-          "oklch(84% 0.0064 299.80)",
-          "oklch(95% 0.0037 299.80)"
+          "oklch(15% 0.0377 275.10)",
+          "oklch(25% 0.0628 275.10)",
+          "oklch(35% 0.0879 275.10)",
+          "oklch(45% 0.1130 275.10)",
+          "oklch(60% 0.1255 275.10)",
+          "oklch(72% 0.0954 275.10)",
+          "oklch(84% 0.0653 275.10)",
+          "oklch(95% 0.0377 275.10)"
         ]
       },
       "text-secondary": {
         "role": "neutral",
-        "displayName": "Lavender Secondary",
+        "displayName": "Secondary Reading Text",
         "tonalRamp": [
-          "oklch(15% 0.0126 301.00)",
-          "oklch(25% 0.0211 301.00)",
-          "oklch(35% 0.0295 301.00)",
-          "oklch(45% 0.0379 301.00)",
-          "oklch(60% 0.0422 301.00)",
-          "oklch(72% 0.0320 301.00)",
-          "oklch(84% 0.0219 301.00)",
-          "oklch(95% 0.0126 301.00)"
+          "oklch(15% 0.0154 284.27)",
+          "oklch(25% 0.0257 284.27)",
+          "oklch(35% 0.0360 284.27)",
+          "oklch(45% 0.0463 284.27)",
+          "oklch(60% 0.0514 284.27)",
+          "oklch(72% 0.0391 284.27)",
+          "oklch(84% 0.0267 284.27)",
+          "oklch(95% 0.0154 284.27)"
         ]
       },
       "action": {
         "role": "primary",
-        "displayName": "Action Blue",
+        "displayName": "Action Indigo",
         "tonalRamp": [
-          "oklch(15% 0.0463 250.44)",
-          "oklch(25% 0.0772 250.44)",
-          "oklch(35% 0.1081 250.44)",
-          "oklch(45% 0.1390 250.44)",
-          "oklch(60% 0.1544 250.44)",
-          "oklch(72% 0.1173 250.44)",
-          "oklch(84% 0.0803 250.44)",
-          "oklch(95% 0.0463 250.44)"
+          "oklch(15% 0.0578 276.75)",
+          "oklch(25% 0.0964 276.75)",
+          "oklch(35% 0.1350 276.75)",
+          "oklch(45% 0.1735 276.75)",
+          "oklch(60% 0.1928 276.75)",
+          "oklch(72% 0.1465 276.75)",
+          "oklch(84% 0.1003 276.75)",
+          "oklch(95% 0.0578 276.75)"
         ]
       },
       "accent": {
         "role": "primary",
-        "displayName": "Clear Sky Accent",
+        "displayName": "Deep Action Indigo",
         "tonalRamp": [
-          "oklch(15% 0.0367 245.68)",
-          "oklch(25% 0.0612 245.68)",
-          "oklch(35% 0.0857 245.68)",
-          "oklch(45% 0.1101 245.68)",
-          "oklch(60% 0.1224 245.68)",
-          "oklch(72% 0.0930 245.68)",
-          "oklch(84% 0.0636 245.68)",
-          "oklch(95% 0.0367 245.68)"
+          "oklch(15% 0.0538 276.82)",
+          "oklch(25% 0.0897 276.82)",
+          "oklch(35% 0.1255 276.82)",
+          "oklch(45% 0.1614 276.82)",
+          "oklch(60% 0.1793 276.82)",
+          "oklch(72% 0.1363 276.82)",
+          "oklch(84% 0.0933 276.82)",
+          "oklch(95% 0.0538 276.82)"
         ]
       },
       "ink": {
         "role": "neutral",
-        "displayName": "Deep Purple Ink",
+        "displayName": "White Action Ink",
         "tonalRamp": [
-          "oklch(15% 0.0134 296.01)",
-          "oklch(25% 0.0223 296.01)",
-          "oklch(35% 0.0312 296.01)",
-          "oklch(45% 0.0402 296.01)",
-          "oklch(60% 0.0446 296.01)",
-          "oklch(72% 0.0339 296.01)",
-          "oklch(84% 0.0232 296.01)",
-          "oklch(95% 0.0134 296.01)"
+          "oklch(15% 0.0000 89.88)",
+          "oklch(25% 0.0000 89.88)",
+          "oklch(35% 0.0000 89.88)",
+          "oklch(45% 0.0000 89.88)",
+          "oklch(60% 0.0000 89.88)",
+          "oklch(72% 0.0000 89.88)",
+          "oklch(84% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
         ]
       },
       "warning": {
         "role": "status",
         "displayName": "Amber Warning",
         "tonalRamp": [
-          "oklch(15% 0.0328 82.66)",
-          "oklch(25% 0.0547 82.66)",
-          "oklch(35% 0.0766 82.66)",
-          "oklch(45% 0.0985 82.66)",
-          "oklch(60% 0.1094 82.66)",
-          "oklch(72% 0.0832 82.66)",
-          "oklch(84% 0.0569 82.66)",
-          "oklch(95% 0.0328 82.66)"
+          "oklch(15% 0.0285 73.60)",
+          "oklch(25% 0.0475 73.60)",
+          "oklch(35% 0.0666 73.60)",
+          "oklch(45% 0.0856 73.60)",
+          "oklch(60% 0.0951 73.60)",
+          "oklch(72% 0.0723 73.60)",
+          "oklch(84% 0.0495 73.60)",
+          "oklch(95% 0.0285 73.60)"
         ]
       },
       "warning-surface": {
         "role": "status",
-        "displayName": "Amber State Ground",
+        "displayName": "Pale Warning Field",
         "tonalRamp": [
-          "oklch(15% 0.0100 75.78)",
-          "oklch(25% 0.0167 75.78)",
-          "oklch(35% 0.0233 75.78)",
-          "oklch(45% 0.0300 75.78)",
-          "oklch(60% 0.0333 75.78)",
-          "oklch(72% 0.0253 75.78)",
-          "oklch(84% 0.0173 75.78)",
-          "oklch(95% 0.0100 75.78)"
+          "oklch(15% 0.0103 88.77)",
+          "oklch(25% 0.0172 88.77)",
+          "oklch(35% 0.0241 88.77)",
+          "oklch(45% 0.0310 88.77)",
+          "oklch(60% 0.0344 88.77)",
+          "oklch(72% 0.0262 88.77)",
+          "oklch(84% 0.0179 88.77)",
+          "oklch(95% 0.0103 88.77)"
         ]
       },
       "error": {
         "role": "status",
         "displayName": "Rose Error",
         "tonalRamp": [
-          "oklch(15% 0.0324 11.62)",
-          "oklch(25% 0.0540 11.62)",
-          "oklch(35% 0.0756 11.62)",
-          "oklch(45% 0.0972 11.62)",
-          "oklch(60% 0.1080 11.62)",
-          "oklch(72% 0.0821 11.62)",
-          "oklch(84% 0.0562 11.62)",
-          "oklch(95% 0.0324 11.62)"
+          "oklch(15% 0.0497 14.49)",
+          "oklch(25% 0.0828 14.49)",
+          "oklch(35% 0.1160 14.49)",
+          "oklch(45% 0.1491 14.49)",
+          "oklch(60% 0.1657 14.49)",
+          "oklch(72% 0.1259 14.49)",
+          "oklch(84% 0.0862 14.49)",
+          "oklch(95% 0.0497 14.49)"
         ]
       },
       "error-surface": {
         "role": "status",
-        "displayName": "Rose State Ground",
+        "displayName": "Pale Error Field",
         "tonalRamp": [
-          "oklch(15% 0.0159 352.48)",
-          "oklch(25% 0.0265 352.48)",
-          "oklch(35% 0.0372 352.48)",
-          "oklch(45% 0.0478 352.48)",
-          "oklch(60% 0.0531 352.48)",
-          "oklch(72% 0.0404 352.48)",
-          "oklch(84% 0.0276 352.48)",
-          "oklch(95% 0.0159 352.48)"
+          "oklch(15% 0.0050 3.65)",
+          "oklch(25% 0.0083 3.65)",
+          "oklch(35% 0.0116 3.65)",
+          "oklch(45% 0.0150 3.65)",
+          "oklch(60% 0.0166 3.65)",
+          "oklch(72% 0.0126 3.65)",
+          "oklch(84% 0.0087 3.65)",
+          "oklch(95% 0.0050 3.65)"
         ]
       },
       "success": {
         "role": "status",
-        "displayName": "Mint Success",
+        "displayName": "Green Success",
         "tonalRamp": [
-          "oklch(15% 0.0259 166.15)",
-          "oklch(25% 0.0432 166.15)",
-          "oklch(35% 0.0605 166.15)",
-          "oklch(45% 0.0778 166.15)",
-          "oklch(60% 0.0865 166.15)",
-          "oklch(72% 0.0657 166.15)",
-          "oklch(84% 0.0450 166.15)",
-          "oklch(95% 0.0259 166.15)"
+          "oklch(15% 0.0243 165.69)",
+          "oklch(25% 0.0405 165.69)",
+          "oklch(35% 0.0567 165.69)",
+          "oklch(45% 0.0729 165.69)",
+          "oklch(60% 0.0809 165.69)",
+          "oklch(72% 0.0615 165.69)",
+          "oklch(84% 0.0421 165.69)",
+          "oklch(95% 0.0243 165.69)"
         ]
       },
       "success-surface": {
         "role": "status",
-        "displayName": "Mint State Ground",
+        "displayName": "Pale Success Field",
         "tonalRamp": [
-          "oklch(15% 0.0108 179.33)",
-          "oklch(25% 0.0179 179.33)",
-          "oklch(35% 0.0251 179.33)",
-          "oklch(45% 0.0323 179.33)",
-          "oklch(60% 0.0359 179.33)",
-          "oklch(72% 0.0272 179.33)",
-          "oklch(84% 0.0186 179.33)",
-          "oklch(95% 0.0108 179.33)"
+          "oklch(15% 0.0047 160.62)",
+          "oklch(25% 0.0078 160.62)",
+          "oklch(35% 0.0110 160.62)",
+          "oklch(45% 0.0141 160.62)",
+          "oklch(60% 0.0157 160.62)",
+          "oklch(72% 0.0119 160.62)",
+          "oklch(84% 0.0082 160.62)",
+          "oklch(95% 0.0047 160.62)"
+        ]
+      },
+      "hero-field": {
+        "role": "neutral",
+        "displayName": "Hero Field",
+        "tonalRamp": [
+          "oklch(15% 0.0048 286.09)",
+          "oklch(25% 0.0080 286.09)",
+          "oklch(35% 0.0112 286.09)",
+          "oklch(45% 0.0144 286.09)",
+          "oklch(60% 0.0160 286.09)",
+          "oklch(72% 0.0122 286.09)",
+          "oklch(84% 0.0083 286.09)",
+          "oklch(95% 0.0048 286.09)"
+        ]
+      },
+      "preview-field": {
+        "role": "secondary",
+        "displayName": "Preview Field",
+        "tonalRamp": [
+          "oklch(15% 0.0089 269.12)",
+          "oklch(25% 0.0149 269.12)",
+          "oklch(35% 0.0209 269.12)",
+          "oklch(45% 0.0268 269.12)",
+          "oklch(60% 0.0298 269.12)",
+          "oklch(72% 0.0226 269.12)",
+          "oklch(84% 0.0155 269.12)",
+          "oklch(95% 0.0089 269.12)"
+        ]
+      },
+      "support-blue": {
+        "role": "secondary",
+        "displayName": "Sky Support",
+        "tonalRamp": [
+          "oklch(15% 0.0217 264.07)",
+          "oklch(25% 0.0362 264.07)",
+          "oklch(35% 0.0506 264.07)",
+          "oklch(45% 0.0651 264.07)",
+          "oklch(60% 0.0724 264.07)",
+          "oklch(72% 0.0550 264.07)",
+          "oklch(84% 0.0376 264.07)",
+          "oklch(95% 0.0217 264.07)"
+        ]
+      },
+      "support-purple": {
+        "role": "secondary",
+        "displayName": "Lilac Support",
+        "tonalRamp": [
+          "oklch(15% 0.0357 309.86)",
+          "oklch(25% 0.0596 309.86)",
+          "oklch(35% 0.0834 309.86)",
+          "oklch(45% 0.1072 309.86)",
+          "oklch(60% 0.1191 309.86)",
+          "oklch(72% 0.0906 309.86)",
+          "oklch(84% 0.0620 309.86)",
+          "oklch(95% 0.0357 309.86)"
+        ]
+      },
+      "muted": {
+        "role": "secondary",
+        "displayName": "Muted Lilac",
+        "tonalRamp": [
+          "oklch(15% 0.0203 294.44)",
+          "oklch(25% 0.0339 294.44)",
+          "oklch(35% 0.0475 294.44)",
+          "oklch(45% 0.0610 294.44)",
+          "oklch(60% 0.0678 294.44)",
+          "oklch(72% 0.0515 294.44)",
+          "oklch(84% 0.0353 294.44)",
+          "oklch(95% 0.0203 294.44)"
         ]
       },
       "photo-mat": {
         "role": "neutral",
-        "displayName": "Neutral Photo Mat",
+        "displayName": "Photo Mat",
         "tonalRamp": [
-          "oklch(15% 0.0030 303.10)",
-          "oklch(25% 0.0051 303.10)",
-          "oklch(35% 0.0071 303.10)",
-          "oklch(45% 0.0091 303.10)",
-          "oklch(60% 0.0102 303.10)",
-          "oklch(72% 0.0077 303.10)",
-          "oklch(84% 0.0053 303.10)",
-          "oklch(95% 0.0030 303.10)"
+          "oklch(15% 0.0034 252.09)",
+          "oklch(25% 0.0057 252.09)",
+          "oklch(35% 0.0080 252.09)",
+          "oklch(45% 0.0103 252.09)",
+          "oklch(60% 0.0115 252.09)",
+          "oklch(72% 0.0087 252.09)",
+          "oklch(84% 0.0060 252.09)",
+          "oklch(95% 0.0034 252.09)"
         ]
       }
     },
     "typographyMeta": {
       "display": {
         "displayName": "Display",
-        "purpose": "Large invitation headings."
+        "purpose": "Editorial landing invitation; mobile clamp is documented separately."
       },
       "headline": {
         "displayName": "Headline",
-        "purpose": "Workspace page headings."
+        "purpose": "Workspace headings."
       },
-      "title": {
-        "displayName": "Title",
+      "section": {
+        "displayName": "Section",
         "purpose": "Section headings."
       },
       "body": {
@@ -267,6 +351,18 @@
       "evidence": {
         "displayName": "Evidence",
         "purpose": "Readable source and state information."
+      },
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "Slanted live-text identity; size depends on placement."
+      },
+      "card-title": {
+        "displayName": "Card Title",
+        "purpose": "Compact desktop vehicle headings."
+      },
+      "price": {
+        "displayName": "Price",
+        "purpose": "Vehicle prices with tabular numerals."
       }
     },
     "shadows": [],
@@ -311,108 +407,110 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Blue primary action with dark ink and a visible keyboard focus ring.",
+      "description": "Action-indigo primary control with white text and visible keyboard focus.",
       "html": "<button class=\"ds-button-primary\">Import a car</button>",
-      "css": ".ds-button-primary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:12px 20px;border:1px solid transparent;border-radius:var(--radius-control,8px);font-family:var(--font-body,'Satoshi',sans-serif);font-size:16px;font-weight:640;line-height:1.38;cursor:pointer;transition:background-color 160ms,border-color 160ms;background:var(--action,#339cfc);color:var(--ink,#100820)}.ds-button-primary:hover{background:var(--accent,#5cb4fc)}.ds-button-primary:focus-visible{outline:3px solid var(--accent,#5cb4fc);outline-offset:4px;}.ds-button-primary:disabled{opacity:.6;cursor:not-allowed}"
+      "css": ".ds-button-primary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:12px 20px;border:1px solid transparent;border-radius:var(--radius-control,8px);font-family:var(--font-body,'Satoshi',sans-serif);font-size:16px;font-weight:640;line-height:1.38;cursor:pointer;transition:background-color 160ms,border-color 160ms;background:var(--action,#4c4ccc);color:var(--ink,#ffffff)}.ds-button-primary:hover{background:var(--accent,#4545ba)}.ds-button-primary:focus-visible{outline:3px solid var(--accent,#4545ba);outline-offset:4px;}.ds-button-primary:disabled{opacity:.6;cursor:not-allowed}"
     },
     {
       "name": "Secondary Button",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "Quiet bordered action for supporting controls.",
+      "description": "Quiet bordered supporting action.",
       "html": "<button class=\"ds-button-secondary\">Clear comparison</button>",
-      "css": ".ds-button-secondary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:12px 20px;border:1px solid transparent;border-radius:var(--radius-control,8px);font-family:var(--font-body,'Satoshi',sans-serif);font-size:16px;font-weight:640;line-height:1.38;cursor:pointer;transition:background-color 160ms,border-color 160ms;background:transparent;color:var(--text,#f8f5ff);border-color:var(--border,#493467)}.ds-button-secondary:hover{background:var(--surface-hover,#321e52)}.ds-button-secondary:focus-visible{outline:3px solid var(--accent,#5cb4fc);outline-offset:4px;}"
+      "css": ".ds-button-secondary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:12px 20px;border:1px solid transparent;border-radius:var(--radius-control,8px);font-family:var(--font-body,'Satoshi',sans-serif);font-size:16px;font-weight:640;line-height:1.38;cursor:pointer;transition:background-color 160ms,border-color 160ms;background:transparent;color:var(--text,#1d1d67);border-color:var(--border,#9494b8)}.ds-button-secondary:hover{background:var(--surface-hover,#e0e0f5)}.ds-button-secondary:focus-visible{outline:3px solid var(--accent,#4545ba);outline-offset:4px;}"
     },
     {
       "name": "Text Field",
       "kind": "input",
       "refersTo": "input",
-      "description": "Dark field with secondary placeholder, error border and explicit focus.",
-      "html": "<label class=\"ds-field-label\" for=\"ds-listing\">Vehicle listing URL</label><input class=\"ds-field\" id=\"ds-listing\" type=\"url\" placeholder=\"Paste an eBay.ca car link?\">",
-      "css": ".ds-field-label{display:block;margin-bottom:12px;font-family:var(--font-body,'Satoshi',sans-serif);color:var(--text,#f8f5ff);font-size:16px;font-weight:600}.ds-field{width:100%;min-height:48px;padding:12px;background:var(--background,#100820);color:var(--text,#f8f5ff);border:1px solid var(--border,#493467);border-radius:var(--radius-control,8px);font-family:var(--font-body,'Satoshi',sans-serif);font-size:16px;caret-color:var(--accent,#5cb4fc)}.ds-field::placeholder{color:var(--text-secondary,#bdb2d2);opacity:1}.ds-field:focus-visible{outline:3px solid var(--accent,#5cb4fc);outline-offset:4px;}.ds-field[aria-invalid=true]{border-color:var(--error,#ff9ca9)}"
+      "description": "Near-white field with readable placeholder, error border and explicit focus.",
+      "html": "<label class=\"ds-field-label\" for=\"ds-listing\">Vehicle listing URL</label><input class=\"ds-field\" id=\"ds-listing\" type=\"url\" placeholder=\"Paste an eBay.ca car link\">",
+      "css": ".ds-field-label{display:block;margin-bottom:12px;font-family:var(--font-body,'Satoshi',sans-serif);color:var(--text,#1d1d67);font-size:16px;font-weight:600}.ds-field{width:100%;min-height:48px;padding:12px;background:var(--background,#fdfdff);color:var(--text,#1d1d67);border:1px solid var(--border,#9494b8);border-radius:var(--radius-control,8px);font-family:var(--font-body,'Satoshi',sans-serif);font-size:16px;caret-color:var(--accent,#4545ba)}.ds-field::placeholder{color:var(--text-secondary,#585878);opacity:1}.ds-field:focus-visible{outline:3px solid var(--accent,#4545ba);outline-offset:4px;}.ds-field[aria-invalid=true]{border-color:var(--error,#b12f48)}"
     },
     {
       "name": "Primary Navigation",
       "kind": "nav",
-      "description": "Readable route links with an active blue underline.",
+      "description": "Readable route links with an action-colored active underline.",
       "html": "<nav class=\"ds-nav\" aria-label=\"Example navigation\"><a href=\"#import\">Import</a><a href=\"#compare\" aria-current=\"page\">Compare</a><a href=\"#decide\">Help Me Decide</a></nav>",
-      "css": ".ds-nav{display:flex;flex-wrap:wrap;gap:28px;font-family:var(--font-body,'Satoshi',sans-serif);font-size:16px}.ds-nav a{display:inline-flex;align-items:center;min-height:44px;color:var(--text-secondary,#bdb2d2);font-weight:600;text-decoration:none}.ds-nav a:hover{color:var(--text,#f8f5ff)}.ds-nav a[aria-current=page]{color:var(--text,#f8f5ff);text-decoration:underline;text-decoration-color:var(--action,#339cfc);text-underline-offset:10px}.ds-nav a:focus-visible{outline:3px solid var(--accent,#5cb4fc);outline-offset:4px;}"
+      "css": ".ds-nav{display:flex;flex-wrap:wrap;gap:28px;font-family:var(--font-body,'Satoshi',sans-serif);font-size:16px}.ds-nav a{display:inline-flex;align-items:center;min-height:44px;color:var(--text-secondary,#585878);font-weight:600;text-decoration:none}.ds-nav a:hover{color:var(--text,#1d1d67)}.ds-nav a[aria-current=page]{color:var(--text,#1d1d67);text-decoration:underline;text-decoration-color:var(--action,#4c4ccc);text-underline-offset:10px}.ds-nav a:focus-visible{outline:3px solid var(--accent,#4545ba);outline-offset:4px;}"
     },
     {
       "name": "Factory Evidence Badge",
       "kind": "chip",
       "refersTo": "evidence-badge",
-      "description": "Source distinction expressed by words and accent text.",
+      "description": "Source distinction expressed in words within a thin boundary.",
       "html": "<span class=\"ds-evidence-badge\">Factory reference</span>",
-      "css": ".ds-evidence-badge{display:inline-block;padding:4px 8px;border:1px solid var(--border,#493467);border-radius:6px;color:var(--accent,#5cb4fc);font-family:var(--font-body,'Satoshi',sans-serif);font-size:14px;font-weight:500;line-height:1.4}"
+      "css": ".ds-evidence-badge{display:inline-block;padding:4px 8px;border:1px solid var(--border,#9494b8);border-radius:6px;color:var(--text-secondary,#585878);font-family:var(--font-body,'Satoshi',sans-serif);font-size:14px;font-weight:500;line-height:1.4}"
     },
     {
       "name": "Vehicle Surface",
       "kind": "card",
       "refersTo": "surface-card",
-      "description": "Solid bordered surface for a fictional example vehicle.",
-      "html": "<article class=\"ds-card\"><h3>2018 Honda Civic</h3><p>Fictional example ? seller details require confirmation</p></article>",
-      "css": ".ds-card{padding:20px;background:var(--surface,#22113f);color:var(--text,#f8f5ff);border:1px solid var(--border,#493467);border-radius:var(--radius-card,12px)}.ds-card h3{margin:0 0 16px;font-family:var(--font-display,'Clash Grotesk',sans-serif);font-size:24px;font-weight:540;line-height:1.18;letter-spacing:-.02em}.ds-card p{margin:0;font-family:var(--font-body,'Satoshi',sans-serif);font-size:14px;line-height:1.55;color:var(--text-secondary,#bdb2d2)}"
+      "description": "Flat cool surface for a clearly fictional example.",
+      "html": "<article class=\"ds-card\"><h3>2018 Honda Civic</h3><p>Fictional example; seller details require confirmation</p></article>",
+      "css": ".ds-card{padding:20px;background:var(--surface,#f4f4fc);color:var(--text,#1d1d67);border:1px solid var(--border,#9494b8);border-radius:var(--radius-card,8px)}.ds-card h3{margin:0 0 8px;font-family:var(--font-display,'Clash Grotesk',sans-serif);font-size:20px;font-weight:540;line-height:1.25;letter-spacing:-.02em}.ds-card p{margin:0;font-family:var(--font-body,'Satoshi',sans-serif);font-size:14px;line-height:1.55;color:var(--text-secondary,#585878)}"
     },
     {
       "name": "Selected Decision Priority",
       "kind": "button",
       "refersTo": "priority-selected",
-      "description": "Active decision mode with SVG icon, accent fill and dark ink.",
+      "description": "Selected priority with deeper accent, white text and pressed state.",
       "html": "<button class=\"ds-priority\" aria-pressed=\"true\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><path d=\"M12 2v20m6-15c-1-4-12-4-12 1 0 5 12 3 12 8 0 5-11 5-12 1\"/></svg><strong>Lowest Cost</strong></button>",
-      "css": ".ds-priority{display:flex;flex-direction:column;align-items:flex-start;gap:12px;min-height:44px;padding:20px;background:var(--accent,#5cb4fc);color:var(--ink,#100820);border:1px solid var(--accent,#5cb4fc);border-radius:var(--radius-card,12px);font-family:var(--font-body,'Satoshi',sans-serif);font-size:16px;cursor:pointer}.ds-priority strong{font-weight:700}.ds-priority:hover{background:var(--accent,#5cb4fc)}.ds-priority:focus-visible{outline:3px solid var(--accent,#5cb4fc);outline-offset:4px;}"
+      "css": ".ds-priority{display:flex;flex-direction:column;align-items:flex-start;gap:12px;min-height:44px;padding:20px;background:var(--accent,#4545ba);color:var(--ink,#ffffff);border:1px solid var(--accent,#4545ba);border-radius:var(--radius-card,8px);font-family:var(--font-body,'Satoshi',sans-serif);font-size:16px;cursor:pointer}.ds-priority strong{font-weight:700}.ds-priority:hover{background:var(--accent,#4545ba)}.ds-priority:focus-visible{outline:3px solid var(--accent,#4545ba);outline-offset:4px;}"
     },
     {
       "name": "Evidence Disclosure",
       "kind": "custom",
       "refersTo": "disclosure",
-      "description": "Native expandable source details with a readable summary.",
+      "description": "Native expandable evidence with a readable summary.",
       "html": "<details class=\"ds-disclosure\"><summary>Specifications, amenities &amp; sources</summary><p>Factory ratings are reference values, not measured output.</p></details>",
-      "css": ".ds-disclosure{background:var(--background,#100820);color:var(--text,#f8f5ff);border:1px solid var(--border,#493467);border-radius:var(--radius-card,12px);font-family:var(--font-body,'Satoshi',sans-serif);font-size:14px;line-height:1.7}.ds-disclosure summary{min-height:48px;padding:20px;font-weight:640;cursor:pointer}.ds-disclosure summary::marker{color:var(--accent,#5cb4fc)}.ds-disclosure summary:hover{color:var(--accent,#5cb4fc)}.ds-disclosure summary:focus-visible{outline:3px solid var(--accent,#5cb4fc);outline-offset:4px;}.ds-disclosure[open]>summary{border-bottom:1px solid var(--border,#493467);margin-bottom:20px}.ds-disclosure p{margin:0;padding:0 20px 20px;color:var(--text-secondary,#bdb2d2)}"
+      "css": ".ds-disclosure{background:var(--background,#fdfdff);color:var(--text,#1d1d67);border:1px solid var(--border,#9494b8);border-radius:var(--radius-card,8px);font-family:var(--font-body,'Satoshi',sans-serif);font-size:14px;line-height:1.7}.ds-disclosure summary{min-height:48px;padding:20px;font-weight:640;cursor:pointer}.ds-disclosure summary::marker{color:var(--accent,#4545ba)}.ds-disclosure summary:hover{color:var(--accent,#4545ba)}.ds-disclosure summary:focus-visible{outline:3px solid var(--accent,#4545ba);outline-offset:4px;}.ds-disclosure[open]>summary{border-bottom:1px solid var(--border,#9494b8);margin-bottom:20px}.ds-disclosure p{margin:0;padding:0 20px 20px;color:var(--text-secondary,#585878)}"
+    },
+    {
+      "name": "Accelerate Wordmark",
+      "kind": "custom",
+      "description": "Live-text identity with no separate symbol.",
+      "html": "<a class=\"ds-brand\" href=\"#import\" aria-label=\"Accelerate home\"><span class=\"ds-wordmark\">Accelerate</span></a>",
+      "css": ".ds-brand{display:inline-flex;align-items:center;min-height:44px;color:var(--text,#1d1d67);font-size:32px;text-decoration:none}.ds-wordmark{display:inline-block;padding-inline:2px 6px;font-family:var(--font-display,'Clash Grotesk',sans-serif);font-weight:650;letter-spacing:-.04em;line-height:1.15;transform:skewX(-9deg)}.ds-brand:hover{color:var(--text,#1d1d67)}.ds-brand:focus-visible{outline:3px solid var(--accent,#4545ba);outline-offset:4px}"
     }
   ],
   "narrative": {
-    "northStar": "The Purple Component Playground",
-    "overview": "Dilemma adapts the user-supplied Uizard reference into a dark purple system for Canadian car comparison. Clear blue actions and geometric display type establish the identity; solid surfaces and legible evidence support sustained reading. The reference is inspiration, not a copied product identity.\n\nThe system uses tonal layering and thin boundaries rather than shadows. Car photographs remain uncropped against neutral mats, while labels distinguish facts, sources, warnings and uncertainty. The photo-credit page carries the same palette and self-hosted typefaces in a narrower reading layout.",
+    "northStar": "The Open Comparison Desk",
+    "overview": "Accelerate pairs open editorial space with a practical car-shopping workspace. The approved Aerotime reference supplies the light, restrained rhythm; the implementation adapts that direction to real listing import, comparison and evidence. Deep indigo text and compact blue actions sit on near-white and pale fields.\n\nThe name itself is the identity: a slanted typographic wordmark, with no separate logo or symbol. Self-hosted Clash Grotesk headings and Satoshi interface text preserve continuity while flat surfaces, contained photographs and explicit source labels make the product approachable and useful.",
     "keyCharacteristics": [
-      "Purple tonal surfaces with one blue action hierarchy.",
-      "Clash Grotesk headings with Satoshi interface text.",
-      "Readable source labels, status text and tabular vehicle values.",
-      "Contained car photography and manual preview interactions."
+      "Light editorial fields with deep indigo reading text and a clear action hierarchy.",
+      "Self-hosted Clash Grotesk headings, Satoshi controls and a slanted Accelerate wordmark.",
+      "Flat tonal grouping, restrained borders and gently curved controls.",
+      "Contained car photography, manual preview controls and visible evidence."
     ],
     "rules": [
       {
-        "name": "The Dark Ink Rule",
-        "body": "Bright blue action and selected-state fills use dark ink, never white button text.",
-        "section": "colors"
-      },
-      {
         "name": "The Evidence Rule",
-        "body": "State is expressed in words as well as color; source provenance and unresolved values remain readable.",
+        "body": "State is expressed in words as well as color; provenance, warnings and unresolved values remain readable.",
         "section": "colors"
       },
       {
         "name": "The Two Voices Rule",
-        "body": "Clash Grotesk carries headings; Satoshi carries controls, prose, labels and vehicle values.",
+        "body": "Clash Grotesk carries headings and the wordmark; Satoshi carries controls, prose, labels and vehicle values.",
         "section": "typography"
       },
       {
         "name": "The Tonal Depth Rule",
-        "body": "Resting surfaces use solid color and thin borders, without drop shadows.",
+        "body": "Resting surfaces use solid fields and thin boundaries, without decorative drop shadows.",
         "section": "elevation"
       }
     ],
     "dos": [
-      "Do use the named color and type roles across all screens.",
-      "Do keep car photographs contained and source labels close to their facts.",
-      "Do preserve keyboard focus, reduced motion and explicit state wording.",
-      "Do treat comparison-table scrolling as local, not permission for page overflow."
+      "Do use the canonical color roles and self-hosted fonts across landing, workspace and credits.",
+      "Do keep car photographs contained and source labels close to the facts they qualify.",
+      "Do preserve visible keyboard focus, reduced motion and explicit state wording.",
+      "Do keep comparison overflow inside labeled regions and account for sticky controls and safe areas."
     ],
     "donts": [
-      "Don't replace dark ink with white on blue action fills.",
-      "Don't turn absent specifications into visual certainty or remove visible warnings.",
-      "Don't crop vehicle photographs to fill a frame.",
-      "Don't introduce autoplay, decorative eyebrow labels or invented proof."
+      "Don't add a separate logo, symbol or raster badge beside the Accelerate wordmark.",
+      "Don't use pale support colors as small-text foregrounds or action-label substitutes.",
+      "Don't turn missing specifications into certainty or remove visible purchase warnings.",
+      "Don't crop vehicle photographs, add autoplay or invent testimonials or performance claims."
     ]
   }
 }

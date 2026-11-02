@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-test('shared dark-theme text and state combinations meet normal-text contrast', async () => {
+test('light indigo text and states meet normal-text contrast across workspaces and landing fields', async () => {
   const css = await readFile('src/theme.css', 'utf8');
   const tokens = Object.fromEntries([...css.matchAll(/--([\w-]+):\s*(#[a-f\d]{6});/gi)].map(m => [m[1], m[2]]));
   const luminance = hex => {
@@ -14,7 +14,7 @@ test('shared dark-theme text and state combinations meet normal-text contrast', 
     return (high + .05) / (low + .05);
   };
   for (const foreground of ['text', 'text-secondary', 'accent', 'success', 'warning', 'error']) {
-    for (const background of ['background', 'surface', 'surface-raised']) assert.ok(contrast(tokens[foreground], tokens[background]) >= 4.5, `${foreground} on ${background}`);
+    for (const background of ['background', 'surface', 'surface-raised', 'surface-hover', 'hero-field', 'preview-field']) assert.ok(contrast(tokens[foreground], tokens[background]) >= 4.5, `${foreground} on ${background}`);
   }
   for (const background of ['action', 'accent']) assert.ok(contrast(tokens.ink, tokens[background]) >= 4.5, `button ink on ${background}`);
   for (const state of ['success', 'warning', 'error']) assert.ok(contrast(tokens[state], tokens[`${state}-surface`]) >= 4.5, state);

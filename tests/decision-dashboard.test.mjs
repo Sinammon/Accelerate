@@ -335,9 +335,6 @@ test('three-page journey preserves imports, supports all modes, removes and repl
       document.querySelector('.demo-entry button').click();
       await new Promise(resolve => setTimeout(resolve, 100));
     });
-    for (let attempt = 0; attempt < 100 && document.querySelector('.source-status-grid [role="status"]'); attempt++) {
-      await act(async () => new Promise(resolve => setTimeout(resolve, 20)));
-    }
     assert.equal(document.querySelectorAll('.car-card').length, 3);
     await tab('sources');
     assert.equal(demoRequests.length, 3);
@@ -345,6 +342,11 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.match(document.querySelector('.source-status-grid').textContent, /Reference specifications and your entries.*Seller-reported claims.*Typical model information.*Still to verify on this car/s);
     assert.ok(document.querySelector('.model-research a[href="https://www.caranddriver.com/honda/civic-2018"]'));
     await tab('specifications');
+    // Fuel references load from disk asynchronously. Wait for their table row;
+    // the sources panel is absent while Overview is selected and cannot signal readiness.
+    for (let attempt = 0; attempt < 100 && document.querySelector('.table-scroll tbody').rows.length < 13; attempt++) {
+      await act(async () => new Promise(resolve => setTimeout(resolve, 20)));
+    }
     assert.equal(document.querySelector('.table-scroll').querySelectorAll('tbody tr').length, 13);
     assert.match(document.querySelector('.table-scroll').textContent, /Power \(hp\).*158.*132.*155/s);
     await tab('sources');

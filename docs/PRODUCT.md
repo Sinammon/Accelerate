@@ -1,4 +1,4 @@
-# Core
+# Accelerate
 
 <!-- impeccable:product-schema 1 -->
 
@@ -28,7 +28,7 @@ React/Vite web app with stateless import, VIN, recall and optional free-tier Gem
 
 ## Brand Commitments
 
-Keep the Core name and existing honest, plain product language. The approved refinement uses blue-black surfaces, clear blue actions, and the existing self-hosted fonts. Compare starts with an overview, with specifications and sources available in tabs. Phones compare two selected contenders at a time; all four remain in the shortlist. Keep motion subtle and responsive.
+Use the Accelerate name with honest, plain product language. Style the name as a slanted typographic wordmark without a separate logo or icon. The user-approved Aerotime direction uses light editorial fields, deep indigo text, restrained blue actions and the existing self-hosted fonts; [the canonical design system](../DESIGN.md) records the accessible adaptation. Keep the real car-shopping import, comparison and decision workflow prominent. Compare starts with an overview, with specifications and sources available in tabs. Phones compare two selected contenders at a time; all four remain in the shortlist. Keep motion subtle and responsive.
 
 ## Evidence on Hand
 
@@ -43,7 +43,7 @@ Bundled fictional demo, four credited model photographs, reviewed model-research
 
 ## Accessibility & Inclusion
 
-Keyboard access, visible focus, reduced motion, readable dark-mode contrast, responsive layouts, 44px primary touch targets and usable content at 200% zoom are acceptance requirements.
+Keyboard access, visible focus, reduced motion, readable contrast on light fields and semantic states, responsive layouts, 44px primary touch targets and usable content at 200% zoom are acceptance requirements.
 
 ## Dependable specifications
 

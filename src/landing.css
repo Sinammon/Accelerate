@@ -1,10 +1,10 @@
 /* Shared site chrome and import controls. */
 .site-shell { width: 100%; max-width: calc(var(--content-width) + 64px); margin: 0 auto; padding: 0 32px; }
-.site-header { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 88px; border-bottom: 1px solid var(--border); background: var(--background); }
+.site-header { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 88px; border-bottom: 1px solid var(--border-subtle); background: var(--background); }
 .brand, .footer-brand { display: inline-flex; gap: 12px; min-height: 44px; align-items: center; color: var(--text); text-decoration: none; font-family: var(--font-display); font-weight: 600; letter-spacing: -.03em; }
-.brand { font-size: 28px; white-space: nowrap; }
+.brand { font-size: 32px; white-space: nowrap; }
 .site-header nav { display: flex; align-items: center; gap: 28px; }
-.nav-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--text-secondary); text-decoration: none; font-weight: 600; }
+.nav-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--text-secondary); text-decoration: none; font-weight: 500; }
 .nav-link[aria-current='page'] { color: var(--text); text-decoration: underline; text-decoration-color: var(--action); text-underline-offset: 10px; }
 .nav-count { display: grid; place-items: center; min-width: 26px; height: 26px; border-radius: 8px; background: var(--surface); color: var(--text-secondary); font-size: 14px; font-variant-numeric: tabular-nums; }
 .nav-menu-toggle { display: none; }
@@ -18,7 +18,7 @@
 .workflow [aria-current='step'] span { color: var(--ink); background: var(--action); border-color: var(--action); }
 .url-form { min-width: 0; }
 .url-form > label { display: block; margin-bottom: 12px; font-size: 16px; }
-.input-row { display: flex; align-items: center; gap: 16px; padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--surface); }
+.input-row { display: flex; align-items: center; gap: 16px; padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--background); }
 .input-row:focus-within { border-color: var(--accent); }
 .input-row > svg { color: var(--text-secondary); margin-left: 12px; }
 .input-row input { border: 0; background: transparent; flex: 1; padding: 12px 0; }
@@ -34,7 +34,7 @@
 .demo-entry p { margin-top: 8px; color: var(--text-secondary); font-size: 14px; }
 .loading-spinner { width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 800ms linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px 32px; border-top: 1px solid var(--border); padding: 32px 0; color: var(--text-secondary); font-size: 14px; }
+footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px 32px; border-top: 1px solid var(--border-subtle); padding: 40px 0; color: var(--text-secondary); font-size: 14px; }
 .footer-brand { font-size: 24px; }
 @media(min-width: 768px) and (max-width: 1000px) { .site-header nav { gap: 12px; } .nav-button { padding: 12px; } }
 @media(max-width: 767px) {

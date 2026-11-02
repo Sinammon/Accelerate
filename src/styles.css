@@ -12,7 +12,7 @@
 .vehicle-image { position: relative; height: 230px; width: 100%; min-width: 0; flex-shrink: 0; overflow: hidden; background: #e5ebf2; }
 .vehicle-image img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center; }
 .image-placeholder { display: flex; height: 100%; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: var(--surface); color: var(--text-secondary); font-size: 14px; }
-.source-pill { position: absolute; top: 12px; left: 12px; max-width: calc(100% - 24px); padding: 6px 10px; border-radius: var(--radius-control); background: #080f1aed; color: var(--text); font-size: 14px; }
+.source-pill { position: absolute; top: 12px; left: 12px; max-width: calc(100% - 24px); padding: 6px 10px; border-radius: var(--radius-control); background: var(--background); color: var(--text); font-size: 14px; }
 .photo-next { position: absolute; bottom: 12px; right: 12px; min-width: 44px; padding: 8px; }
 .car-card-body { padding: 20px; }
 .card-topline { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 14px; color: var(--text-secondary); }

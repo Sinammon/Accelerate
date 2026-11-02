@@ -1,6 +1,6 @@
-# Core
+# Accelerate
 
-Formerly Dilemma. The app is now Core; its GitHub repository and existing deployment URLs remain the same.
+Formerly Dilemma and Core. The app is now Accelerate; its GitHub repository and existing deployment URLs remain the same.
 
 A temporary, in-memory eBay.ca used-car comparison for a Grade 12 CS demo. React + JavaScript + CSS, Vite, and a minimal Node.js API. Import up to four cars, view real photos, compare available fields and specifications, and read seller descriptions as safe plain text.
 
@@ -268,7 +268,7 @@ node --test .\tests\ebay-feasibility.test.mjs
 
 ## Motors support and limitations
 
-**Finding: Canadian Browse search is documented; complete eBay Motors vehicle coverage remains unverified.** The documentation reviewed does not establish a blanket exclusion of all vehicle listings. Equally, marketplace support and vehicle compatibility examples do not establish a complete used-car inventory feed. A credentialed Production run is required to observe what this application can retrieve, and eBay should confirm category/format coverage before Core depends on it.
+**Finding: Canadian Browse search is documented; complete eBay Motors vehicle coverage remains unverified.** The documentation reviewed does not establish a blanket exclusion of all vehicle listings. Equally, marketplace support and vehicle compatibility examples do not establish a complete used-car inventory feed. A credentialed Production run is required to observe what this application can retrieve, and eBay should confirm category/format coverage before Accelerate depends on it.
 
 - eBay documents Browse `item_summary` and `item` support for Canada in its [marketplace support table](https://developer.ebay.com/api-docs/buy/static/ref-marketplace-supported.html). The [Canadian category table](https://developer.ebay.com/api-docs/sell/static/marketing/pl-supported-categories.html) identifies `6001` as Cars & Trucks; that table concerns advertising eligibility, **not Browse eligibility**.
 - The [Browse guide's compatibility feature](https://developer.ebay.com/api-docs/buy/static/api-browse.html) finds **parts that fit a vehicle**. Its year/make/model examples are not proof that complete vehicles can be discovered.

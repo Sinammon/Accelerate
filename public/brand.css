@@ -1,26 +1,10 @@
-/* Display the central icon from the original, unmodified 1536 x 1024 artwork.
-   The 720 x 720 viewport starts at (408, 152); no generated replacement. */
-.brand-logo {
-  --logo-size: 44px;
-  position: relative;
+/* The name is the identity. No separate symbol or raster logo. */
+.wordmark {
   display: inline-block;
-  flex: 0 0 var(--logo-size);
-  width: var(--logo-size);
-  height: var(--logo-size);
-  overflow: hidden;
-  border-radius: 12px;
-  vertical-align: middle;
-}
-.brand-logo img {
-  position: absolute;
-  display: block;
-  left: -56.666667%;
-  top: -21.111111%;
-  width: 213.333333%;
-  height: 142.222222%;
-  max-width: none;
-}
-.brand-logo--small { --logo-size: 32px; border-radius: 8px; }
-@media (max-width: 767px) {
-  .site-header .brand-logo { --logo-size: 36px; border-radius: 8px; }
+  padding-inline: 2px 6px;
+  font-family: 'Clash Grotesk', sans-serif;
+  font-weight: 650;
+  letter-spacing: -.04em;
+  line-height: 1.15;
+  transform: skewX(-9deg);
 }
