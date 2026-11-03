@@ -8,7 +8,7 @@ export const PRIMARY_MODES = [
   { id: 'value', label: 'Best Value', icon: 'trophy' },
   { id: 'cost', label: 'Affordability', icon: 'dollar' },
   { id: 'comfort', label: 'Comfort', icon: 'seat' },
-  { id: 'balanced', label: 'Balanced', icon: 'balance' },
+  { id: 'practical', label: 'Practicality', icon: 'compare' },
   { id: 'performance', label: 'Performance', icon: 'engine' },
 ];
 const money = n => `$${n.toLocaleString('en-CA', { maximumFractionDigits: 0 })} CAD`;

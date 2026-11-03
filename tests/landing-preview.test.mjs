@@ -56,6 +56,10 @@ test('preview is manual, guards rapid navigation, supports keyboard steps and ke
     });
     assert.equal(document.activeElement.id, 'preview-step-2');
     assert.equal(document.querySelectorAll('.sample-priorities button').length, 4);
+    assert.doesNotMatch(document.querySelector('.sample-priorities').textContent, /Balanced/);
+    await click('.sample-priorities button:nth-child(4)');
+    assert.match(document.querySelector('.sample-priorities').textContent, /Practicality/);
+    assert.match(document.querySelector('.match-reason').textContent, /fictional scenario.*passenger and luggage space/);
     await click('.sample-priorities button:nth-child(3)');
     assert.equal(document.querySelector('.preview-match h3').textContent, '2019 Toyota Corolla');
     assert.match(document.querySelector('.match-reason').textContent, /fictional scenario/);

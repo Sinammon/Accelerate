@@ -17,7 +17,7 @@ const priorities = [
   { id: 'value', label: 'Best Value', car: cars[1], reason: 'A middle asking price and fewer kilometres than the cheapest example.', strengths: ['$1,500 below the Corolla', '8,000 fewer km than the Mazda3'], tradeoff: '$2,400 more than the Mazda3' },
   { id: 'cost', label: 'Lowest Cost', car: cars[2], reason: 'The lowest asking price leaves more room in the purchase budget.', strengths: ['Lowest example price: $14,500', '$2,400 less than the Civic'], tradeoff: '90,000 km; running costs are not known' },
   { id: 'comfort', label: 'Comfort', car: cars[0], reason: 'For this fictional scenario only, assume a test drive found this car the most comfortable.', strengths: ['Assumed test-drive preference', 'Automatic in this example'], tradeoff: 'Highest example asking price' },
-  { id: 'balanced', label: 'Balanced', car: cars[1], reason: 'A compromise between the three example asking prices and mileages.', strengths: ['Middle price and mileage', 'Automatic in this example'], tradeoff: '15,000 more km than the Corolla' },
+  { id: 'practical', label: 'Practicality', car: cars[1], reason: 'For this fictional scenario only, assume the passenger and luggage space suit your everyday needs.', strengths: ['Assumed passenger-space fit', 'Assumed luggage-space fit'], tradeoff: 'Confirm seating capacity and storage in the actual car' },
 ];
 const money = value => `$${value.toLocaleString('en-CA')}`;
 const photo = car => <img src={`/images/preview/${car.id}.jpg`} alt={`${car.name} model example; not an actual listing`} width="480" height="300" decoding="async" />;

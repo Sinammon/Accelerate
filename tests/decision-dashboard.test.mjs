@@ -140,7 +140,10 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(document.activeElement.id, 'main-content');
     assert.equal(document.querySelectorAll('input[type="range"]').length, 0);
     assert.equal(document.querySelectorAll('.mode-grid .mode-card').length, 5);
-    assert.equal(document.querySelectorAll('.mode-card').length, 6);
+    assert.deepEqual([...document.querySelectorAll('.mode-grid .mode-card strong')].map(el => el.textContent), ['Best Value', 'Affordability', 'Comfort', 'Practicality', 'Performance']);
+    assert.equal(document.querySelector('.more-mode-options'), null);
+    assert.doesNotMatch(document.querySelector('.decision-page').textContent, /Balanced|More priorities/);
+    assert.equal(document.querySelectorAll('.mode-card').length, 5);
     assert.equal(document.querySelector('.best-match'), null, 'unresearched listings have no category winner');
     await act(async () => document.querySelector('.mode-card[data-mode="practical"]').click());
     assert.equal(document.querySelector('.best-match'), null);
@@ -168,8 +171,8 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(document.querySelector('.ownership-costs'), null, 'ownership context appears under Affordability');
     assert.equal(document.querySelector('.best-match'), null);
     assert.equal(document.querySelector('.ranking-row:last-child h3').textContent, '2025 Example 3');
-    await act(async () => document.querySelector('.mode-card[data-mode="balanced"]').click());
-    assert.equal(document.querySelector('.mode-card[data-mode="balanced"]').getAttribute('aria-pressed'), 'true');
+    await act(async () => document.querySelector('.mode-card[data-mode="practical"]').click());
+    assert.equal(document.querySelector('.mode-card[data-mode="practical"]').getAttribute('aria-pressed'), 'true');
     await go('compare');
     await add('444444444444', 25000, 2023);
     assert.equal(document.querySelectorAll('.car-card').length, 4);
@@ -183,7 +186,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(document.querySelector('.vehicle-name').textContent, '2021 Example 2');
     await go('decide');
     assert.equal(document.querySelectorAll('.ranking-row').length, 4);
-    assert.equal(document.querySelector('.mode-card[data-mode="balanced"]').getAttribute('aria-pressed'), 'true');
+    assert.equal(document.querySelector('.mode-card[data-mode="practical"]').getAttribute('aria-pressed'), 'true');
     await go('compare');
     await clearComparison();
     assert.equal(document.querySelectorAll('.car-card').length, 0);
@@ -429,8 +432,8 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.ok(document.querySelector('.mode-grid [data-mode="performance"]'));
     await act(async () => document.querySelector('[data-mode="value"]').click());
     assert.match(document.querySelector('.mode-explanation').textContent, /See what you get for the asking price/);
-    await act(async () => document.querySelector('[data-mode="balanced"]').click());
-    assert.match(document.querySelector('.mode-explanation').textContent, /Balanced emphasizes overall capability/);
+    await act(async () => document.querySelector('[data-mode="practical"]').click());
+    assert.match(document.querySelector('.mode-explanation').textContent, /Seating needs, passenger space/);
 
     // The compact workspace preserves accessible navigation and mobile choices.
     await go('compare');

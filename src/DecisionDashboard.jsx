@@ -73,8 +73,7 @@ export default function DecisionDashboard({ cars, mode = 'value', setMode, retry
   return <section className="page-section decision-page">
     <div className="decision-heading"><div><h1 tabIndex={-1}>Let's Find Your Best Match</h1><p className="page-intro">Choose what matters most. See your match, the reasons, and the trade-off.</p></div><a className="back-link" href="#compare">Back to comparison <Icon name="arrow" size={18} /></a></div>
     <div className="mode-grid" role="group" aria-label="Decision priority">{PRIMARY_MODES.map(item => <ModeButton key={item.id} item={item} mode={mode} setMode={setMode} />)}</div>
-    <p className="mode-explanation">{result.mode.description} {mode === 'value' ? 'See what you get for the asking price, with the strengths and trade-offs explained. Balanced gives price less influence.' : mode === 'balanced' ? 'Balanced emphasizes overall capability; Best Value gives asking price more influence.' : ''}</p>
-    <details className="more-mode-options" open={mode === 'practical' || undefined}><summary>More priorities</summary><div className="additional-mode-grid" role="group" aria-label="Additional decision priorities"><ModeButton item={{ id: 'practical', label: 'Practicality', icon: 'compare' }} mode={mode} setMode={setMode} /></div></details>
+    <p className="mode-explanation">{result.mode.description} {mode === 'value' ? 'See what you get for the asking price, with the strengths and trade-offs explained.' : ''}</p>
     {cars.some(car => car.demo) && <p className="decision-demo-note">Fictional demo cars · Listing details are examples; linked model research is real.</p>}
     {cars.some(car => ['loading', 'loading-model'].includes(car.enrichment?.status)) && <p className="decision-status" role="status">Checking specifications and typical model sources… Your result may update.</p>}
     <div className="decision-result" aria-live="polite" aria-atomic="false">
