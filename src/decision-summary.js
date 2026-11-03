@@ -1,7 +1,7 @@
 import { rankDecisionMode } from './decision-engine.js';
 import { extractVehicleSpecs, specEvidenceLabel } from './vehicle-specs.js';
 import { DIMENSION_LABELS, supportedPowerToWeight } from './capability-scoring.js';
-import { dimensionRatingsForCar } from './model-research.js';
+import { dimensionRatingsForCar, researchGuidance } from './model-research.js';
 import { resolveMileage, numeric } from './vehicle-data.js';
 
 export const PRIMARY_MODES = [
@@ -19,6 +19,59 @@ export function decisionSummary(cars, mode, year, scenario) {
   const requested = rankDecisionMode(cars, mode, year, scenario);
   const kind = !cars.length ? 'empty' : !requested.best.length ? 'guidance' : requested.best[0].reviewRequired ? 'review' : 'supported';
   return { requested, ranking: requested, kind, provisional: requested.provisional, shared: requested.best.length > 1, single: cars.length === 1 };
+}
+
+// Describe evidence, rather than translating a score into an unsupported claim.
+function comfortReasons(car) {
+  const ratings = dimensionRatingsForCar(car);
+  const reasons = ['rideQuality', 'frontSeatComfort', 'rearSeatComfort', 'cabinQuietness', 'frontPassengerSpace', 'rearPassengerSpace']
+    .flatMap(key => {
+      const rating = ratings[key];
+      const evidence = rating?.evidence?.find(e => e.url);
+      return rating?.rationale && evidence ? [{ text: `${DIMENSION_LABELS[key]}: ${rating.rationale}`, topic: DIMENSION_LABELS[key], label: 'Professional review · model context', source: { url: evidence.url, publisher: evidence.source } }] : [];
+    });
+  const claims = rankFreeComfortClaims(car);
+  const seen = new Set();
+  return [...reasons, ...claims].filter(reason => {
+    const text = reason.text.replace(/^[^:]+: /, '').trim();
+    if (seen.has(text)) return false;
+    seen.add(text);
+    return true;
+  });
+}
+
+function rankFreeComfortClaims(car) {
+  return researchGuidance(car, 'comfort').claims.filter(c => !c.contextOnly)
+    .map(c => ({ text: c.text, label: 'Professional review · model context', source: c.sources[0] }));
+}
+
+function valueReasons(summary, entry) {
+  const reasons = [];
+  const price = entry.values.price;
+  if (price != null) {
+    const peers = summary.ranking.ranked.filter(e => e !== entry && !e.identityMismatch);
+    const comparable = peers.length > 0 && peers.every(e => e.values.price != null);
+    const lowest = comparable && peers.every(e => price <= e.values.price) && peers.some(e => price < e.values.price);
+    reasons.push({ text: `At ${money(price)}, ${lowest ? 'it has the lowest asking price in this comparison' : 'here is what you get for the asking price'}.`, label: 'Seller-reported asking price' });
+  }
+  const comfort = comfortReasons(entry.car);
+  reasons.push(...comfort.slice(0, 1));
+  const model = researchGuidance(entry.car, 'value');
+  reasons.push(...model.claims.filter(c => c.tone === 'positive' && !c.contextOnly).slice(0, 1).map(c => ({ text: c.text, label: 'Sourced model strength', source: c.sources[0] })));
+  for (const key of ['powerToWeight', 'power', 'seats']) {
+    if (reasons.length >= 3) break;
+    if (entry.values[key] == null) continue;
+    const text = key === 'powerToWeight' ? `${number(entry.values[key])} hp/tonne from compatible power and weight specifications.`
+      : key === 'power' ? `${number(entry.values[key])} hp of supported engine output.`
+        : entry.values.seats ? `Meets your ${summary.requested.scenario.minSeats}-seat need.` : null;
+    if (text) reasons.push({ text, label: entry.labels[key], source: entry.evidence[key]?.[0] && { url: entry.evidence[key][0].url, publisher: entry.evidence[key][0].source } });
+  }
+  const comparison = ['age', 'mileage'].flatMap(key => {
+    const factor = entry.breakdown.find(c => c.key === key);
+    return factor && factor.min < factor.max && factor.value === factor.min ? [{ text: key === 'age' ? 'The newest model year in this comparison.' : `The lowest reported mileage in this comparison: ${number(factor.value)} km.`, label: entry.labels[key] }] : [];
+  });
+  if (comparison.length) reasons.splice(2, reasons.length > 2 ? 1 : 0, comparison[0]);
+  return reasons.slice(0, 3);
 }
 
 export function entrySummary(summary, entry) {
@@ -39,22 +92,31 @@ export function entrySummary(summary, entry) {
   };
   const factors = [...entry.breakdown].sort((a, b) => b.contribution - a.contribution);
   let reasons = factors.slice(0, 3).map(describe);
+  if (!entry.identityMismatch && requested.mode.id === 'value') reasons = valueReasons(summary, entry);
+  if (!entry.identityMismatch && requested.mode.id === 'comfort') reasons = comfortReasons(entry.car).slice(0, 3);
   if (!reasons.length) reasons = (model?.claims || []).filter(c => !c.contextOnly).slice(0, 2).map(c => ({ text: c.text, label: 'Model context | not a comparative score', source: c.sources[0] }));
+  if (!entry.identityMismatch && ['value', 'comfort'].includes(requested.mode.id) && !comfortReasons(entry.car).length) {
+    const check = { text: 'Ride quality and seat comfort still need checking. On a test drive, check bump absorption, seat support and rear-seat comfort.', label: 'What to check in this car' };
+    reasons = [...reasons.slice(0, 2), check];
+  }
   const weaker = [...entry.breakdown].sort((a, b) => a.points - b.points)[0];
   const modelDrawback = model?.claims.find(c => c.tone === 'caution' && !c.contextOnly);
-  const tradeoff = modelDrawback?.text || (weaker && weaker.points < 50 ? `${weaker.label} is a weaker factor in this comparison.` : summary.provisional ? 'Some category evidence is missing. This result may change as research completes.' : 'Model assessments do not establish the condition of this used car; confirm on a test drive.');
+  const tradeoff = modelDrawback?.text || (weaker && weaker.points < 50 ? `${weaker.key === 'capability' ? 'The documented comfort, performance and practicality' : weaker.label} ${weaker.key === 'capability' ? 'are less competitive' : 'is a weaker factor'} in this comparison.` : summary.provisional ? 'Some category evidence is missing. This result may change as research completes.' : 'Model assessments do not establish the condition of this used car; confirm on a test drive.');
   const active = ranking.criteria.filter(c => c.active).map(c => c.label.toLowerCase());
   const explanation = entry.identityMismatch ? 'Resolve conflicting identity or configuration details before ranking this car.'
-    : entry.score == null ? 'This car does not have enough comparable category evidence to rank. No price-based substitute is used.'
+    : entry.score == null ? 'Here is what we know so far. More comparable information is needed to choose between the cars.'
     : !ranking.best.includes(entry) ? 'Another contender in your shortlist, scored on the same supported category factors.'
-    : kind === 'review' ? `Highest supported ${requested.mode.title.toLowerCase()} score, with purchase concerns to review. The warning does not change its category capability.`
+    : kind === 'review' ? `Leads the available ${requested.mode.title.toLowerCase()} comparison, with purchase concerns to review before choosing.`
       : summary.single ? 'Your only contender so far. Add another car for a relative comparison.'
-        : summary.shared ? `An equal match on ${active.join(', ')}.`
-          : `${summary.provisional ? 'Provisional best fit' : 'Best fit'} for ${requested.mode.title.toLowerCase()} on the supported comparable factors.`;
+        : summary.shared ? ['value', 'comfort'].includes(requested.mode.id) ? 'An equal match on the comparable details available. Review the strengths and trade-offs below.' : `An equal match on ${active.join(', ')}.`
+          : requested.mode.id === 'value' ? `${summary.provisional ? 'A tentative' : 'Our'} best-value pick: the strongest overall combination of ${ranking.criteria.filter(c => c.active).map(c => c.key === 'capability' ? 'documented strengths' : c.key === 'price' ? 'asking price' : c.key === 'age' ? 'model year' : 'mileage').join(', ')} among these contenders. See what you get for the money below.`
+            : requested.mode.id === 'comfort' ? `${summary.provisional ? 'A tentative comfort pick' : 'Our comfort pick'}, based on the available ride, seating and cabin evidence below.`
+              : `${summary.provisional ? 'Provisional best fit' : 'Best fit'} for ${requested.mode.title.toLowerCase()} on the supported comparable factors.`;
   return { reasons, tradeoff, tradeoffSource: modelDrawback?.sources[0], explanation };
 }
 
 export function keyFacts(car, mode = 'value') {
+  if (mode === 'comfort') return comfortReasons(car).slice(0, 3).map((reason, index) => ({ icon: 'seat', label: reason.topic || `Comfort evidence ${index + 1}`, value: reason.topic ? reason.text.slice(reason.topic.length + 2) : reason.text, source: reason.source?.publisher || reason.label, sourceUrl: reason.source?.url }));
   const { specs, features } = extractVehicleSpecs(car);
   const facts = [];
   const engine = [specs.displacement.value != null && `${specs.displacement.value.toFixed(1)} L`, specs.cylinders.value != null && `${specs.cylinders.value}-cylinder`].filter(Boolean).join(' · ');
@@ -78,11 +140,6 @@ export function keyFacts(car, mode = 'value') {
     specFact('fuelType', 'Fuel type', '', 'dollar');
     if (car.enrichment?.fuel?.status === 'matched') facts.push({ icon: 'dollar', label: 'Fuel reference', value: `${car.enrichment.fuel.combined.toFixed(1)} L/100 km`, source: 'NRCan configuration reference' });
     if (car.priceCAD?.currency === 'CAD' && numeric(car.priceCAD.value) != null && !facts.some(f => f.label === 'Asking price')) facts.push({ icon: 'dollar', label: 'Asking price', value: money(numeric(car.priceCAD.value)), source: 'Seller-reported' });
-    if (mode === 'comfort') {
-      const ratings = dimensionRatingsForCar(car);
-      for (const key of ['rideQuality', 'cabinQuietness']) if (ratings[key]) facts.push({ icon: 'seat', label: DIMENSION_LABELS[key], value: `${ratings[key].rating} / 5`, source: 'Cited professional review assessment' });
-      if (ratings.frontSeatComfort && ratings.rearSeatComfort) facts.push({ icon: 'seat', label: 'Seat comfort', value: `${(ratings.frontSeatComfort.rating + ratings.rearSeatComfort.rating) / 2} / 5`, source: 'Front and rear occupants weighted equally' });
-    }
     const order = ({ cost: ['Asking price', 'Fuel reference', 'Fuel type', 'Engine', 'Mileage'], comfort: ['Ride quality', 'Cabin quietness', 'Seat comfort', 'Passenger space'], practical: ['Seats', 'Body style', 'Reported features', 'Mileage'], performance: ['Power-to-weight', 'Power', 'Torque', 'Curb weight'], balanced: ['Engine', 'Fuel reference', 'Fuel type', 'Reported features', 'Mileage'] })[mode] || [];
     return order.flatMap(label => facts.filter(f => f.label === label)).slice(0, 3);
   }

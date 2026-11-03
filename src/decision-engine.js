@@ -80,7 +80,7 @@ export function rankCars(cars, priorities = DEFAULT_PRIORITIES, currentYear = ne
 }
 
 export const DECISION_MODES = [
-  { id: 'value', title: 'BEST VALUE', description: 'Supported capability for the asking price.', weights: { capability: 50, price: 35, age: 10, mileage: 5 } },
+  { id: 'value', title: 'BEST VALUE', description: 'What each car offers for the asking price.', weights: { capability: 50, price: 35, age: 10, mileage: 5 } },
   { id: 'cost', title: 'AFFORDABILITY', description: 'Compare asking price and fuel, then check insurance and the wider costs of ownership.', weights: { price: 80, fuel: 20 } },
   { id: 'practical', title: 'EVERYDAY PRACTICALITY', description: 'Seating needs, passenger space, body preference and usable cargo capacity.' },
   { id: 'performance', title: 'PERFORMANCE', description: 'Acceleration, power-to-weight and supported engine output.' },

@@ -5,6 +5,7 @@ import { createServer } from 'vite';
 import { readFile } from 'node:fs/promises';
 import { DISCRIMINATORS } from '../shared/model-specs.js';
 import { comfortReferenceCars } from './fixtures/comfort-reference.mjs';
+import { ratedCar } from './fixtures/scoring-fixtures.mjs';
 import { vinMismatches } from '../src/vehicle-specs.js';
 
 test('three-page journey preserves imports, supports all modes, removes and replaces cars, and handles unknown data', async () => {
@@ -145,7 +146,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(document.querySelector('.best-match'), null);
     await act(async () => document.querySelector('.mode-card[data-mode="performance"]').click());
     assert.equal(document.querySelector('.decision-match').dataset.basis, 'guidance');
-    assert.match(document.querySelector('.decision-reason').textContent, /No price-based substitute/);
+    assert.match(document.querySelector('.decision-reason').textContent, /More comparable information/);
     await act(async () => document.querySelector('.mode-card[data-mode="comfort"]').click());
     assert.equal(document.querySelector('.best-match'), null, 'unresearched listings have no category winner');
     await go('compare');
@@ -365,7 +366,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     await act(async () => document.querySelector('.mode-card[data-mode="performance"]').click());
     assert.equal(document.querySelector('.decision-match').dataset.basis, 'supported');
     assert.match(document.querySelector('.decision-reason').textContent, /Provisional best fit/);
-    assert.match(document.querySelector('.evidence-coverage').textContent, /50% evidence coverage/);
+    assert.match(document.querySelector('.evidence-coverage').textContent, /Tentative recommendation/);
     assert.match(document.querySelector('.capability-details').textContent, /Curb weight.*Power-to-weight/s);
     assert.match(document.querySelector('.score-parts').textContent, /factory reference; not measured output/);
     assert.equal(document.querySelectorAll('.research-guidance-grid > article').length, 3);
@@ -422,12 +423,12 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     await go('decide');
     await act(async () => document.querySelector('[data-mode="comfort"]').click());
     assert.equal(document.querySelector('.best-match h2').textContent, '2025 Mercedes-Benz S-Class');
-    assert.match(document.querySelector('.evidence-coverage').textContent, /35% evidence coverage.*Provisional/);
+    assert.match(document.querySelector('.evidence-coverage').textContent, /Tentative recommendation/);
     assert.match(document.querySelector('.ranking-row .capability-details').textContent, /Ride quality.*5 \/ 5.*Cabin quietness.*Seat comfort.*Passenger space/s);
     assert.ok(document.querySelector('.capability-details a[href="https://www.caranddriver.com/mercedes-maybach/s580-s680-2025"]'));
     assert.ok(document.querySelector('.mode-grid [data-mode="performance"]'));
     await act(async () => document.querySelector('[data-mode="value"]').click());
-    assert.match(document.querySelector('.mode-explanation').textContent, /Best Value emphasizes capability for the asking price; Balanced emphasizes overall capability/);
+    assert.match(document.querySelector('.mode-explanation').textContent, /See what you get for the asking price/);
     await act(async () => document.querySelector('[data-mode="balanced"]').click());
     assert.match(document.querySelector('.mode-explanation').textContent, /Balanced emphasizes overall capability/);
 
@@ -588,6 +589,45 @@ test('Compare and Decide omit false powertrain warnings while retaining genuine 
       assert.match(invalid.window.document.body.textContent, /VIN\/listing mismatch.*Transmission: listing Automatic; VIN record Manual/);
       invalid.window.close();
     }
+  } finally {
+    await vite.close();
+  }
+});
+
+
+test('main cards explain value and comfort while calculations stay in disclosures', async () => {
+  const React = await import('react');
+  const { renderToStaticMarkup } = await import('react-dom/server');
+  const vite = await createServer({ server: { middlewareMode: true, hmr: false }, appType: 'custom' });
+  try {
+    const { default: Dashboard } = await vite.ssrLoadModule('/src/DecisionDashboard.jsx');
+    const car = ratedCar('leader', 4, undefined, 15000);
+    const ratings = car.enrichment.modelSpecs.dimensionRatings;
+    ratings.rideQuality.rationale = 'Smooth bump absorption on uneven streets.';
+    ratings.frontSeatComfort.rationale = 'Supportive front seats for longer drives.';
+    ratings.rearSeatComfort.rationale = 'Well cushioned rear seats.';
+    for (const mode of ['value', 'comfort']) {
+      const dom = new JSDOM(renderToStaticMarkup(React.createElement(Dashboard, { cars: [car, ratedCar('peer', 2, undefined, 25000)], mode })));
+      const doc = dom.window.document;
+      const card = doc.querySelector('.decision-match');
+      assert.doesNotMatch(card.textContent, /Supported capability|Unranked|\/ 100|\/ 5|% evidence coverage/);
+      assert.match(card.textContent, /Smooth bump absorption/);
+      assert.ok(card.querySelector('a[href="https://reviews.example.test/fixture"]'));
+      if (mode === 'value') assert.match(card.textContent, /\$15,000 CAD.*lowest asking price/);
+      else assert.match(card.textContent, /Supportive front seats.*Well cushioned rear seats/);
+      assert.match(doc.querySelector('.ranking-score').textContent, /\/ 100/);
+      assert.ok(doc.querySelector('.ranking-score').closest('details'));
+      assert.equal(doc.querySelector('.decision-result').getAttribute('aria-live'), 'polite');
+      dom.window.close();
+    }
+    const dom = new JSDOM(renderToStaticMarkup(React.createElement(Dashboard, { cars: [{ legacyItemId: 'unknown', description: 'Engine problems.' }], mode: 'comfort' })));
+    const card = dom.window.document.querySelector('.decision-match');
+    assert.match(card.textContent, /What we know so far/);
+    assert.match(card.textContent, /Ride quality and seat comfort still need checking/);
+    assert.match(card.textContent, /bump absorption, seat support and rear-seat comfort/);
+    assert.match(card.textContent, /Engine concern/);
+    assert.doesNotMatch(card.textContent, /Unranked|Unscored|Best category fit/);
+    dom.window.close();
   } finally {
     await vite.close();
   }

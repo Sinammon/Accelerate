@@ -6,6 +6,61 @@ import { makeDemoCars } from '../src/demo-cars.js';
 import { researchForCar } from '../src/model-research.js';
 const cars = makeDemoCars();
 
+test('value explains the asking price and documented benefits without changing the winner', () => {
+  const first = ratedCar('less', 4, undefined, 15000);
+  const second = ratedCar('more', 3, undefined, 25000);
+  const summary = decisionSummary([first, second], 'value', 2026);
+  assert.equal(summary.ranking.best[0].car, first);
+  const notes = entrySummary(summary, summary.ranking.best[0]);
+  const text = notes.reasons.map(r => r.text).join(' ');
+  assert.match(text, /\$15,000 CAD.*lowest asking price/);
+  assert.match(text, /Ride quality: Synthetic assessment/);
+  assert.doesNotMatch(text, /Supported capability|\/ 100|\/ 5/);
+  assert.ok(notes.tradeoff);
+  assert.equal(summary.ranking.best[0].breakdown.find(c => c.key === 'capability').weight, 50);
+});
+
+test('comfort prioritizes sourced ride and separate seat descriptions without requiring a score', () => {
+  const car = ratedCar('partial');
+  const ratings = car.enrichment.modelSpecs.dimensionRatings;
+  for (const key of Object.keys(ratings)) if (!['rideQuality', 'frontSeatComfort'].includes(key)) delete ratings[key];
+  ratings.rideQuality.rationale = 'Absorbs bumps smoothly.';
+  ratings.frontSeatComfort.rationale = 'Supportive front seats over longer journeys.';
+  const summary = decisionSummary([car], 'comfort', 2026);
+  const notes = entrySummary(summary, summary.ranking.ranked[0]);
+  assert.match(notes.reasons[0].text, /Ride quality: Absorbs bumps/);
+  assert.match(notes.reasons[1].text, /Front-seat comfort: Supportive front seats/);
+  assert.doesNotMatch(JSON.stringify(notes.reasons), /Rear-seat comfort|\/ 5/);
+  assert.ok(notes.reasons.every(r => r.source?.url.startsWith('https:')));
+  assert.match(notes.explanation, /only contender/);
+  assert.ok(keyFacts(car, 'comfort').every(f => f.sourceUrl && !/\/ 5/.test(f.value)));
+});
+
+test('comfort deduplicates shared rationales and absent evidence provides actionable checks', () => {
+  const car = ratedCar('shared');
+  const summary = decisionSummary([car], 'comfort', 2026);
+  assert.equal(entrySummary(summary, summary.ranking.ranked[0]).reasons.filter(r => r.text.includes('Synthetic assessment')).length, 1);
+  const unknown = decisionSummary([{ legacyItemId: 'unknown' }], 'comfort', 2026);
+  const notes = entrySummary(unknown, unknown.ranking.ranked[0]);
+  assert.match(notes.reasons[0].text, /Ride quality and seat comfort still need checking.*bump absorption, seat support and rear-seat comfort/);
+  assert.match(notes.explanation, /More comparable information/);
+  assert.equal(unknown.ranking.ranked[0].score, null);
+  assert.deepEqual(unknown.ranking.best, []);
+});
+
+test('value mentions supported mileage advantages but never compares missing prices', () => {
+  const car = ratedCar('lower-mileage');
+  const peer = ratedCar('higher-mileage');
+  peer.mileage.raw = '150000';
+  const summary = decisionSummary([car, peer], 'value', 2026);
+  const notes = entrySummary(summary, summary.ranking.ranked.find(e => e.car === car));
+  assert.match(JSON.stringify(notes), /lowest reported mileage/);
+  peer.priceCAD = null;
+  const missing = decisionSummary([car, peer], 'value', 2026);
+  assert.doesNotMatch(JSON.stringify(entrySummary(missing, missing.ranking.ranked.find(e => e.car === car))), /lowest asking price/);
+  assert.match(JSON.stringify(notes), /lowest reported mileage/);
+});
+
 test('sparse comfort and performance retain their category with guidance and no substitute score', () => {
   const before = structuredClone(cars);
   for (const mode of ['comfort', 'performance']) {
@@ -15,7 +70,7 @@ test('sparse comfort and performance retain their category with guidance and no 
     assert.equal(summary.requested.best.length, 0);
     assert.equal(summary.ranking.best.length, 0);
     const notes = entrySummary(summary, summary.ranking.ranked[0]);
-    assert.match(notes.explanation, /No price-based substitute/);
+    assert.match(notes.explanation, /More comparable information/);
     assert.ok(notes.reasons.every(reason => !reason.source || reason.source.url.startsWith('https:')));
   }
   assert.deepEqual(cars, before);
@@ -27,7 +82,7 @@ test('condition and identity concerns never disappear through the fallback', () 
   assert.equal(summary.kind, 'guidance');
   assert.ok(summary.ranking.ranked.every(entry => entry.warnings.length));
   assert.equal(summary.ranking.best.length, 0);
-  assert.match(entrySummary(summary, summary.ranking.ranked[0]).explanation, /No price-based substitute/);
+  assert.match(entrySummary(summary, summary.ranking.ranked[0]).explanation, /More comparable information/);
   const mismatch = decisionSummary(cars.map(car => ({ ...car, enrichment: { vin: { mismatches: [{ field: 'Year' }] } } })), 'cost', 2026);
   assert.ok(mismatch.ranking.best.length);
   assert.equal(mismatch.kind, 'supported');

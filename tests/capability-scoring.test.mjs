@@ -72,7 +72,7 @@ test('unsupported contenders stay unranked; empty overlap never substitutes anot
   const summary = decisionSummary([b], 'comfort');
   assert.equal(summary.ranking.mode.id, 'comfort');
   assert.equal(summary.kind, 'guidance');
-  assert.match(entrySummary(summary, summary.ranking.ranked[0]).explanation, /No price-based substitute/);
+  assert.match(entrySummary(summary, summary.ranking.ranked[0]).explanation, /More comparable information/);
 });
 
 test('power-to-weight can favor a lighter car over a more powerful heavy car', () => {

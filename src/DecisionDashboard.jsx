@@ -41,22 +41,22 @@ function MatchCard({ summary }) {
   const { car } = entry;
   const endorsed = summary.ranking.best.includes(entry);
   const notes = entrySummary(summary, entry);
-  const facts = keyFacts(car, summary.requested.mode.id);
-  const label = entry.score == null ? 'Unranked · more evidence needed' : entry.reviewRequired ? 'Category score · review required'
+  const facts = keyFacts(car, summary.requested.mode.id).filter(fact => !notes.reasons.some(reason => reason.text.includes(fact.value)));
+  const label = entry.score == null ? 'What we know so far' : entry.reviewRequired ? 'Review before choosing'
     : !endorsed ? 'Other contender' : summary.provisional ? 'Provisional match' : summary.shared ? 'Equal match' : 'Best category fit';
-  const explanation = endorsed || ['review', 'guidance'].includes(summary.kind) ? notes.explanation : 'Another contender in your shortlist. Compare its supported details and trade-offs.';
+  const explanation = notes.explanation;
   const canView = (car.images || []).some((_, i) => vehicleImageUrl(car, i));
   return <>
     <article className={`decision-match ${endorsed ? 'best-match' : ''}`} data-basis={summary.kind}>
       <div className="decision-photo"><VehicleImage key={car.legacyItemId} car={car} />{canView && <button type="button" className="view-photo" onClick={() => dialog.current?.showModal()}><Icon name="expand" size={17} />View larger photo</button>}</div>
       <div className="decision-match-copy"><div className="match-topline"><span className={`recommendation-badge ${!endorsed ? 'neutral' : ''} ${entry.warnings.length ? 'caution' : ''}`}><Icon name={endorsed && summary.kind === 'supported' && !entry.warnings.length ? 'trophy' : 'info'} size={18} />{summary.requested.mode.title.toLowerCase()} &middot; {label}</span></div>
         <h2>{vehicleName(car)}</h2><p className="decision-reason">{explanation}</p>
-        <p className="evidence-coverage">{entry.score == null ? 'Unranked' : `${(summary.requested.evidenceCoverage * 100).toFixed(0)}% evidence coverage`}{summary.provisional && ' · Provisional comparison'}{summary.requested.usesApproximation && ' · Includes approximate or stale specifications'} · Category capability and purchase warnings are shown separately.</p>
+        <p className="evidence-coverage">{entry.score == null ? 'Available details and next checks' : summary.provisional ? 'Tentative recommendation · more comparable evidence would help' : 'Based on comparable vehicle details'}{summary.requested.usesApproximation && ' · Includes approximate or stale specifications'} · Reviews describe the model; confirm comfort and condition in this car.</p>
         <ul className="decision-reasons">{notes.reasons.map(reason => <li key={reason.text} className={reason.source ? 'model-context' : ''}><Icon name={reason.source ? 'book' : 'check-circle'} size={21} /><span>{reason.text}<small>{reason.label}{reason.source && <> &middot; <a href={reason.source.url} target="_blank" rel="noopener noreferrer">{reason.source.publisher} <Icon name="arrow" size={14} /></a></>}</small></span></li>)}</ul>
         <div className="decision-tradeoff"><Icon name="balance" size={23} /><b>Trade-off</b><span>{notes.tradeoff}{notes.tradeoffSource && <small><a href={notes.tradeoffSource.url} target="_blank" rel="noopener noreferrer">{notes.tradeoffSource.publisher} <Icon name="arrow" size={14} /></a></small>}</span></div>
         <ListingWarnings entry={entry} />
       </div>
-      {!!facts.length && <div className="decision-key-facts">{facts.map(fact => <div key={fact.label}><span className="fact-icon"><Icon name={fact.icon} size={28} /></span><div><span>{fact.label}</span><strong>{fact.value}</strong><small>{fact.source}</small></div></div>)}</div>}
+      {!!facts.length && <div className="decision-key-facts">{facts.map(fact => <div key={fact.label}><span className="fact-icon"><Icon name={fact.icon} size={28} /></span><div><span>{fact.label}</span><strong>{fact.value}</strong><small>{fact.sourceUrl ? <a href={fact.sourceUrl} target="_blank" rel="noopener noreferrer">{fact.source}</a> : fact.source}</small></div></div>)}</div>}
       {summary.ranking.ranked.length > 1 && <div className="contender-controls"><button type="button" className="decision-arrow previous" aria-label="Previous contender" onClick={() => setIndex(i => (i + summary.ranking.ranked.length - 1) % summary.ranking.ranked.length)}><Icon name="chevron" size={20} />Previous</button><button type="button" className="decision-arrow next" aria-label="Next contender" onClick={() => setIndex(i => (i + 1) % summary.ranking.ranked.length)}>Next<Icon name="chevron" size={20} /></button></div>}
       <div className="decision-card-foot"><span>{index % summary.ranking.ranked.length + 1} of {summary.ranking.ranked.length} contenders</span>{car.demo && <a href="/images/preview/credits.html" target="_blank" rel="noreferrer">Photo credits</a>}<ListingLink car={car} /></div>
     </article>
@@ -73,7 +73,7 @@ export default function DecisionDashboard({ cars, mode = 'value', setMode, retry
   return <section className="page-section decision-page">
     <div className="decision-heading"><div><h1 tabIndex={-1}>Let's Find Your Best Match</h1><p className="page-intro">Choose what matters most. See your match, the reasons, and the trade-off.</p></div><a className="back-link" href="#compare">Back to comparison <Icon name="arrow" size={18} /></a></div>
     <div className="mode-grid" role="group" aria-label="Decision priority">{PRIMARY_MODES.map(item => <ModeButton key={item.id} item={item} mode={mode} setMode={setMode} />)}</div>
-    <p className="mode-explanation">{result.mode.description} {mode === 'value' ? 'Best Value emphasizes capability for the asking price; Balanced emphasizes overall capability with less influence from price.' : mode === 'balanced' ? 'Balanced emphasizes overall capability; Best Value gives asking price more influence.' : ''}</p>
+    <p className="mode-explanation">{result.mode.description} {mode === 'value' ? 'See what you get for the asking price, with the strengths and trade-offs explained. Balanced gives price less influence.' : mode === 'balanced' ? 'Balanced emphasizes overall capability; Best Value gives asking price more influence.' : ''}</p>
     <details className="more-mode-options" open={mode === 'practical' || undefined}><summary>More priorities</summary><div className="additional-mode-grid" role="group" aria-label="Additional decision priorities"><ModeButton item={{ id: 'practical', label: 'Practicality', icon: 'compare' }} mode={mode} setMode={setMode} /></div></details>
     {cars.some(car => car.demo) && <p className="decision-demo-note">Fictional demo cars · Listing details are examples; linked model research is real.</p>}
     {cars.some(car => ['loading', 'loading-model'].includes(car.enrichment?.status)) && <p className="decision-status" role="status">Checking specifications and typical model sources… Your result may update.</p>}
