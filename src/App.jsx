@@ -11,6 +11,7 @@ import { mergeResearch } from '../shared/model-specs.js';
 import { modelSpecCache } from './spec-cache.js';
 import { makeDemoCars } from './demo-cars.js';
 import { emptyComparisonView, reconcileComparisonView } from './comparison-view.js';
+import { DEFAULT_SCENARIO } from '../shared/experience.js';
 
 const route = () => ['compare', 'decide'].includes(window.location.hash.slice(1)) ? window.location.hash.slice(1) : 'import';
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
   const [comparisonView, setComparisonView] = useState(emptyComparisonView);
   const [page, setPage] = useState(route);
   const [mode, setMode] = useState('value');
+  const [scenario, setScenario] = useState(DEFAULT_SCENARIO);
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -151,8 +153,8 @@ export default function App() {
           <section className="final-cta"><h2>Make room for a better decision.</h2><p>Start with a car you already have your eye on.</p><button type="button" onClick={startImport}>Import your first car <Icon name="arrow" size={20} /></button></section>
         </section>
       </>}
-      {page === 'compare' && <VehicleComparison onSaveDetails={saveVehicleDetails} cars={cars} view={comparisonView} onViewChange={setComparisonView} notice={notice} retryResearch={retryResearch} clearSavedSpecs={() => { modelSpecCache.clear(); setNotice('Saved model specifications cleared. Your current comparison is unchanged.'); }} importForm={importForm} navigate={navigate} removeCar={id => { for (const controller of enrichmentTasks.current) if (controller.vehicleId === id) controller.abort(); const remaining = cars.filter(car => car.legacyItemId !== id); setCars(remaining); setComparisonView(previous => reconcileComparisonView(previous, remaining)); setNotice('Car removed. You can import a replacement.'); }} clearCars={() => { for (const controller of enrichmentTasks.current) controller.abort(); setCars([]); setComparisonView(emptyComparisonView()); setNotice('Comparison cleared.'); }} />}
-      {page === 'decide' && <DecisionDashboard cars={cars} retryResearch={retryResearch} mode={mode} setMode={setMode} />}
+      {page === 'compare' && <VehicleComparison scenario={scenario} setScenario={setScenario} onSaveDetails={saveVehicleDetails} cars={cars} view={comparisonView} onViewChange={setComparisonView} notice={notice} retryResearch={retryResearch} clearSavedSpecs={() => { modelSpecCache.clear(); setNotice('Saved model specifications cleared. Your current comparison is unchanged.'); }} importForm={importForm} navigate={navigate} removeCar={id => { for (const controller of enrichmentTasks.current) if (controller.vehicleId === id) controller.abort(); const remaining = cars.filter(car => car.legacyItemId !== id); setCars(remaining); setComparisonView(previous => reconcileComparisonView(previous, remaining)); setNotice('Car removed. You can import a replacement.'); }} clearCars={() => { for (const controller of enrichmentTasks.current) controller.abort(); setCars([]); setComparisonView(emptyComparisonView()); setNotice('Comparison cleared.'); }} />}
+      {page === 'decide' && <DecisionDashboard scenario={scenario} setScenario={setScenario} cars={cars} retryResearch={retryResearch} mode={mode} setMode={setMode} />}
     </m.div></main><footer><Brand className="footer-brand" small /><span>A clearer road to your next car.</span><span className="prototype-label">Temporary shortlist · Refresh clears your shortlist</span></footer>
   </div></MotionConfig></LazyMotion>;
 }

@@ -109,9 +109,9 @@ test('six modes are deterministic and purchase warnings stay separate from categ
 test('capability and purchase factors match the new value and balanced hand calculation', () => {
   const cars = pair.map(car => ({ ...car, description: '200 hp. 300 Nm.' }));
   const value = rankDecisionMode(cars, 'value', 2026);
-  assert.equal(value.best[0].score, 62.5); // capability 25 + price 35 + age 0 + mileage 2.5
+  assert.equal(value.best[0].score, 65.55); // capability 28.05 + price 35 + age 0 + mileage 2.5
   const balanced = rankDecisionMode(cars, 'balanced', 2026);
-  assert.equal(balanced.best[0].score, 55); // capability 37.5 + affordability 15 + age 0 + mileage 2.5
+  assert.equal(balanced.best[0].score, 56.58); // capability 42.075 + affordability 12 + mileage 2.5
   assert.equal(balanced.provisional, true);
 });
 
@@ -123,12 +123,13 @@ test('performance uses compatible power only, not engine size, and abstains on m
   assert.equal(incomplete.ranked[1].score, null);
   assert.equal(incomplete.provisional, true);
 });
-test('comfort cannot be established from amenity counts alone', () => {
+test('comfort uses baseline refinement with heating as a bounded separate factor', () => {
   const cars = [{ ...pair[0], description: 'Heated seats. Leather seats.' }, { ...pair[1], description: 'No heated seats.' }];
   const result = rankDecisionMode(cars, 'comfort');
-  assert.equal(result.best.length, 0);
-  assert.ok(result.ranked.every(entry => entry.score === null));
-  assert.equal(result.evidenceCoverage, 0);
+  assert.equal(result.best[0].car.legacyItemId, cars[0].legacyItemId);
+  assert.ok(result.ranked.every(entry => Number.isFinite(entry.score)));
+  assert.equal(result.evidenceCoverage, 0.1);
+  assert.equal(result.provisional, true);
 });
 
 test('description distances cannot replace structured mileage in decision modes', () => {

@@ -19,7 +19,7 @@ test('reviewed Maybach refinement outranks mainstream cars despite seating discr
   const before = structuredClone(cars);
   const result = rankDecisionMode(cars, 'comfort');
   assert.equal(result.best[0].car.legacyItemId, 'maybach');
-  assert.equal(result.best[0].score, 100);
+  assert.equal(result.best[0].score, 85); // ride 35 + quietness 30 + baseline cushioning 15 + unresolved heating 5
   assert.equal(result.best[0].warnings.length, 1);
   assert.equal(result.provisional, true, 'only ride evidence is comparable across all four');
   assert.equal(result.evidenceCoverage, 0.35);
@@ -28,12 +28,12 @@ test('reviewed Maybach refinement outranks mainstream cars despite seating discr
   assert.equal(rankDecisionMode(renamed, 'comfort').best[0].car.legacyItemId, 'maybach');
 });
 
-test('comfort uses absolute cross-class anchors and front/rear occupants equally, never price or feature counts', () => {
+test('comfort uses cross-class ride and cushioning anchors with a separate heating allowance', () => {
   const a = ratedCar('A', 5, 'No heated seats. 100 hp.', 500000), b = ratedCar('B', 3, 'Heated seats. Leather seats. Navigation. 900 hp.', 100);
   a.enrichment.modelSpecs.dimensionRatings.frontSeatComfort.rating = 3;
   const result = rankDecisionMode([a, b], 'comfort');
   assert.equal(result.best[0].values.seatComfort, 4);
-  assert.equal(result.best[0].score, 95); // 35 + 30 + 20 + 10
+  assert.equal(result.best[0].score, 85); // ride 35 + quietness 30 + cushioning 20 + reported no heating 0
   assert.equal(result.evidenceCoverage, 1);
   assert.equal(result.provisional, false);
   assert.deepEqual(result.criteria.map(c => c.weight), [35, 30, 25, 10]);
@@ -52,27 +52,27 @@ test('reviewed refinement fallback survives provider failures and stays limited 
   assert.equal(result.provisional, true);
 });
 
-test('missing rear-seat evidence excludes the seating dimension for everyone, not a guessed average', () => {
+test('missing rear-seat cushioning uses a labeled baseline and reduces sourced coverage', () => {
   const cars = [ratedCar('A', 5), ratedCar('B', 3)];
   delete cars[0].enrichment.modelSpecs.dimensionRatings.rearSeatComfort;
   const result = rankDecisionMode(cars, 'comfort');
-  assert.equal(result.criteria.find(c => c.key === 'seatComfort').active, false);
-  assert.equal(result.evidenceCoverage, 0.75);
+  assert.equal(result.criteria.find(c => c.key === 'seatComfort').active, true);
+  assert.equal(result.evidenceCoverage, 0.775);
   assert.equal(result.provisional, true);
 });
 
-test('unsupported contenders stay unranked; empty overlap never substitutes another priority', () => {
+test('sparse comfort contenders receive provisional category estimates without switching priorities', () => {
   const a = ratedCar('A', 4), b = { legacyItemId: 'B', priceCAD: { currency: 'CAD', value: '1' } };
   const result = rankDecisionMode([a, b], 'comfort');
-  assert.equal(result.ranked[1].score, null);
+  assert.equal(result.ranked[1].score, 59);
   assert.equal(result.provisional, true);
   const c = ratedCar('C'); c.enrichment.modelSpecs.dimensionRatings = { cabinQuietness: c.enrichment.modelSpecs.dimensionRatings.cabinQuietness };
   a.enrichment.modelSpecs.dimensionRatings = { rideQuality: a.enrichment.modelSpecs.dimensionRatings.rideQuality };
-  assert.equal(rankDecisionMode([a, c], 'comfort').best.length, 0);
+  assert.ok(rankDecisionMode([a, c], 'comfort').best.length);
   const summary = decisionSummary([b], 'comfort');
   assert.equal(summary.ranking.mode.id, 'comfort');
-  assert.equal(summary.kind, 'guidance');
-  assert.match(entrySummary(summary, summary.ranking.ranked[0]).explanation, /More comparable information/);
+  assert.equal(summary.kind, 'supported');
+  assert.match(entrySummary(summary, summary.ranking.ranked[0]).explanation, /only contender/);
 });
 
 test('power-to-weight can favor a lighter car over a more powerful heavy car', () => {
@@ -176,7 +176,7 @@ test('ties and equal-factor arithmetic are stable, legacy sentiment adds no poin
   const a = ratedCar('A'), b = ratedCar('B');
   b.enrichment.modelSpecs.assessments = { comfort: { assessment: 'favourable', value: 2, insightIds: [] } };
   const result = rankDecisionMode([a, b], 'comfort');
-  assert.deepEqual(result.ranked.map(e => e.score), [60, 60]);
+  assert.deepEqual(result.ranked.map(e => e.score), [59, 59]);
   assert.equal(result.best.length, 2);
   assert.equal(result.researchWeight, 0);
   assert.ok(!result.criteria.some(c => c.key === 'research'));

@@ -1,5 +1,20 @@
 # Vehicle evidence and the school demo
 
+## Consistent experience estimates (3 November 2026)
+
+Compare overview and every decision result now show annual running costs and ride, seat cushioning, heating and cabin-noise information. Space and everyday usability are presented under Practicality. `src/vehicle-experience.js` resolves each detail independently: applicable references, model estimates, then an offline general baseline. Local results render synchronously; failed research does not clear them. Model and general-baseline results can influence rankings and are explicitly provisional. Source coverage is not an accuracy percentage.
+
+The opt-in `POST /api/model-specs` request `{ phase: "quick", domain: "experience", year, make, model, fields: [] }` uses the existing provider with an eight-second deadline and current retry rules. Its optional `modelSpecs.experience` contains `ratings`, `energy`, `heating` and `practicality`. Every estimate has configuration scope, quality/origin, rationale, assumptions and no fabricated citations. It runs independently of VIN, catalog confirmation and core-specification success. Existing request shapes retain their behavior.
+
+The resolver prefers an exact NRCan match, compatible catalog consumption (median scenario cost across unresolved configurations), an AI model estimate, and finally the offline government-data medians. `node scripts/build-experience-baselines.mjs` reproducibly regenerates the compact baseline table from bundled NRCan/EPA snapshots, grouped by powertrain, fuel, body class and decade. Catalog estimates do not select an engine or claim EPA and NRCan test cycles are identical. EPA EV consumption is converted from kWh/100 mi to kWh/100 km; plug-in hybrids retain separate fuel and electricity estimates. MPGe never becomes litres of gasoline.
+
+Compare and Decide share editable scenario defaults: 15,000 km/year, $1.70 CAD/L for liquid fuels, $0.15 CAD/kWh and 50% electric driving for plug-in hybrids. Costs use consumption/100 times annual distance times the applicable price. Plug-ins split distance by the electric-driving share. These are user assumptions, not current pump or utility prices. Invalid edits retain the last valid calculation with an inline error. Insurance and other ownership costs remain outside this estimate.
+
+The existing allowlisted model cache also saves experience estimates and sourced review dimensions by configuration. Experience estimates are fresh for seven days and may recover as visibly stale during outages for up to 30 days; source-backed dimensions use 30/90 days. Reading or saving reused cache entries does not renew expiry. Existing clear-generation and cancellation safeguards apply. No listing URL, ID, VIN, price, mileage or seller information is persisted.
+
+Live checks returned all seven ratings, consumption, heating guidance and practicality notes for a 2018 Civic and 2023 Tesla Model 3 in approximately three seconds each. This is an availability check, not a measured accuracy claim. Browser inspection was blocked by the Windows URL-verification policy; rendered UI and responsive source checks provide the available UI verification. The historical sections below describe earlier stricter behavior and are superseded by this section for experience estimates.
+
+
 The app uses live seller data, optional original VIN records, reviewed factory power references, bundled Canadian fuel reference data, a reviewed model-opinion library, and optional Gemini web research for missing typical-model specifications. Sourced single values can enter comparisons and category rankings; ranges and optional equipment remain context. Comfort uses cited refinement dimensions rather than equipment counts.
 
 ## Automatic specifications (31 October 2026)

@@ -1,19 +1,18 @@
 import { extractVehicleSpecs, specEvidenceLabel, researchVinMismatches } from './vehicle-specs.js';
 import { resolveMileage, numeric } from './vehicle-data.js';
-import { dimensionRatingsForCar, researchGuidance } from './model-research.js';
-import { annualFuelCost } from './fuel-data.js';
+import { researchGuidance } from './model-research.js';
+import { resolveVehicleExperience, experienceLabel } from './vehicle-experience.js';
 import { CONFIG_FIELDS, sameConfigurationValue, approximateScopeMatches } from '../shared/model-specs.js';
 
-export const COMFORT_WEIGHTS = { rideQuality: 35, cabinQuietness: 30, seatComfort: 25, passengerSpace: 10 };
-export const DIMENSION_LABELS = { rideQuality: 'Ride quality', cabinQuietness: 'Cabin quietness', seatComfort: 'Seat comfort · front and rear', passengerSpace: 'Passenger space · front and rear', frontSeatComfort: 'Front-seat comfort', rearSeatComfort: 'Rear-seat comfort', frontPassengerSpace: 'Front passenger space', rearPassengerSpace: 'Rear passenger space', cargoSpace: 'Usable cargo space' };
+export const COMFORT_WEIGHTS = { rideQuality: 35, cabinQuietness: 30, seatComfort: 25, seatHeating: 10 };
+export const DIMENSION_LABELS = { rideQuality: 'Ride quality', cabinQuietness: 'Cabin quietness', seatComfort: 'Seat cushioning', seatHeating: 'Seat heating', passengerSpace: 'Passenger space · front and rear', frontSeatComfort: 'Front-seat cushioning', rearSeatComfort: 'Rear-seat cushioning', frontPassengerSpace: 'Front passenger space', rearPassengerSpace: 'Rear passenger space', cargoSpace: 'Usable cargo space' };
 const round = n => Math.round(n * 100) / 100;
 const known = value => typeof value === 'number' && Number.isFinite(value);
-const averagePair = (a, b) => known(a) && known(b) ? (a + b) / 2 : null;
 const criterion = (key, label, weight, extra = {}) => ({ key, label, weight, ...extra });
 
-// Same factors and normalization for every eligible contender. Unknowns are never
-// zeroes; a car with no category evidence remains unranked, rather than winning
-// on a different priority. Nested coverage retains missing original weight.
+// Same factors and normalization for every eligible contender. The resolver fills
+// experience gaps before scoring; other unknowns are excluded rather than zeroed.
+// Nested coverage keeps estimates separate from sourced experience information.
 function scoreGroup(records, definitions, eligible) {
   const contenders = records.filter(eligible);
   const intendedWeight = definitions.reduce((sum, c) => sum + c.weight, 0);
@@ -50,7 +49,7 @@ export function rankCapabilities(cars, mode, year, scenario, detectWarnings) {
   if (cars.length > 4) throw new RangeError('Compare at most four cars.');
   const records = cars.map(car => {
     const { specs } = extractVehicleSpecs(car);
-    const ratings = dimensionRatingsForCar(car);
+    const experience = resolveVehicleExperience(car, scenario), ratings = experience.ratings;
     const mileage = resolveMileage(car);
     const identityMismatch = researchVinMismatches(car).length > 0 || CONFIG_FIELDS.some(key => specs[key]?.status === 'conflict');
     const values = {
@@ -60,21 +59,25 @@ export function rankCapabilities(cars, mode, year, scenario, detectWarnings) {
       power: specs.horsepower.value, torque: specs.torque.value, powerToWeight: supportedPowerToWeight(specs),
       seats: specs.seats.value == null || !Number.isFinite(scenario.minSeats) || scenario.minSeats < 1 ? null : Number(specs.seats.value >= scenario.minSeats),
       body: !scenario.bodyType || specs.bodyType.value == null ? null : Number(specs.bodyType.value === scenario.bodyType),
-      fuel: annualFuelCost(car.enrichment?.fuel, scenario),
+      fuel: experience.energy.annualCost,
       ...Object.fromEntries(Object.entries(ratings).map(([key, rating]) => [key, rating.rating])),
     };
-    values.seatComfort = averagePair(values.frontSeatComfort, values.rearSeatComfort);
-    values.passengerSpace = averagePair(values.frontPassengerSpace, values.rearPassengerSpace);
+    values.seatComfort = experience.seatComfort;
+    values.passengerSpace = experience.passengerSpace;
     const labels = { price: 'Seller-reported asking price', age: specEvidenceLabel(specs.year), mileage: mileage.assumedUnit ? 'Seller reading · kilometres assumed' : 'Seller-reported mileage', fuel: 'NRCan configuration reference + your scenario', seats: specEvidenceLabel(specs.seats), body: specEvidenceLabel(specs.bodyType), power: specEvidenceLabel(specs.horsepower), torque: specEvidenceLabel(specs.torque), powerToWeight: `Derived hp/tonne · ${specEvidenceLabel(specs.horsepower)} + ${specEvidenceLabel(specs.curbWeightKg)}` };
     const evidence = { power: specs.horsepower.evidence, torque: specs.torque.evidence, powerToWeight: [...specs.horsepower.evidence, ...specs.curbWeightKg.evidence] };
-    for (const key of ['rideQuality', 'cabinQuietness', 'cargoSpace', 'seatComfort', 'passengerSpace']) {
-      labels[key] = 'Cited professional review · cross-class 0–5 rubric';
+    const coverage = { fuel: experience.energy.quality === 'estimated' || experience.energy.stale ? 0 : 1 };
+    labels.fuel = `${experienceLabel(experience.energy)} + your scenario`;
+    for (const key of ['rideQuality', 'cabinQuietness', 'cargoSpace', 'seatComfort', 'seatHeating', 'passengerSpace']) {
+      const parts = (key === 'seatComfort' ? [ratings.frontSeatComfort, ratings.rearSeatComfort] : key === 'passengerSpace' ? [ratings.frontPassengerSpace, ratings.rearPassengerSpace] : [ratings[key]]).filter(Boolean);
+      labels[key] = [...new Set(parts.map(experienceLabel))].join(' + ');
+      coverage[key] = parts.filter(r => r.quality !== 'estimated' && !r.stale).length / parts.length;
       evidence[key] = key === 'seatComfort' ? [...(ratings.frontSeatComfort?.evidence || []), ...(ratings.rearSeatComfort?.evidence || [])]
         : key === 'passengerSpace' ? [...(ratings.frontPassengerSpace?.evidence || []), ...(ratings.rearPassengerSpace?.evidence || [])] : ratings[key]?.evidence || [];
     }
     const warnings = detectWarnings(car);
     const reviewRequired = identityMismatch || warnings.some(w => w.label !== 'VIN/listing mismatch');
-    return { car, specs, ratings, identityMismatch, reviewRequired, warnings, values, labels, evidence, coverage: {} };
+    return { car, specs, ratings, experience, identityMismatch, reviewRequired, warnings, values, labels, evidence, coverage };
   });
   const valid = r => !r.identityMismatch;
   const comfortDefinitions = Object.entries(COMFORT_WEIGHTS).map(([key, weight]) => criterion(key, DIMENSION_LABELS[key], weight, { absolute: true, scale: 20, higherBetter: true }));
@@ -102,8 +105,6 @@ export function rankCapabilities(cars, mode, year, scenario, detectWarnings) {
     records[index].evidence[key] = entry.breakdown.flatMap(f => f.evidence);
   }
   const capability = scoreGroup(records, [criterion('comfort', 'Comfort capability', 40, { absolute: true }), criterion('performance', 'Performance capability', 35, { absolute: true }), criterion('practical', 'Practicality capability', 25, { absolute: true })], r => valid(r) && ['comfort', 'performance', 'practical'].some(key => known(r.values[key])));
-  const sameFuel = records.length && records.every(r => r.car.enrichment?.fuel?.status === 'matched' && r.car.enrichment.fuel.fuel === records[0].car.enrichment.fuel.fuel);
-  if (!sameFuel) for (const r of records) r.values.fuel = null;
   const affordability = scoreGroup(records, [criterion('price', 'Purchase price', 80), criterion('fuel', 'Annual fuel cost (scenario)', 20)], r => valid(r) && known(r.values.price));
   for (const [index, record] of records.entries()) {
     record.values.capability = capability.entries[index].score;
@@ -127,13 +128,15 @@ export function rankCapabilities(cars, mode, year, scenario, detectWarnings) {
   const approximate = spec => spec?.stale || ['typical', 'estimated'].includes(spec?.quality);
   const approximatePerformance = r => performance.criteria.some(c => c.active && (c.key === 'powerToWeight' ? approximate(r.specs.horsepower) || approximate(r.specs.curbWeightKg) : approximate(r.specs[({ power: 'horsepower', torque: 'torque', acceleration: accelerationMetric })[c.key]])));
   const approximatePractical = r => practical.criteria.some(c => c.active && approximate(r.specs[({ seats: 'seats', body: 'bodyType' })[c.key]]));
-  const usesApproximation = records.some(r => mode.id === 'performance' ? approximatePerformance(r) : mode.id === 'practical' ? approximatePractical(r) : ['value', 'balanced'].includes(mode.id) && capability.criteria.some(c => c.active && (c.key === 'performance' ? approximatePerformance(r) : c.key === 'practical' && approximatePractical(r))));
+  const approximateComfort = r => ['rideQuality', 'cabinQuietness', 'seatComfort', 'seatHeating'].some(key => r.coverage[key] < 1);
+  const approximateSpace = r => ['passengerSpace', 'cargoSpace'].some(key => r.coverage[key] < 1);
+  const usesApproximation = records.some(r => mode.id === 'performance' ? approximatePerformance(r) : mode.id === 'comfort' ? approximateComfort(r) : mode.id === 'cost' ? r.coverage.fuel < 1 : mode.id === 'practical' ? approximatePractical(r) || approximateSpace(r) : ['value', 'balanced'].includes(mode.id) && (approximateComfort(r) || approximatePerformance(r) || approximatePractical(r) || approximateSpace(r) || mode.id === 'balanced' && r.coverage.fuel < 1));
   return { ranked, criteria: result.criteria, totalWeight: result.totalWeight, best, mode, scenario, research, commonFeatures: [], researchWeight: 0,
     evidenceCoverage: result.coverage, usesApproximation, provisional: usesApproximation || result.coverage < 0.8 || ranked.some(e => e.score == null) || cars.length < 2,
     accelerationMetric: accelerationMetric || null, performanceStrategy: accelerationMetric ? 'acceleration' : ratioComparable ? 'power-to-weight' : 'power-and-torque',
     componentScores: { comfort, performance, practical, capability, affordability },
     basis: result.totalWeight ? 'supported-specs' : research.some(e => e.guidance.claims.length) ? 'model-research-only' : 'insufficient',
-    limitation: mode.id === 'comfort' ? 'Ride 35%, quietness 30%, seat comfort 25%, passenger space 10%. Front and rear occupants count equally within seating and space. Cited review assessments describe the model, not current condition.'
+    limitation: mode.id === 'comfort' ? 'Ride 35%, quietness 30%, seat cushioning 25%, heating 10%. Front and rear cushioning count equally when rear seats exist. Model estimates and general baselines fill research gaps; confirm comfort and equipment on this car. Passenger and cargo space belong to Practicality.'
       : mode.id === 'performance' ? 'Acceleration and power capability, not track handling. Same acceleration metric and measurement method only. Power-to-weight uses compatible curb weight; original ratings do not measure this used car’s current output. Proxy-based results are provisional.'
         : mode.id === 'value' ? 'Capability 50%, asking price 35%, age 10%, mileage 5%. Capability combines Comfort 40%, Performance 35% and Practicality 25%. A preference score, not a market valuation.'
           : mode.id === 'balanced' ? 'Capability 75%, affordability 15%, age 5%, mileage 5%. Affordability uses price and comparable fuel scenarios. Capability combines Comfort 40%, Performance 35% and Practicality 25%.'

@@ -27,10 +27,17 @@ function researchConfiguration(car) {
 export const modelResearchRequest = car => researchConfiguration(car).input;
 export const modelResearchBlockReason = car => researchConfiguration(car).reason;
 
+export function experienceResearchRequest(car) {
+  if (car.demo || researchVinMismatches(car).length) return null;
+  const { specs } = extractVehicleSpecs({ ...car, enrichment: { ...car.enrichment, modelSpecs: undefined, catalog: undefined } });
+  if (['year', 'make', 'model'].some(key => specs[key].value == null)) return null;
+  return modelSpecsInput({ ...Object.fromEntries(CONFIG_FIELDS.filter(key => specs[key]?.value != null).map(key => [key, specs[key].value])), fields: [] });
+}
+
 let dailyCooldownUntil = 0;
 export async function loadModelSpecs(car, { fetcher = fetch, signal, phase = 'research', domain, requestedFields, cache, scheduler = specScheduler } = {}) {
   if (car.demo) return { status: 'skipped', fields: {}, reason: 'Fictional demo uses bundled references; no AI request is made.' };
-  const { input, reason } = researchConfiguration(car);
+  const { input, reason } = domain === 'experience' ? { input: experienceResearchRequest(car), reason: 'Add year, make and model to improve general estimates.' } : researchConfiguration(car);
   if (!input) return { status: 'insufficient', fields: {}, reason };
   if (phase === 'quick') input.fields = input.fields.filter(key => CORE_SPEC_FIELDS.includes(key));
   if (requestedFields) input.fields = input.fields.filter(key => requestedFields.includes(key));
@@ -47,6 +54,7 @@ export async function loadModelSpecs(car, { fetcher = fetch, signal, phase = 're
       for (let attempt = 0; ; attempt++) {
         try {
           requestSignal.throwIfAborted();
+          if (Date.now() < dailyCooldownUntil) return { status: 'quota', fields: {}, dailyQuota: true, reason: 'Daily AI quota is unavailable. Existing estimates remain available.' };
           const response = await fetcher('/api/model-specs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...input, phase, ...(domain ? { domain } : {}) }), signal: requestSignal, cache: 'no-store' });
           if (!response.ok) {
             const error = new Error('Specification endpoint unavailable');

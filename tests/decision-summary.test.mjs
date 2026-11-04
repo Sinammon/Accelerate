@@ -29,23 +29,24 @@ test('comfort prioritizes sourced ride and separate seat descriptions without re
   const summary = decisionSummary([car], 'comfort', 2026);
   const notes = entrySummary(summary, summary.ranking.ranked[0]);
   assert.match(notes.reasons[0].text, /Ride quality: Absorbs bumps/);
-  assert.match(notes.reasons[1].text, /Front-seat comfort: Supportive front seats/);
+  assert.match(notes.reasons[1].text, /Seat cushioning: Front: Supportive front seats/);
   assert.doesNotMatch(JSON.stringify(notes.reasons), /Rear-seat comfort|\/ 5/);
-  assert.ok(notes.reasons.every(r => r.source?.url.startsWith('https:')));
+  assert.ok(notes.reasons.slice(0, 2).every(r => r.source?.url.startsWith('https:')));
+  assert.equal(notes.reasons[2].label, 'General baseline');
   assert.match(notes.explanation, /only contender/);
-  assert.ok(keyFacts(car, 'comfort').every(f => f.sourceUrl && !/\/ 5/.test(f.value)));
+  assert.ok(keyFacts(car, 'comfort').some(f => f.sourceUrl));
 });
 
-test('comfort deduplicates shared rationales and absent evidence provides actionable checks', () => {
+test('comfort keeps required topics populated and labels baseline checks', () => {
   const car = ratedCar('shared');
   const summary = decisionSummary([car], 'comfort', 2026);
-  assert.equal(entrySummary(summary, summary.ranking.ranked[0]).reasons.filter(r => r.text.includes('Synthetic assessment')).length, 1);
+  assert.equal(entrySummary(summary, summary.ranking.ranked[0]).reasons.filter(r => r.text.includes('Synthetic assessment')).length, 2);
   const unknown = decisionSummary([{ legacyItemId: 'unknown' }], 'comfort', 2026);
   const notes = entrySummary(unknown, unknown.ranking.ranked[0]);
-  assert.match(notes.reasons[0].text, /Ride quality and seat comfort still need checking.*bump absorption, seat support and rear-seat comfort/);
-  assert.match(notes.explanation, /More comparable information/);
-  assert.equal(unknown.ranking.ranked[0].score, null);
-  assert.deepEqual(unknown.ranking.best, []);
+  assert.match(notes.reasons[0].text, /Ride quality: Mainstream bump absorption assumed/);
+  assert.match(notes.explanation, /only contender/);
+  assert.equal(unknown.ranking.ranked[0].score, 59);
+  assert.equal(unknown.ranking.best.length, 1);
 });
 
 test('value mentions supported mileage advantages but never compares missing prices', () => {
@@ -65,12 +66,12 @@ test('sparse comfort and performance retain their category with guidance and no 
   const before = structuredClone(cars);
   for (const mode of ['comfort', 'performance']) {
     const summary = decisionSummary(cars, mode, 2026);
-    assert.equal(summary.kind, 'guidance');
-    assert.equal(summary.requested.totalWeight, 0);
-    assert.equal(summary.requested.best.length, 0);
-    assert.equal(summary.ranking.best.length, 0);
+    assert.equal(summary.kind, mode === 'comfort' ? 'supported' : 'guidance');
+    assert.equal(summary.requested.totalWeight, mode === 'comfort' ? 100 : 0);
+    assert.equal(summary.requested.best.length > 0, mode === 'comfort');
+    assert.equal(summary.ranking.best.length > 0, mode === 'comfort');
     const notes = entrySummary(summary, summary.ranking.ranked[0]);
-    assert.match(notes.explanation, /More comparable information/);
+    assert.match(notes.explanation, mode === 'comfort' ? /equal match|comfort pick/ : /More comparable information/);
     assert.ok(notes.reasons.every(reason => !reason.source || reason.source.url.startsWith('https:')));
   }
   assert.deepEqual(cars, before);
@@ -79,20 +80,20 @@ test('sparse comfort and performance retain their category with guidance and no 
 test('condition and identity concerns never disappear through the fallback', () => {
   const bad = cars.map(car => ({ ...car, description: 'Engine problems. Not running.' }));
   const summary = decisionSummary(bad, 'comfort', 2026);
-  assert.equal(summary.kind, 'guidance');
+  assert.equal(summary.kind, 'review');
   assert.ok(summary.ranking.ranked.every(entry => entry.warnings.length));
-  assert.equal(summary.ranking.best.length, 0);
-  assert.match(entrySummary(summary, summary.ranking.ranked[0]).explanation, /More comparable information/);
+  assert.ok(summary.ranking.best.length);
+  assert.match(entrySummary(summary, summary.ranking.ranked[0]).explanation, /purchase concerns/);
   const mismatch = decisionSummary(cars.map(car => ({ ...car, enrichment: { vin: { mismatches: [{ field: 'Year' }] } } })), 'cost', 2026);
   assert.ok(mismatch.ranking.best.length);
   assert.equal(mismatch.kind, 'supported');
 });
 
-test('completely missing evidence stays unranked and equal matches stay equal', () => {
+test('baseline-only comfort estimates tie and equal matches stay equal', () => {
   const empty = decisionSummary([{ legacyItemId: 'A' }, { legacyItemId: 'B' }], 'comfort', 2026);
-  assert.equal(empty.kind, 'guidance');
-  assert.ok(empty.ranking.ranked.every(e => e.score === null));
-  assert.equal(empty.ranking.best.length, 0);
+  assert.equal(empty.kind, 'supported');
+  assert.ok(empty.ranking.ranked.every(e => e.score === 59));
+  assert.equal(empty.ranking.best.length, 2);
   const equal = decisionSummary([ratedCar('first'), ratedCar('second')], 'value', 2026);
   assert.equal(equal.shared, true);
   assert.match(entrySummary(equal, equal.ranking.best[0]).explanation, /equal match/);

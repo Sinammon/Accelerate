@@ -2,7 +2,7 @@ import { validateVin } from '../shared/vin.js';
 import { extractVehicleSpecs, vinMismatches } from './vehicle-specs.js';
 import { loadFuelYear, matchFuelEconomy, NRCAN_SOURCE } from './fuel-data.js';
 import { matchFactorySpecs } from './factory-specs.js';
-import { loadModelSpecs, modelResearchRequest } from './model-specs.js';
+import { loadModelSpecs, modelResearchRequest, experienceResearchRequest } from './model-specs.js';
 import { bundledModelSpecs } from './bundled-model-specs.js';
 import { modelSpecCache } from './spec-cache.js';
 import { CORE_SPEC_FIELDS, mergeResearch } from '../shared/model-specs.js';
@@ -17,12 +17,27 @@ export async function enrichVehicle(car, { fetcher = fetch, signal, researchSign
   const catalogSpecs = () => extractVehicleSpecs({ ...car, enrichment: { ...state, modelSpecs: undefined, catalog: undefined } }).specs;
   const factory = () => { try { return factoryMatcher({ ...car, enrichment: { ...state, modelSpecs: undefined } }); } catch { return { status: 'unavailable', reason: 'Factory references are unavailable.' }; } };
   state.factorySpecs = factory();
-  let input = modelResearchRequest(candidate());
+  let input = modelResearchRequest(candidate()) || experienceResearchRequest(candidate());
   let saved = input && !car.demo ? cache.read(input) : null;
   state.modelSpecs = mergeResearch(mergeResearch(car.enrichment?.modelSpecs || {}, bundledModelSpecs(candidate())), saved || {});
   if (input && !car.demo) cache.save(input, state.modelSpecs);
   const emit = domain => { if (!signal?.aborted && (domain !== 'specs' || !specsSignal?.aborted)) onUpdate?.({ ...state }, { domain }); };
   emit('initial');
+
+  // Model-level experience does not depend on VIN, catalog selection or core
+  // specification success. Local estimates are already rendered synchronously.
+  const experienceTask = (async () => {
+    const experienceInput = experienceResearchRequest(candidate());
+    if (!experienceInput) return;
+    const prior = cache.read(experienceInput);
+    state.modelSpecs = mergeResearch(state.modelSpecs, prior || {});
+    const seats = extractVehicleSpecs(candidate()).specs.seats.value;
+    const expectedRatings = seats === 1 || seats === 2 ? 5 : 7;
+    if (!force && prior?.experience?.energy && prior.experience.heating && Object.keys(prior.experience.ratings || {}).length >= expectedRatings) { emit('specs'); return; }
+    const result = await loadModelSpecs(candidate(), { fetcher, signal: specsSignal, phase: 'quick', domain: 'experience', cache: phaseCache, scheduler });
+    state.modelSpecs = mergeResearch(state.modelSpecs, result);
+    emit('specs');
+  })().catch(() => {});
 
   const initialYear = extractVehicleSpecs(candidate()).specs.year.value;
   const initialFuelRows = loadFuelYear(initialYear, { fetcher, signal }).catch(() => null);
@@ -115,7 +130,7 @@ export async function enrichVehicle(car, { fetcher = fetch, signal, researchSign
     state.modelSpecs = mergeResearch(state.modelSpecs, { status: 'unavailable', fields: {}, reason: 'Specification lookup could not finish. Existing values remain available.' });
     state.specsStatus = 'failed'; emit('specs');
   });
-  await Promise.all([vinTask, specsTask, catalogTask]);
+  await Promise.all([vinTask, specsTask, catalogTask, experienceTask]);
   signal?.throwIfAborted();
   state.status = 'complete';
   return { ...state };

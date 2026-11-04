@@ -119,6 +119,19 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(document.querySelectorAll('.feature-evidence > div').length, 1, 'only explicit amenity claims appear');
     await tab('specifications');
     assert.equal(document.querySelector('.mode-grid'), null);
+    await tab('overview');
+    assert.match(document.querySelector('table').textContent, /Annual fuel \/ charging cost.*CAD\/year.*Ride quality.*Seat cushioning.*Seat heating.*Cabin quietness.*Practicality/s);
+    await change('.scenario-panel input', '10000');
+    const validCost = document.querySelector('.experience-cost strong').textContent;
+    await change('.scenario-panel input', '');
+    assert.equal(document.querySelector('.scenario-panel input').getAttribute('aria-invalid'), 'true');
+    assert.equal(document.querySelector('.experience-cost strong').textContent, validCost);
+    await go('decide');
+    assert.equal(document.querySelector('.scenario-panel input').value, '10000', 'last valid assumptions persist across routes');
+    assert.match(document.querySelector('.vehicle-experience').textContent, /CAD\/year.*Ride quality.*Seat cushioning.*Seat heating.*Cabin quietness/s);
+    await change('.scenario-panel input', '15000');
+    await go('compare');
+    await tab('specifications');
     await add('222222222222', 20000, 2021, 'No heated seats.', null);
     assert.equal(document.querySelectorAll('.car-card').length, 2);
     assert.match(document.querySelector('tbody').textContent, /km \(assumed\)/);
@@ -144,14 +157,14 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(document.querySelector('.more-mode-options'), null);
     assert.doesNotMatch(document.querySelector('.decision-page').textContent, /Balanced|More priorities/);
     assert.equal(document.querySelectorAll('.mode-card').length, 5);
-    assert.equal(document.querySelector('.best-match'), null, 'unresearched listings have no category winner');
+    assert.ok(document.querySelector('.best-match'), 'unresearched listings receive provisional estimates');
     await act(async () => document.querySelector('.mode-card[data-mode="practical"]').click());
-    assert.equal(document.querySelector('.best-match'), null);
+    assert.ok(document.querySelector('.best-match'));
     await act(async () => document.querySelector('.mode-card[data-mode="performance"]').click());
     assert.equal(document.querySelector('.decision-match').dataset.basis, 'guidance');
     assert.match(document.querySelector('.decision-reason').textContent, /More comparable information/);
     await act(async () => document.querySelector('.mode-card[data-mode="comfort"]').click());
-    assert.equal(document.querySelector('.best-match'), null, 'unresearched listings have no category winner');
+    assert.ok(document.querySelector('.best-match'), 'unresearched listings receive provisional estimates');
     await go('compare');
     await add('333333333333', 100, 2025, 'Engine problems. Coolant leak. Not running.');
     assert.match(document.querySelector('.car-card:last-child .warning-details').textContent, /Engine concern.*Coolant leak/s, 'condition warnings remain visible while evidence sections are collapsed');
@@ -169,8 +182,8 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     await change('.scenario-panel input', '15000');
     await act(async () => document.querySelector('.mode-card[data-mode="value"]').click());
     assert.equal(document.querySelector('.ownership-costs'), null, 'ownership context appears under Affordability');
-    assert.equal(document.querySelector('.best-match'), null);
-    assert.equal(document.querySelector('.ranking-row:last-child h3').textContent, '2025 Example 3');
+    assert.ok(document.querySelector('.best-match'));
+    assert.equal(document.querySelector('.ranking-row:first-child h3').textContent, '2025 Example 3');
     await act(async () => document.querySelector('.mode-card[data-mode="practical"]').click());
     assert.equal(document.querySelector('.mode-card[data-mode="practical"]').getAttribute('aria-pressed'), 'true');
     await go('compare');
@@ -231,6 +244,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
       if (String(input).startsWith('/data/')) return Response.json({ columns: [], rows: [] });
       if (input === '/api/model-specs') {
         const config = JSON.parse(init.body);
+        if (config.domain === 'experience') return Response.json({ modelSpecs: { status: 'partial', fields: {} } });
         if (config.phase === 'research') return Response.json(savedResponses.get(config.model) || { modelSpecs: { status: 'unavailable', fields: {} } });
         return new Promise(resolve => researchPending.push({ signal: init.signal, resolve: async response => {
           const data = await response.json(); if (!init.signal.aborted) savedResponses.set(config.model, data); resolve(Response.json(data));
@@ -377,7 +391,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.match(document.querySelector('.decision-research').textContent, /retrieved manufacturer information/);
     assert.match(document.querySelector('.score-basis').textContent, /Preference score/);
     await act(async () => document.querySelector('.mode-card[data-mode="comfort"]').click());
-    assert.equal(document.querySelector('.decision-match').dataset.basis, 'guidance');
+    assert.equal(document.querySelector('.decision-match').dataset.basis, 'supported');
     assert.match(document.querySelector('.decision-research').textContent, /sound isolation/);
     await act(async () => document.querySelector('.mode-card[data-mode="value"]').click());
     assert.ok(document.querySelector('.best-match'));
@@ -427,7 +441,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     await act(async () => document.querySelector('[data-mode="comfort"]').click());
     assert.equal(document.querySelector('.best-match h2').textContent, '2025 Mercedes-Benz S-Class');
     assert.match(document.querySelector('.evidence-coverage').textContent, /Tentative recommendation/);
-    assert.match(document.querySelector('.ranking-row .capability-details').textContent, /Ride quality.*5 \/ 5.*Cabin quietness.*Seat comfort.*Passenger space/s);
+    assert.match(document.querySelector('.ranking-row .capability-details').textContent, /Ride quality.*5 \/ 5.*Cabin quietness.*Seat cushioning.*Seat heating/s);
     assert.ok(document.querySelector('.capability-details a[href="https://www.caranddriver.com/mercedes-maybach/s580-s680-2025"]'));
     assert.ok(document.querySelector('.mode-grid [data-mode="performance"]'));
     await act(async () => document.querySelector('[data-mode="value"]').click());
@@ -446,7 +460,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     await pressTabKey('specifications', 'Home');
     assert.equal(document.activeElement.id, 'compare-tab-overview');
     assert.ok(document.querySelector('#compare-panel-overview:not([hidden])'));
-    assert.ok(document.querySelector('.table-scroll tbody').children.length <= 5, 'overview stays focused');
+    assert.ok(document.querySelector('.table-scroll tbody').children.length <= 12, 'overview contains the required costs, comfort and practicality topics without full technical specifications');
     await pressTabKey('overview', 'ArrowRight');
     assert.equal(document.activeElement.id, 'compare-tab-specifications');
     await pressTabKey('specifications', 'End');
@@ -509,7 +523,8 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     };
     await change('#listing-url', 'https://www.ebay.ca/itm/999999999999');
     await submit();
-    assert.equal(detailRequests.length, 0, 'ambiguous engines cannot silently trigger a base-engine estimate');
+    assert.equal(detailRequests.length, 1, 'ambiguous engines allow model-level experience without selecting a base engine');
+    assert.equal(detailRequests[0].domain, 'experience');
     await act(async () => document.querySelector('.car-card .research-control button').click());
     assert.equal(document.querySelector('.vehicle-details-editor').open, true);
     await act(async () => {
@@ -523,8 +538,9 @@ test('three-page journey preserves imports, supports all modes, removes and repl
       await new Promise(resolve => setTimeout(resolve, 20));
     });
     assert.equal(detailImports, 1);
-    assert.equal(detailRequests[0].displacement, 1.5);
-    assert.equal(detailRequests[0].transmission, 'CVT');
+    const confirmedRequest = detailRequests.slice(1).find(request => request.displacement === 1.5);
+    assert.ok(confirmedRequest, 'confirmed configuration reaches subsequent lookups');
+    assert.equal(confirmedRequest.transmission, 'CVT');
     assert.match(document.querySelector('.evidence-specs').textContent, /192.*User-entered/s);
     assert.match(document.querySelector('.evidence-specs').textContent, /Original imported evidence.*190 hp/s);
     await go('decide');
@@ -613,7 +629,7 @@ test('main cards explain value and comfort while calculations stay in disclosure
       const dom = new JSDOM(renderToStaticMarkup(React.createElement(Dashboard, { cars: [car, ratedCar('peer', 2, undefined, 25000)], mode })));
       const doc = dom.window.document;
       const card = doc.querySelector('.decision-match');
-      assert.doesNotMatch(card.textContent, /Supported capability|Unranked|\/ 100|\/ 5|% evidence coverage/);
+      assert.doesNotMatch(card.textContent, /Supported capability|Unranked|\/ 100|% evidence coverage/);
       assert.match(card.textContent, /Smooth bump absorption/);
       assert.ok(card.querySelector('a[href="https://reviews.example.test/fixture"]'));
       if (mode === 'value') assert.match(card.textContent, /\$15,000 CAD.*lowest asking price/);
@@ -625,9 +641,9 @@ test('main cards explain value and comfort while calculations stay in disclosure
     }
     const dom = new JSDOM(renderToStaticMarkup(React.createElement(Dashboard, { cars: [{ legacyItemId: 'unknown', description: 'Engine problems.' }], mode: 'comfort' })));
     const card = dom.window.document.querySelector('.decision-match');
-    assert.match(card.textContent, /What we know so far/);
-    assert.match(card.textContent, /Ride quality and seat comfort still need checking/);
-    assert.match(card.textContent, /bump absorption, seat support and rear-seat comfort/);
+    assert.match(card.textContent, /Review before choosing/);
+    assert.match(card.textContent, /Ride quality.*Mainstream bump absorption assumed/s);
+    assert.match(card.textContent, /Seat cushioning.*Seat heating/s);
     assert.match(card.textContent, /Engine concern/);
     assert.doesNotMatch(card.textContent, /Unranked|Unscored|Best category fit/);
     dom.window.close();

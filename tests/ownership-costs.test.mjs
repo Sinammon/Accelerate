@@ -18,7 +18,8 @@ test('ownership context distinguishes fuel scenarios, personal quotes and unavai
     const cards = page.window.document.querySelectorAll('.ownership-vehicles > li');
     assert.match(cards[0].textContent, /\$1,530 CAD\/year.*\$128 CAD\/month average/s);
     assert.match(page.window.document.querySelector('.ownership-scenario').textContent, /\$1\.70 CAD\/L/);
-    assert.match(cards[1].textContent, /Estimate unavailable/);
+    assert.match(cards[1].textContent, /General baseline/);
+    assert.match(cards[1].textContent, /CAD\/year/);
     assert.doesNotMatch(cards[1].textContent, /\$0 CAD/);
     for (const card of cards) assert.match(card.textContent, /Personal quote needed.*No premium has been estimated/s);
     assert.match(page.window.document.querySelector('.ownership-scope').textContent, /does not establish the cheapest car to own/);
@@ -28,7 +29,7 @@ test('ownership context distinguishes fuel scenarios, personal quotes and unavai
     for (const invalid of [{ ...scenario, annualKm: 0 }, { ...scenario, pricePerLitre: NaN }, { ...scenario, annualKm: Number.MAX_VALUE, pricePerLitre: 10 }]) {
       const page = render(invalid);
       assert.doesNotMatch(page.window.document.body.textContent, /Infinity|NaN|\$0 CAD/);
-      assert.equal(page.window.document.querySelectorAll('.ownership-facts dd')[1].textContent, 'Estimate unavailable');
+      assert.equal(page.window.document.querySelectorAll('.ownership-facts dd')[1].textContent, 'Check driving and price assumptions');
       page.window.close();
     }
     assert.deepEqual({ car, missing, scenario }, before);

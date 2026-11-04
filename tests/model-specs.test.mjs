@@ -149,7 +149,7 @@ test('legacy broad sentiment remains readable but cannot add numerical ranking p
   assert.equal(result.best.length, 2);
   assert.ok(result.research.every(entry => entry.guidance.claims.length));
   assert.ok(result.ranked.every(entry => !entry.breakdown.some(f => f.key === 'research')));
-  assert.equal(rankDecisionMode(cars, 'comfort').best.length, 0);
+  assert.equal(rankDecisionMode(cars, 'comfort').best.length, 2, 'equal baselines tie; sentiment still adds no points');
 });
 
 test('failed sources, irrelevant scopes, unsupported money and invalid assessment references are excluded', () => {
@@ -208,7 +208,8 @@ test('ranges and optional features are context, standard equipment and single va
   const performance = rankDecisionMode(cars, 'performance');
   assert.equal(performance.best[0].car.legacyItemId, 'A');
   assert.match(performance.best[0].breakdown[0].evidenceLabel, /Factory reference/);
-  assert.equal(rankDecisionMode(cars, 'comfort').best.length, 0, 'standard amenities alone do not establish ride comfort');
+  assert.equal(rankDecisionMode(cars, 'comfort').best[0].car.legacyItemId, 'A');
+  assert.ok(rankDecisionMode(cars, 'comfort').ranked.every(entry => entry.values.rideQuality === 3), 'heating does not change estimated ride quality');
   assert.equal(rankDecisionMode([cars[0], modelCar('B', ranges)], 'performance').ranked[1].score, null);
 });
 

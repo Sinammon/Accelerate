@@ -55,15 +55,15 @@ test('profiles require exact identity and appropriate body/variant scope', () =>
   assert.equal(researchForCar({ ...noSpecs(civic), enrichment: { vin: { status: 'decoded', fields: { year: '2018', make: 'Honda', model: 'Civic', bodyType: 'Sedan' } } } }).status, 'matched');
 });
 
-test('sparse listings still receive useful mode-specific research without invented scores or equipment', () => {
+test('sparse listings still receive useful mode-specific research with labeled comfort baselines and unchanged equipment', () => {
   const sparse = [noSpecs(civic), noSpecs(mazda)];
   const before = structuredClone(sparse);
   for (const mode of ['comfort', 'performance']) {
     const result = rankDecisionMode(sparse, mode, 2026);
-    assert.equal(result.basis, 'model-research-only');
-    assert.equal(result.totalWeight, 0);
-    assert.equal(result.best.length, 0);
-    assert.ok(result.ranked.every(e => e.score === null));
+    assert.equal(result.basis, mode === 'comfort' ? 'supported-specs' : 'model-research-only');
+    assert.equal(result.totalWeight, mode === 'comfort' ? 100 : 0);
+    assert.equal(result.best.length > 0, mode === 'comfort');
+    assert.ok(result.ranked.every(e => mode === 'comfort' ? Number.isFinite(e.score) : e.score === null));
     assert.equal(result.research.length, 2);
     assert.ok(result.research.every(e => e.guidance.claims.length));
     assert.ok(result.research.flatMap(e => e.guidance.claims).every(c => c.category === mode));

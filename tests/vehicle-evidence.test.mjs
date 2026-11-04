@@ -246,7 +246,7 @@ test('enrichment gracefully handles missing VIN, API outages and static-data fai
   const result = await enrichVehicle(car, { fetcher: async url => { calls.push(url); return Response.json(data); } });
   assert.equal(result.vin.status, 'missing');
   assert.equal(result.fuel.status, 'matched');
-  assert.equal(calls.filter(url => url === '/api/model-specs').length, 3);
+  assert.equal(calls.filter(url => url === '/api/model-specs').length, 4);
   assert.ok(calls.includes('/data/fuel/2018.json'));
   assert.deepEqual(car, before);
   const outage = await enrichVehicle({ ...car, vin }, { fetcher: async () => new Response('Unavailable', { status: 503 }) });
@@ -295,26 +295,26 @@ test('performance ranks explicit power or torque, not engine size or drivetrain 
   assert.equal(rankDecisionMode([listing({ description: '200 Nm' }), listing({ legacyItemId: 'B', description: '300 Nm' })], 'performance').best[0].car.legacyItemId, 'B');
 });
 
-test('comfort compares only shared documented feature categories while unknown equipment is never absent', () => {
+test('comfort includes baseline refinement and known heating while unknown equipment remains unresolved', () => {
   const a = listing({ legacyItemId: 'A', description: 'Heated seats. Backup camera.' });
   const b = listing({ legacyItemId: 'B', description: 'Leather seats. Navigation. Climate control.' });
   const result = rankDecisionMode([a, b], 'comfort');
-  assert.equal(result.best.length, 0, 'disjoint feature lists cannot establish comfort superiority');
-  assert.equal(result.ranked[0].score, null);
-  assert.equal(result.ranked[1].score, null);
+  assert.equal(result.best[0].car.legacyItemId, 'A');
+  assert.equal(result.ranked[0].values.rideQuality, result.ranked[1].values.rideQuality);
+  assert.equal(result.provisional, true);
   assert.match(result.limitation, /Ride 35%/);
   assert.equal(extractVehicleSpecs(b).features['Heated seats'].value, null);
-  assert.equal(rankDecisionMode([a, listing()], 'comfort').best.length, 0);
+  assert.equal(rankDecisionMode([a, listing()], 'comfort').best.length, 1);
 });
 
-test('fuel, seating and body factors are comparable and transparent; missing evidence disables each for everyone', () => {
+test('fuel estimates and mixed grades remain comparable alongside seating and body factors', () => {
   const a = listing({ legacyItemId: 'A', enrichment: { fuel: { ...matchFuelEconomy(listing(), [row]) } } });
   const b = listing({ legacyItemId: 'B', enrichment: { fuel: { ...matchFuelEconomy(listing(), [{ ...row, combined: 6 }]) } } });
   const result = rankDecisionMode([a, b], 'cost');
   assert.equal(result.best[0].car.legacyItemId, 'B');
   assert.equal(result.best[0].score, 60); // equal price: 50 × .8; best fuel: 100 × .2
-  assert.equal(rankDecisionMode([a, listing({ legacyItemId: 'B' })], 'cost').criteria.find(c => c.key === 'fuel').active, false);
-  assert.equal(rankDecisionMode([a, { ...b, enrichment: { fuel: { ...b.enrichment.fuel, fuel: 'Z' } } }], 'cost').criteria.find(c => c.key === 'fuel').active, false);
+  assert.equal(rankDecisionMode([a, listing({ legacyItemId: 'B' })], 'cost').criteria.find(c => c.key === 'fuel').active, true);
+  assert.equal(rankDecisionMode([a, { ...b, enrichment: { fuel: { ...b.enrichment.fuel, fuel: 'Z' } } }], 'cost').criteria.find(c => c.key === 'fuel').active, true);
   const suv = listing({ legacyItemId: 'SUV', itemSpecifics: aspects({ 'Body type': 'SUV', Seats: '7' }) });
   const practical = rankDecisionMode([listing(), suv], 'practical', 2026, { annualKm: 15000, pricePerLitre: 1.7, minSeats: 7, bodyType: 'SUV' });
   assert.equal(practical.best[0].car.legacyItemId, 'SUV');

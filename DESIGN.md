@@ -268,3 +268,8 @@ The landing preview demonstrates Import → Compare → Decide using fictional e
 ### Affordability ownership context
 
 Affordability places a compact Beyond the asking price section after the result. Each contender shows the seller asking price, an available NRCan fuel scenario with an explicitly labeled monthly average, and the need for a personal insurance quote. Other ownership factors and model-specific sourced notes use native disclosures. Keep the score's purchase-price/fuel scope visible, and distinguish missing costs from zero. The fuel-adjustment action opens the existing assumptions and focuses its first input, respecting reduced motion. Use existing text, border and spacing roles; the vehicle list collapses to one column below 768px.
+
+
+### Consistent running costs and comfort
+
+Compare overview and each decision result expose annual fuel/charging costs and four comfort topics: ride, cushioning, heating and quietness. Space and daily usability appear under Practicality. Reuse existing surfaces, type and responsive pair selection. Show Model estimate, Catalog estimate or General baseline beside inferred information; assumptions and sources use a native disclosure. Estimates remain visible during lookup failures and may contribute to provisional rankings. The shared assumption controls cover annual distance, liquid fuel price, electricity price and plug-in electric share, retaining the last valid calculation after an invalid edit. The decision comfort summary uses two columns on desktop and one below 768px. Browser visual inspection remains unverified after the Windows URL-verification block.

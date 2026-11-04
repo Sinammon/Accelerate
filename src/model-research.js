@@ -1,7 +1,6 @@
 import { MODEL_PROFILES } from './model-profiles.js';
 import { extractVehicleSpecs, normalized } from './vehicle-specs.js';
 import { CONFIG_FIELDS, MODEL_FIELDS, modelSpecsInput, validatedResearch } from '../shared/model-specs.js';
-import { modelResearchBlockReason } from './model-specs.js';
 import { reviewedDimensionsForCar } from './reviewed-dimensions.js';
 
 export const RESEARCH_CATEGORIES = { strengths: 'Strengths', issues: 'Documented issues to investigate', comfort: 'Comfort', practicality: 'Practicality', performance: 'Performance' };
@@ -38,7 +37,7 @@ export function researchForCar(car, profiles = MODEL_PROFILES) {
 const modeCategories = { value: ['strengths', 'issues'], cost: ['issues'], comfort: ['comfort'], practical: ['practicality'], performance: ['performance'], balanced: ['strengths', 'comfort', 'practicality', 'performance'] };
 export function liveResearchForCar(car) {
   const none = { fields: {}, insights: [], assessments: {} };
-  if (!['matched', 'partial'].includes(car.enrichment?.modelSpecs?.status) || modelResearchBlockReason(car)) return none;
+  if (!['matched', 'partial'].includes(car.enrichment?.modelSpecs?.status)) return none;
   const { specs } = extractVehicleSpecs({ ...car, enrichment: { ...car.enrichment, modelSpecs: undefined } });
   if (CONFIG_FIELDS.some(key => specs[key]?.status === 'conflict')) return none;
   const input = modelSpecsInput({ ...Object.fromEntries(CONFIG_FIELDS.filter(key => specs[key]?.value != null).map(key => [key, specs[key].value])), fields: MODEL_FIELDS });

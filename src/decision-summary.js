@@ -1,7 +1,8 @@
 import { rankDecisionMode } from './decision-engine.js';
 import { extractVehicleSpecs, specEvidenceLabel } from './vehicle-specs.js';
 import { DIMENSION_LABELS, supportedPowerToWeight } from './capability-scoring.js';
-import { dimensionRatingsForCar, researchGuidance } from './model-research.js';
+import { researchGuidance } from './model-research.js';
+import { resolveVehicleExperience, experienceLabel } from './vehicle-experience.js';
 import { resolveMileage, numeric } from './vehicle-data.js';
 
 export const PRIMARY_MODES = [
@@ -23,26 +24,14 @@ export function decisionSummary(cars, mode, year, scenario) {
 
 // Describe evidence, rather than translating a score into an unsupported claim.
 function comfortReasons(car) {
-  const ratings = dimensionRatingsForCar(car);
-  const reasons = ['rideQuality', 'frontSeatComfort', 'rearSeatComfort', 'cabinQuietness', 'frontPassengerSpace', 'rearPassengerSpace']
-    .flatMap(key => {
-      const rating = ratings[key];
-      const evidence = rating?.evidence?.find(e => e.url);
-      return rating?.rationale && evidence ? [{ text: `${DIMENSION_LABELS[key]}: ${rating.rationale}`, topic: DIMENSION_LABELS[key], label: 'Professional review · model context', source: { url: evidence.url, publisher: evidence.source } }] : [];
-    });
-  const claims = rankFreeComfortClaims(car);
-  const seen = new Set();
-  return [...reasons, ...claims].filter(reason => {
-    const text = reason.text.replace(/^[^:]+: /, '').trim();
-    if (seen.has(text)) return false;
-    seen.add(text);
-    return true;
+  const experience = resolveVehicleExperience(car);
+  return ['rideQuality', 'seatComfort', 'seatHeating', 'cabinQuietness'].map(key => {
+    const record = key === 'seatComfort' ? experience.ratings.frontSeatComfort : experience.ratings[key];
+    const evidence = record.evidence?.find(e => e.url);
+    const rationale = key === 'seatComfort' && experience.hasRearSeats ? `Front: ${record.rationale} Rear: ${experience.ratings.rearSeatComfort.rationale}` : record.rationale;
+    const parts = key === 'seatComfort' ? [record, experience.ratings.rearSeatComfort].filter(Boolean) : [record];
+    return { text: `${DIMENSION_LABELS[key]}: ${rationale}`, topic: DIMENSION_LABELS[key], label: [...new Set(parts.map(experienceLabel))].join(' + '), source: evidence ? { url: evidence.url, publisher: evidence.source } : undefined };
   });
-}
-
-function rankFreeComfortClaims(car) {
-  return researchGuidance(car, 'comfort').claims.filter(c => !c.contextOnly)
-    .map(c => ({ text: c.text, label: 'Professional review · model context', source: c.sources[0] }));
 }
 
 function valueReasons(summary, entry) {
@@ -84,7 +73,7 @@ export function entrySummary(summary, entry) {
       : factor.key === 'torque' ? `${number(factor.value)} Nm`
       : factor.key === 'powerToWeight' ? `${number(factor.value)} hp/tonne`
       : factor.key === 'acceleration' ? `${factor.value} s`
-      : ['rideQuality', 'cabinQuietness', 'seatComfort', 'passengerSpace', 'cargoSpace'].includes(factor.key) ? `${factor.value} / 5`
+      : ['rideQuality', 'cabinQuietness', 'seatComfort', 'seatHeating', 'passengerSpace', 'cargoSpace'].includes(factor.key) ? `${factor.value} / 5`
       : ['capability', 'affordability', 'comfort', 'performance', 'practical'].includes(factor.key) ? `${factor.value.toFixed(1)} / 100`
       : factor.key === 'fuel' ? `${money(factor.value)}/year` : factor.key === 'seats' || factor.key === 'body' ? factor.value ? 'Yes' : 'No' : `${factor.value} years`;
     const evidence = factor.evidence?.find(e => e.url);
@@ -94,6 +83,7 @@ export function entrySummary(summary, entry) {
   let reasons = factors.slice(0, 3).map(describe);
   if (!entry.identityMismatch && requested.mode.id === 'value') reasons = valueReasons(summary, entry);
   if (!entry.identityMismatch && requested.mode.id === 'comfort') reasons = comfortReasons(entry.car).slice(0, 3);
+  if (!entry.identityMismatch && requested.mode.id === 'practical') reasons = [{ text: `Passenger room: ${entry.experience.passengerSpace.toFixed(1)} / 5. ${entry.experience.ratings.frontPassengerSpace.rationale}`, label: experienceLabel(entry.experience.ratings.frontPassengerSpace) }, { text: `Usable cargo space: ${entry.experience.ratings.cargoSpace.rationale}`, label: experienceLabel(entry.experience.ratings.cargoSpace) }, { text: entry.experience.practicality.rationale, label: experienceLabel(entry.experience.practicality) }];
   if (!reasons.length) reasons = (model?.claims || []).filter(c => !c.contextOnly).slice(0, 2).map(c => ({ text: c.text, label: 'Model context | not a comparative score', source: c.sources[0] }));
   if (!entry.identityMismatch && ['value', 'comfort'].includes(requested.mode.id) && !comfortReasons(entry.car).length) {
     const check = { text: 'Ride quality and seat comfort still need checking. On a test drive, check bump absorption, seat support and rear-seat comfort.', label: 'What to check in this car' };
@@ -101,7 +91,7 @@ export function entrySummary(summary, entry) {
   }
   const weaker = [...entry.breakdown].sort((a, b) => a.points - b.points)[0];
   const modelDrawback = model?.claims.find(c => c.tone === 'caution' && !c.contextOnly);
-  const tradeoff = modelDrawback?.text || (weaker && weaker.points < 50 ? `${weaker.key === 'capability' ? 'The documented comfort, performance and practicality' : weaker.label} ${weaker.key === 'capability' ? 'are less competitive' : 'is a weaker factor'} in this comparison.` : summary.provisional ? 'Some category evidence is missing. This result may change as research completes.' : 'Model assessments do not establish the condition of this used car; confirm on a test drive.');
+  const tradeoff = modelDrawback?.text || (weaker && weaker.points < 50 ? `${weaker.key === 'capability' ? 'The documented comfort, performance and practicality' : weaker.label} ${weaker.key === 'capability' ? 'are less competitive' : 'is a weaker factor'} in this comparison.` : summary.provisional ? 'Includes estimates or incomplete evidence. This result may improve as research completes.' : 'Model assessments do not establish the condition of this used car; confirm on a test drive.');
   const active = ranking.criteria.filter(c => c.active).map(c => c.label.toLowerCase());
   const explanation = entry.identityMismatch ? 'Resolve conflicting identity or configuration details before ranking this car.'
     : entry.score == null ? 'Here is what we know so far. More comparable information is needed to choose between the cars.'

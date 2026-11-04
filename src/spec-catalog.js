@@ -20,7 +20,8 @@ export function epaCandidate(row, version) {
       transmissionSpeeds: transmission === 'CVT' ? null : positive(row.trany.match(/(\d+)(?:-spd| speed)/i)?.[1] || row.trany.match(/\((?:AM-)?[AS]?(\d+)\)/i)?.[1]),
       drivetrain: drive(row.drive), fuelType: fuel(row.fuelType1), bodyType: namedBody(row.model) || body(row.VClass) }),
     energy: electric && positive(row.combE) ? { value: Number(row.combE) / 1.609344, unit: 'kWh/100 km', originalValue: Number(row.combE), originalUnit: 'kWh/100 mi' }
-      : !electric && ['Gasoline', 'Diesel', 'Ethanol / flex fuel'].includes(fuel(row.fuelType1)) && positive(row.comb08) ? { value: 235.214583 / Number(row.comb08), unit: 'L/100 km', originalValue: Number(row.comb08), originalUnit: 'US mpg', secondaryFuel: row.fuelType2 || null } : null,
+      : !electric && ['Gasoline', 'Diesel', 'Ethanol / flex fuel'].includes(fuel(row.fuelType1)) && positive(row.comb08) ? { value: 235.214583 / Number(row.comb08), unit: 'L/100 km', originalValue: Number(row.comb08), originalUnit: 'US mpg', secondaryFuel: row.fuelType2 || null,
+        ...(/plug-in/i.test(row.atvType) && positive(row.combE) ? { kwhPer100Km: Number(row.combE) / 1.609344 } : {}) } : null,
     source: { publisher: 'US EPA / DOE', url: `https://www.fueleconomy.gov/feg/Find.do?action=sbs&id=${row.id}`, quote: `${row.year} ${row.make} ${row.model}; ${row.displ || 'electric'} L; ${row.cylinders || 'no'} cylinders; ${row.trany}; ${row.drive}; ${row.fuelType1}; ${row.atvType || 'conventional'}` } };
 }
 

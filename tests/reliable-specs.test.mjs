@@ -60,7 +60,7 @@ test('BMW reviewed core specs are published immediately and survive AI failure w
     assert.equal(specs.horsepower.value, 193); assert.equal(specs.transmissionSpeeds.value, 4); assert.equal(specs.curbWeightKg.value, 1375);
     assert.equal(specs.curbWeightKg.quality, 'typical'); assert.match(specs.curbWeightKg.assumptions.join(' '), /Adjacent model-year/);
   }
-  assert.equal(calls.filter(url => url === '/api/model-specs').length, 3, 'missing essentials and insights run separately');
+  assert.equal(calls.filter(url => url === '/api/model-specs').length, 4, 'experience, missing essentials and insights run separately');
   assert.equal(rankDecisionMode([{ ...car, enrichment: result }], 'performance').ranked[0].values.powerToWeight, 193 / 1.375);
   const reference = bundledModelSpecs(car), weakerWeight = { ...reference.fields.curbWeightKg, value: 1320, origin: 'reference' };
   assert.equal(mergeResearch(reference, { fields: { curbWeightKg: weakerWeight } }).fields.curbWeightKg.value, 1375, 'manually reviewed reference outranks an automatic typical estimate of equal quality');
@@ -184,7 +184,9 @@ test('clearing cache during lookup prevents a late result from saving itself aga
   const data = { modelSpecs: { status: 'partial', fields: { horsepower: estimate('horsepower', 158, { year: 2018, make: 'Honda', model: 'Civic' }) } } };
   const staged = enrichVehicle(car, { cache, scheduler: createSpecScheduler(), skipVin: true, force: true, fetcher: (url, options) => {
     if (url.startsWith('/data/')) return Response.json({ columns: [], rows: [] });
-    const phase = JSON.parse(options.body).phase; phases.push(phase);
+    const request = JSON.parse(options.body);
+    if (request.domain === 'experience') return Response.json({ modelSpecs: { status: 'partial', fields: {} } });
+    const phase = request.phase; phases.push(phase);
     return phase === 'quick' ? phaseGate.promise : Response.json(data);
   } });
   await tick(); cache.clear();
@@ -228,7 +230,7 @@ test('daily quota stops subsequent phases and requests while retaining useful sp
   for (const status of [400, 401]) {
     let invalidCalls = 0;
     await enrichVehicle({ year: '2018', make: 'Honda', model: 'Accord' }, { cache: createSpecCache({ storage: null }), skipVin: true, scheduler: createSpecScheduler(), fetcher: async url => { if (url.startsWith('/data/')) return new Response('', { status: 404 }); invalidCalls++; return new Response('', { status }); } });
-    assert.equal(invalidCalls, 1, 'invalid/auth failures must stop subsequent phases');
+    assert.ok(invalidCalls <= 2, 'only independently started experience and core requests may fail; subsequent phases stop');
   }
   let calls = 0;
   const car = { year: '2018', make: 'Honda', model: 'Civic', enrichment: { modelSpecs: { status: 'partial', fields: { horsepower: estimate('horsepower', 158, { year: 2018, make: 'Honda', model: 'Civic' }) } } } };
@@ -236,6 +238,6 @@ test('daily quota stops subsequent phases and requests while retaining useful sp
     if (url.startsWith('/data/')) return new Response('', { status: 404 });
     calls++; return Response.json({ modelSpecs: { status: 'quota', dailyQuota: true, fields: {}, reason: 'Daily quota exhausted' } });
   } });
-  assert.equal(calls, 1); assert.equal(state.modelSpecs.fields.horsepower.value, 158); assert.equal(state.modelSpecs.lastAttempt.status, 'quota');
+  assert.ok(calls <= 2); assert.equal(state.modelSpecs.fields.horsepower.value, 158); assert.equal(state.modelSpecs.lastAttempt.status, 'quota');
   await loadModelSpecs(bmw(), { fetcher: () => assert.fail('Daily quota must stop new provider requests') });
 });

@@ -61,7 +61,7 @@ export const MODEL_PROFILES = [
     ],
     claims: [
       { id: 'corolla-strength', category: 'strengths', tone: 'positive', text: 'The review highlights generous rear-passenger legroom.', sourceIds: ['corolla-review'] },
-      { id: 'corolla-comfort', category: 'comfort', tone: 'mixed', text: 'Rear-seat space is a strength; the review criticizes cabin materials and the harsher ride of sport trims.', sourceIds: ['corolla-review'] },
+      { id: 'corolla-comfort', category: 'comfort', tone: 'mixed', text: 'The review criticizes cabin materials and the harsher ride of sport trims.', sourceIds: ['corolla-review'] },
       { id: 'corolla-practical', category: 'practicality', tone: 'positive', text: 'The tested sedan has a useful trunk shape, with a trade-off between rear legroom and trunk volume.', sourceIds: ['corolla-review'] },
       { id: 'corolla-performance', category: 'performance', tone: 'caution', text: 'The reviewer finds acceleration and driver engagement limited; sport trims change handling and ride.', sourceIds: ['corolla-review'] },
       { id: 'corolla-issues', category: 'issues', tone: 'caution', text: 'Toyota Canada recalled certain 2011–2019 Corollas for an airbag-control-unit concern. Ask a dealer to check VIN applicability and completion; this is not an open-recall result for this vehicle.', sourceIds: ['corolla-recall'] },
@@ -77,7 +77,7 @@ export const MODEL_PROFILES = [
     ],
     claims: [
       { id: 'mazda-strength', category: 'strengths', tone: 'positive', text: 'CAA-Quebec praises steering, the driving position and interior finish.', sourceIds: ['mazda-review'] },
-      { id: 'mazda-comfort', category: 'comfort', tone: 'mixed', text: 'CAA-Quebec finds the suspension well judged but criticizes sound isolation and restrictive rear seating.', sourceIds: ['mazda-review'] },
+      { id: 'mazda-comfort', category: 'comfort', tone: 'mixed', text: 'CAA-Quebec finds the suspension well judged but criticizes sound isolation.', sourceIds: ['mazda-review'] },
       { id: 'mazda-practical', category: 'practicality', tone: 'caution', text: 'Rear legroom is limited. The tested hatchback struggles with bulky cargo under its sloping rear window.', sourceIds: ['mazda-review'] },
       { id: 'mazda-performance', category: 'performance', tone: 'positive', text: 'The road test highlights agile handling and precise steering. This does not establish an acceleration time for this vehicle.', sourceIds: ['mazda-review'] },
       { id: 'mazda-issues', category: 'issues', tone: 'caution', text: 'Mazda documented a wiper relay failure affecting certain 2016–2018 Mazda3s in the US. Test wipers and check Canadian campaign applicability and completion with a dealer.', sourceIds: ['mazda-wipers'] },

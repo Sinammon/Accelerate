@@ -1,5 +1,6 @@
 import React from 'react';
-import { annualFuelCost } from './fuel-data.js';
+import { resolveVehicleExperience } from './vehicle-experience.js';
+import { ExperienceCost, annualCostLabel } from './VehicleExperience.jsx';
 import { priceDisplay, vehicleName } from './vehicle-data.js';
 import { ResearchClaim } from './ModelResearch.jsx';
 
@@ -19,16 +20,17 @@ export default function OwnershipCosts({ cars, scenario, research = [], onAdjust
     <h2 id="ownership-costs-heading">Beyond the asking price</h2>
     <p>A cheaper listing can cost more to own. Get an insurance quote and budget for servicing, repairs, taxes, financing and resale value before choosing.</p>
     <p className="ownership-scope"><strong>What this score includes:</strong> asking price and comparable fuel scenarios. Insurance and the other ownership costs below are not estimated or included in the ranking, so this result does not establish the cheapest car to own.</p>
-    <div className="ownership-scenario"><p>{validScenario ? `Fuel estimates use ${scenario.annualKm.toLocaleString('en-CA')} km/year and $${scenario.pricePerLitre.toFixed(2)} CAD/L. The monthly figure is an annual average for fuel only.` : 'Enter annual driving from 1 to 200,000 km and a fuel price from $0.01 to $10 CAD/L to calculate a fuel scenario.'}</p>{onAdjustFuel && <button type="button" className="text-button" onClick={onAdjustFuel}>Adjust fuel assumptions</button>}</div>
+    <div className="ownership-scenario"><p>{validScenario ? `Running-cost estimates use ${scenario.annualKm.toLocaleString('en-CA')} km/year and $${scenario.pricePerLitre.toFixed(2)} CAD/L. The monthly figure is an annual average for energy only. EVs use the electricity-price assumption; plug-in hybrids also use the electric-driving share.` : 'Enter annual driving from 1 to 200,000 km and a fuel price from $0.01 to $10 CAD/L to calculate a fuel scenario.'}</p>{onAdjustFuel && <button type="button" className="text-button" onClick={onAdjustFuel}>Adjust fuel assumptions</button>}</div>
     <ul className="ownership-vehicles">{cars.map(car => {
-      const calculatedFuel = validScenario ? annualFuelCost(car.enrichment?.fuel, scenario) : null;
+      const experience = resolveVehicleExperience(car, scenario);
+      const calculatedFuel = validScenario ? experience.energy.annualCost : null;
       const fuel = Number.isFinite(calculatedFuel) ? calculatedFuel : null;
       const notes = research.find(entry => entry.car === car)?.guidance?.claims || [];
       return <li key={car.legacyItemId}>
         <h3>{vehicleName(car)}</h3>
         <dl className="ownership-facts">
           <div><dt>Asking price · seller</dt><dd>{priceDisplay(car)}</dd></div>
-          <div><dt>Fuel only · scenario estimate</dt><dd>{fuel == null ? 'Estimate unavailable' : <>{money(fuel)}/year<small>{money(fuel / 12)}/month average · NRCan reference</small></>}</dd></div>
+          <div><dt>{annualCostLabel(experience.energy)}</dt><dd>{fuel == null ? 'Check driving and price assumptions' : <><ExperienceCost experience={experience} scenario={scenario} /><small>{money(fuel / 12)}/month average · energy only</small></>}</dd></div>
           <div><dt>Insurance</dt><dd>Personal quote needed<small>No premium has been estimated.</small></dd></div>
         </dl>
         {fuel == null && <p className="ownership-note">Fuel or charging costs still need supported consumption data and valid driving and price assumptions. Unavailable costs are not zero.</p>}
