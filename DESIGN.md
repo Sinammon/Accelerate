@@ -219,7 +219,7 @@ components:
 
 Accelerate places a clear car-shopping task inside a cinematic electric-blue and deep-navy world. Soft light fields give the public landing page atmosphere; open editorial spacing and thin dividers keep its facts legible. Light mode carries that atmosphere into a bright lower body, while dark mode continues into navy surfaces with the same content and structure.
 
-The slanted Accelerate wordmark remains the identity. Self-hosted Satoshi supplies the landing page's geometric headlines, selective sans-serif italics and interface text; Clash Grotesk supplies the wordmark, source names and established workspace headings. Working controls, contained vehicle photography and explicit evidence labels carry the experience into Compare and Decide.
+The slanted Accelerate wordmark remains the identity. Self-hosted Satoshi supplies the geometric page headlines, selective sans-serif italics and interface text; Clash Grotesk supplies the wordmark, source names and workspace section headings. Working controls, contained vehicle photography and explicit evidence labels carry the experience into Compare and Decide.
 
 **Key Characteristics:**
 
@@ -282,7 +282,7 @@ The legacy `--support-purple` name is a compatibility alias to blue, not authori
 
 **Display and Body Font:** self-hosted Satoshi, sans-serif fallback. **Identity and Workspace Font:** self-hosted Clash Grotesk, sans-serif fallback. Retain `/fonts/fonts.css`, the font files and licenses. Tailwind exports `--font-sans` and `--font-display`; `--font-body` aliases the former.
 
-Landing type is geometric and open, with normal-weight italic emphasis. The bundled variable fonts contain normal faces; `.hero-italic` deliberately enables style synthesis locally. Workspace headings retain Clash Grotesk.
+Page headline type is geometric and open, with normal-weight italic emphasis. The bundled variable fonts contain normal faces; `.hero-italic` deliberately enables style synthesis locally. Workspace section and evidence headings retain Clash Grotesk.
 
 ### Hierarchy
 
@@ -358,7 +358,17 @@ Composer chips use neutral/navy tonal fills, full rounding and 12px text; the no
 
 ### Cards / Containers
 
-Vehicle cards, summaries and decision matches use flat semantic surfaces, fine boundaries and 16px corners. Card bodies retain 20px padding; decision copy uses 24px base / 40px at `sm`. Selected priorities use readable dark blue/white in light mode and bright blue/navy in dark mode. Keep contained photographs and serious warnings visible.
+Vehicle cards, summaries and decision matches use flat semantic surfaces, fine boundaries and 16px corners. Compact comparison cards retain their dense spacing; decision copy uses 24px base / 40px at `sm`. Selected priorities use readable dark blue/white in light mode and bright blue/navy in dark mode. Keep contained photographs and serious warnings visible.
+
+### Compare and Decide color treatment
+
+`WorkspaceHeading` gives both working pages a compact navy field with soft electric-blue corner lighting, Satoshi page titles and pale-blue italic emphasis. This is the dashboard atmosphere scaled to a task heading, with the existing comparison management and back action intact. On small screens actions wrap; the options menu aligns right and stays within the page gutters.
+
+Blue identifies active workflow steps, selected comparison tabs and the selected decision priority. A check icon and `aria-pressed` also identify the priority. Comparison tables use pale-blue column headings, a quieter label column and an emphasized annual-cost or asking-price row. Vehicle prices and detail actions share the same blue ramp. All source and estimate labels stay visible.
+
+The recommendation pairs a contained vehicle photograph with a navy explanation area in both themes. Light-blue text, source links and explicit purchase warnings remain readable on that field. Key facts use a calm blue strip; annual costs, comfort and expandable assumptions continue on the theme's reading surface below. Dark mode maps those lower surfaces to navy without changing structure. The styling is in `src/workspace.css`, imported after the dashboard styles; no new color families, imagery, motion or scoring behavior are introduced.
+
+Verification for this extension: the existing 181-test suite, production build, shared-token checks and static UI detector pass. Source-level contrast checks cover the new navy panels and selected states. Browser and native preview hosts were unavailable, so rendered desktop, mobile and zoom checks remain unverified.
 
 ### Sources, metrics and working preview
 

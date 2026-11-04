@@ -10,6 +10,7 @@ import { detectWarnings } from './decision-engine.js';
 import { resolveVehicleExperience, DEFAULT_SCENARIO } from './vehicle-experience.js';
 import { ExperienceCost, ComfortDetail, PracticalitySummary, ExperienceAssumptions, COMFORT_TOPICS } from './VehicleExperience.jsx';
 import ScenarioFields from './ScenarioFields.jsx';
+import WorkspaceHeading from './WorkspaceHeading.jsx';
 
 export function vehicleImageUrl(car, index = 0) {
   const value = (car.images || [])[index];
@@ -129,7 +130,9 @@ export default function VehicleComparison({ cars, removeCar, clearCars, importFo
   }
   const decisionButton = <button type="button" className="compare-decide" onClick={() => navigate?.('decide')}>Help me decide <Icon name="arrow" size={18} /></button>;
   return <section className="comparison-section page-section">
-    <div className="section-heading"><div><h1 tabIndex={-1}>Compare Your Vehicles</h1><p className="page-intro">Start with the essentials. Explore the details when you need them.</p></div><div className="comparison-management"><span className="shortlist-count">{cars.length} of 4 cars</span>{!!cars.length && <button type="button" className="text-button add-car" disabled={cars.length >= 4} aria-expanded={adding} aria-controls="comparison-import" onClick={() => setAdding(open => !open)}>{adding ? 'Close form' : 'Add car'}<Icon name={adding ? 'close' : 'link'} size={17} /></button>}<details className="comparison-options"><summary>Comparison options</summary><div>{!!cars.length && <button type="button" className="text-button" data-action="clear-comparison" onClick={clearCars}>Clear comparison</button>}{clearSavedSpecs && <button type="button" className="text-button" data-action="clear-saved-specs" onClick={clearSavedSpecs}>Clear saved model specs</button>}<p>Listing details stay temporary. Only model references may be saved on this device.</p></div></details></div></div>
+    <WorkspaceHeading className="section-heading" title={<>Compare Your <em className="hero-italic">Vehicles</em></>} description="Start with the essentials. Explore the details when you need them.">
+      <div className="comparison-management"><span className="shortlist-count">{cars.length} of 4 cars</span>{!!cars.length && <button type="button" className="text-button add-car" disabled={cars.length >= 4} aria-expanded={adding} aria-controls="comparison-import" onClick={() => setAdding(open => !open)}>{adding ? 'Close form' : 'Add car'}<Icon name={adding ? 'close' : 'link'} size={17} /></button>}<details className="comparison-options"><summary>Comparison options</summary><div>{!!cars.length && <button type="button" className="text-button" data-action="clear-comparison" onClick={clearCars}>Clear comparison</button>}{clearSavedSpecs && <button type="button" className="text-button" data-action="clear-saved-specs" onClick={clearSavedSpecs}>Clear saved model specs</button>}<p>Listing details stay temporary. Only model references may be saved on this device.</p></div></details></div>
+    </WorkspaceHeading>
     {cars.length >= 4 && <p className="shortlist-limit">Your shortlist is full. Remove a car to add another.</p>}
     {notice && <p className="comparison-notice" role="status">{notice}</p>}
     <div id="comparison-import" ref={importRegion} className="comparison-import" hidden={!!cars.length && !adding}>{importForm}</div>

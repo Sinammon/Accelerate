@@ -6,6 +6,7 @@ import { priceDisplay, vehicleName } from './vehicle-data.js';
 import { ListingLink, VehicleImage, vehicleImageUrl } from './VehicleComparison.jsx';
 import { DecisionResearch } from './ModelResearch.jsx';
 import Icon from './Icons.jsx';
+import WorkspaceHeading from './WorkspaceHeading.jsx';
 import { DIMENSION_LABELS } from './capability-scoring.js';
 import { FIELD_LABELS, specEvidenceLabel } from './vehicle-specs.js';
 import { SpecCitations } from './VehicleEvidence.jsx';
@@ -31,7 +32,10 @@ function CapabilityComponents({ entry, result }) {
 }
 
 function ModeButton({ item, mode, setMode }) {
-  return <button type="button" className={`mode-card ${mode === item.id ? 'selected' : ''}`} data-mode={item.id} aria-pressed={mode === item.id} onClick={() => setMode(item.id)}><Icon name={item.icon || 'compare'} size={25} /><strong>{item.label || item.title}</strong></button>;
+  return <button type="button" className={`mode-card ${mode === item.id ? 'selected' : ''}`} data-mode={item.id} aria-pressed={mode === item.id} onClick={() => setMode(item.id)}>
+    <span className="mode-icon"><Icon name={mode === item.id ? 'check-circle' : item.icon || 'compare'} size={24} /></span>
+    <strong>{item.label || item.title}</strong>
+  </button>;
 }
 function ListingWarnings({ entry }) {
   return !!entry.warnings.length && <div className="warning-details" role="note"><strong>Review before choosing</strong>{entry.warnings.map((warning, index) => <p key={index}><b>{warning.label}:</b> {warning.evidence}</p>)}</div>;
@@ -75,7 +79,9 @@ export default function DecisionDashboard({ cars, mode = 'value', setMode, retry
   const result = summary.requested;
   const missing = result.criteria.filter(c => c.weight > 0 && !c.active);
   return <section className="page-section decision-page">
-    <div className="decision-heading"><div><h1 tabIndex={-1}>Let's Find Your Best Match</h1><p className="page-intro">Choose what matters most. See your match, the reasons, and the trade-off.</p></div><a className="back-link" href="#compare">Back to comparison <Icon name="arrow" size={18} /></a></div>
+    <WorkspaceHeading className="decision-heading" title={<>Let's Find Your <em className="hero-italic">Best Match</em></>} description="Choose what matters most. See your match, the reasons, and the trade-off.">
+      <a className="back-link" href="#compare">Back to comparison <Icon name="arrow" size={18} /></a>
+    </WorkspaceHeading>
     <div className="mode-grid" role="group" aria-label="Decision priority">{PRIMARY_MODES.map(item => <ModeButton key={item.id} item={item} mode={mode} setMode={setMode} />)}</div>
     <p className="mode-explanation">{result.mode.description} {mode === 'value' ? 'See what you get for the asking price, with the strengths and trade-offs explained.' : ''}</p>
     {cars.some(car => car.demo) && <p className="decision-demo-note">Fictional demo cars · Listing details are examples; linked model research is real.</p>}
