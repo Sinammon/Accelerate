@@ -14,6 +14,12 @@ Annual fuel/charging costs and comfort remain populated using references, model 
 
 For the requested development port, run `npm run dev -- --port 6006` alongside `npm run server`, then open `http://127.0.0.1:6006/dashboard`. The production rewrite covers only `/dashboard` and `/dashboard/`; API routing is preserved.
 
+## Ownership costs and salary guide
+
+At the bottom of Help Me Decide, choose **Calculate cost of ownership** to open `#ownership` with the same shortlist. Cash is the default; separate purchase and running-cost tables cover all cars, with editable estimates and source labels. Finance is optional. Cash salary guidance covers running expenses only; the purchase amount and optional savings target remain separate. Finance guidance adds loan payments while showing the down payment separately.
+
+The Ontario starting insurance figure is FSRA's June 2026 population average, not a vehicle quote. Purchase fees and maintenance/repair reserves are planning allowances. Replace them with personal quotes or estimates. Salary guidance uses an editable estimated take-home percentage and comfortable/stretched limits; it excludes household expenses. Inputs stay in browser memory across navigation and research updates and reset when the shortlist is cleared. No salary is sent to an API or stored in browser storage. Resale and depreciation are not modeled.
+
 ## Project layout
 
 - `src/`: React frontend and browser logic.

@@ -370,6 +370,16 @@ The recommendation pairs a contained vehicle photograph with a navy explanation 
 
 Verification for this extension: the existing 181-test suite, production build, shared-token checks and static UI detector pass. Source-level contrast checks cover the new navy panels and selected states. Browser and native preview hosts were unavailable, so rendered desktop, mobile and zoom checks remain unverified.
 
+### Ownership calculator
+
+`#ownership` continues Help Me Decide with the shared compact `WorkspaceHeading`, a back link and the same electric-blue/navy semantic roles, Satoshi body text and Clash Grotesk section headings. Cash is selected initially; Cash/Finance buttons expose their state with `aria-pressed`. Separate purchase and running-cost tables retain every shortlisted car. The optional purchase-savings disclosure stays separate from running totals and salary assessments.
+
+Per-car fields retain labels, CAD units, editable estimates and attribution. Insurance starts at $2,218/year, labeled as FSRA's June 2026 Ontario average rather than a vehicle quote; purchase tax links to Ontario guidance. Generic fees and maintenance reserves remain planning estimates. Automatic energy details expose their evidence, while valid shared driving edits also update Compare and Decide. Required missing or invalid amounts show incomplete results. The salary guide starts with an editable 70% take-home assumption and 15%/20% limits: cash assesses running expenses and shows separate acquisition funding; finance adds loan payments and shows the separate down payment. Inputs and drafts remain in React memory across navigation and research updates; clearing the shortlist resets the calculator.
+
+Tables use flat semantic surfaces, fine boundaries, 12px corners and highlighted totals. Each labeled, keyboard-focusable region scrolls horizontally; its cost-label column stays fixed at 180px, reducing to 136px at the 767px breakpoint. Vehicle columns remain at least 220px, or 200px on phones. Headers and highlighted amounts use the existing 18px contextual type; phone headers use 16px. Fields retain 48px minimum height. Salary results stack on phones. These are implemented responsive rules, pending rendered verification.
+
+Evidence recorded on 4 November 2026: seven ownership regression tests passed; the final full suite passed 188/188 and the production build passed (492 modules). The static detector ran once; its two 20px type advisories were corrected to the documented 18px role. Independent finish review confirmed the Decide action's missing flex layout resolved and returned **Ship for reviewed source findings**. Existing Motion directive and bundle-size advisories remain. Browser/native hosts were unavailable: no desktop, phone or 200%-zoom screenshots exist, and ownership contrast and whole-surface visual approval remain unverified. This extension adds no tokens, identity or rasters; the existing frontmatter and design sidecar remain authoritative.
+
 ### Sources, metrics and working preview
 
 Source names have explanatory notes. eBay.ca, NRCan, US EPA, NHTSA and Gemini are listing/reference/research inputs, not partnerships or endorsements. Metrics describe actual product facts, not invented performance claims.
