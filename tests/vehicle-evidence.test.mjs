@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { extractVehicleSpecs, vinMismatches } from '../src/vehicle-specs.js';
 import { validateVin, parseVinResponse, decodeVin } from '../shared/vin.js';
 import { matchFuelEconomy, annualFuelCost, loadFuelYear } from '../src/fuel-data.js';
+import { semanticColors } from '../src/data/config/colors.js';
 import { enrichVehicle } from '../src/enrichment.js';
 import { rankDecisionMode } from '../src/decision-engine.js';
 import { modelResearchRequest } from '../src/model-specs.js';
@@ -270,20 +271,25 @@ test('VIN endpoint validates input and origin, avoids eBay auth, and never cache
 
 test('image CSS preserves whole-image scaling, consistent frames and neutral letterboxing', async () => {
   const css = await readFile('src/styles.css', 'utf8');
-  const dom = new JSDOM(`<style>${css}</style><div class="car-grid"><article class="car-card"><div class="vehicle-image"><img width="1600" height="900" /></div></article><article class="car-card"><div class="vehicle-image"><img width="900" height="1600" /></div></article></div>`);
-  try {
-    const frames = dom.window.document.querySelectorAll('.vehicle-image');
-    assert.equal(dom.window.getComputedStyle(frames[0]).height, dom.window.getComputedStyle(frames[1]).height);
-    assert.notEqual(dom.window.getComputedStyle(frames[0]).backgroundColor, 'rgba(0, 0, 0, 0)');
-    for (const image of dom.window.document.querySelectorAll('img')) {
-      const style = dom.window.getComputedStyle(image);
-      assert.equal(style.objectFit, 'contain');
-      assert.equal(style.objectPosition, 'center');
-      assert.equal(style.width, '100%');
-      assert.equal(style.height, '100%');
-    }
-    assert.equal(dom.window.getComputedStyle(dom.window.document.querySelector('.car-grid')).alignItems, 'stretch');
-  } finally { dom.window.close(); }
+  // JSDOM does not resolve imported CSS variables. Bind the real theme value for
+  // this frame-layout check; compiled token declarations have separate coverage.
+  for (const colors of Object.values(semanticColors)) {
+    const themedCss = css.replaceAll('var(--photo-mat)', colors['photo-mat']);
+    const dom = new JSDOM(`<style>${themedCss}</style><div class="car-grid"><article class="car-card"><div class="vehicle-image"><img width="1600" height="900" /></div></article><article class="car-card"><div class="vehicle-image"><img width="900" height="1600" /></div></article></div>`);
+    try {
+      const frames = dom.window.document.querySelectorAll('.vehicle-image');
+      assert.equal(dom.window.getComputedStyle(frames[0]).height, dom.window.getComputedStyle(frames[1]).height);
+      assert.notEqual(dom.window.getComputedStyle(frames[0]).backgroundColor, 'rgba(0, 0, 0, 0)');
+      for (const image of dom.window.document.querySelectorAll('img')) {
+        const style = dom.window.getComputedStyle(image);
+        assert.equal(style.objectFit, 'contain');
+        assert.equal(style.objectPosition, 'center');
+        assert.equal(style.width, '100%');
+        assert.equal(style.height, '100%');
+      }
+      assert.equal(dom.window.getComputedStyle(dom.window.document.querySelector('.car-grid')).alignItems, 'stretch');
+    } finally { dom.window.close(); }
+  }
 });
 
 test('performance ranks explicit power or torque, not engine size or drivetrain names', () => {

@@ -3,7 +3,10 @@ import { readImportResponse } from './import-response.js';
 import { LazyMotion, domAnimation, m, MotionConfig, useReducedMotion } from 'motion/react';
 import DecisionDashboard from './DecisionDashboard.jsx';
 import VehicleComparison from './VehicleComparison.jsx';
-import LandingPreview from './LandingPreview.jsx';
+import Dashboard from './Dashboard.jsx';
+import ImportComposer from './ImportComposer.jsx';
+import ThemeSwitch from './ThemeSwitch.tsx';
+import { ThemeProvider } from './ThemeProvider.jsx';
 import Icon from './Icons.jsx';
 import Brand from './Brand.jsx';
 import { enrichVehicle } from './enrichment.js';
@@ -14,7 +17,7 @@ import { emptyComparisonView, reconcileComparisonView } from './comparison-view.
 import { DEFAULT_SCENARIO } from '../shared/experience.js';
 
 const route = () => ['compare', 'decide'].includes(window.location.hash.slice(1)) ? window.location.hash.slice(1) : 'import';
-export default function App() {
+function Application() {
   const reduced = useReducedMotion();
   // One owner keeps imported data in memory across all three pages.
   const [cars, setCars] = useState([]);
@@ -133,28 +136,24 @@ export default function App() {
     } catch (err) { setError(err.name === 'TimeoutError' ? 'eBay took too long to respond. Please try again.' : err instanceof TypeError ? 'Could not connect to Accelerate. Please check your connection and try again.' : err.message); }
     finally { setLoading(false); }
   }
-  const importForm = <form className="url-form" onSubmit={handleSubmit} aria-busy={loading}>
-    <label htmlFor="listing-url">{cars.length ? 'Add another car to your shortlist' : 'Your next car starts with a link'}</label>
-    <div className="input-row"><Icon name="link" size={22} /><input id="listing-url" type="url" value={url} onChange={e => setUrl(e.target.value)} placeholder="Paste an eBay.ca car link…" required maxLength={2048} disabled={loading || cars.length >= 4} aria-invalid={!!error} aria-describedby="input-note import-error" /><button disabled={loading || cars.length >= 4} type="submit">{loading && <span className="loading-spinner" aria-hidden="true" />}{loading ? 'Importing…' : cars.length >= 4 ? 'Shortlist full' : page === 'import' ? 'Import' : 'Import car'}{!loading && cars.length < 4 && <Icon name="arrow" size={18} />}</button></div>
-    <p id="input-note" className="input-note"><Icon name="check" size={14} /> No account needed <span>·</span> {cars.length ? `${cars.length}/4 cars added` : '4 cars at a time'}</p><p id="import-error" role="alert" className="error-message">{error}</p><p role="status" className="form-message">{loading ? 'Connecting to eBay and bringing in listing details…' : notice}</p>
-    {!cars.length && <div className="demo-entry"><button type="button" className="text-button" onClick={loadDemo} disabled={loading}>Try fictional demo</button>{page !== 'import' && <p>Three example cars, real sourced research. Works without eBay credentials or internet research.</p>}</div>}
-  </form>;
+  const importForm = <ImportComposer cars={cars} page={page} url={url} setUrl={setUrl} loading={loading} error={error} notice={notice} onSubmit={handleSubmit} onDemo={loadDemo} />;
   const enter = { initial: { opacity: reduced ? 1 : 0 }, animate: { opacity: 1 }, transition: { duration: reduced ? 0 : 0.18 } };
-  return <LazyMotion features={domAnimation} strict><MotionConfig reducedMotion="user"><div className={`site-shell ${page === 'import' ? 'landing-shell' : page === 'decide' ? 'decision-shell' : ''}`}>
+  return <LazyMotion features={domAnimation} strict><MotionConfig reducedMotion="user"><div className={`site-shell app-shell ${page === 'import' ? 'landing-shell' : page === 'decide' ? 'decision-shell' : ''}`}>
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); document.getElementById('main-content')?.focus(); }}>Skip to content</a>
-    <header className="site-header" onKeyDown={event => { if (event.key === 'Escape' && menuOpen) { setMenuOpen(false); menuToggle.current?.focus(); } }}><Brand /><button className="nav-menu-toggle" type="button" ref={menuToggle} aria-expanded={menuOpen} aria-controls="primary-navigation" onClick={() => setMenuOpen(open => !open)}><Icon name={menuOpen ? 'close' : 'menu'} size={22} />{menuOpen ? 'Close' : 'Menu'}</button><nav id="primary-navigation" className={menuOpen ? 'is-open' : ''} aria-label="Main navigation">{[['import', 'Import'], ['compare', 'Compare'], ['decide', 'Help Me Decide']].map(([id, label]) => <a className="nav-link" key={id} href={`#${id}`} aria-current={page === id ? 'page' : undefined} onClick={() => setMenuOpen(false)}>{label}{id === 'compare' && <span className="nav-count" aria-label={`${cars.length} cars in shortlist`}>{cars.length}</span>}</a>)}<button className="nav-button" type="button" onClick={() => { setMenuOpen(false); startImport(); }}>Import a car <Icon name="arrow" size={17} /></button></nav></header>
+    <header className="site-header" onKeyDown={event => { if (event.key === 'Escape' && menuOpen) { setMenuOpen(false); menuToggle.current?.focus(); } }}>
+      <Brand />
+      <nav id="primary-navigation" className={menuOpen ? 'is-open' : ''} aria-label="Main navigation">{[['import', 'Import'], ['compare', 'Compare'], ['decide', 'Help Me Decide']].map(([id, label]) => <a className="nav-link" key={id} href={`#${id}`} aria-current={page === id ? 'page' : undefined} onClick={() => setMenuOpen(false)}>{label}{id === 'compare' && <span className="nav-count" aria-label={`${cars.length} cars in shortlist`}>{cars.length}</span>}</a>)}</nav>
+      <div className="header-actions"><ThemeSwitch overHero={page === 'import'} /><button className="nav-demo" type="button" onClick={cars.length ? () => navigate('compare') : loadDemo} disabled={loading}>{cars.length ? 'Your shortlist' : 'Try the demo'}</button><button className="nav-button size-11 p-0 sm:h-auto sm:w-auto sm:px-4" type="button" aria-label="Import a car" onClick={() => { setMenuOpen(false); startImport(); }}><span className="hidden sm:inline">Import a car</span><Icon name="arrow" size={15} /></button><button className="nav-menu-toggle" type="button" ref={menuToggle} aria-expanded={menuOpen} aria-controls="primary-navigation" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} onClick={() => setMenuOpen(open => !open)}><Icon name={menuOpen ? 'close' : 'menu'} size={20} /></button></div>
+    </header>
     {page !== 'import' && <nav className="workflow" aria-label="Your progress">{[['import', '1', 'Import'], ['compare', '2', 'Compare'], ['decide', '3', 'Decide']].map(([id, n, label]) => <a href={`#${id}`} key={id} aria-current={page === id ? 'step' : undefined}><span>{n}</span>{label}</a>)}</nav>}
     <main id="main-content" tabIndex={-1}><m.div key={page} className="page-transition" {...enter}>
-      {page === 'import' && <>
-        <section className="landing-layout" aria-label="Find your next car">
-          <div className="landing-copy"><h1 tabIndex={-1}>Find the right car.<br /><span>Without the guesswork.</span></h1><p className="hero-intro">Your shortlist. A clearer picture. Bring your eBay.ca finds together and see which car fits what matters to you.</p>{importForm}{!!cars.length && <a className="source-link" href="#compare">Return to your comparison →</a>}<button className="how-link text-button" type="button" onClick={showSteps}>How it works <Icon name="chevron" size={16} /></button></div>
-          <div className="landing-preview"><div className="preview-intro"><h2>From a few tabs to a clear choice.</h2><p>Explore the workflow with fictional examples.</p></div><LandingPreview onStart={startImport} /></div>
-          <section id="how-it-works" className="how-section" aria-labelledby="steps-heading"><h2 id="steps-heading">Less back and forth.<br />More perspective.</h2><div className="landing-steps">{[['link', 'Import your finds', 'Paste an eBay.ca vehicle link. Keep up to four contenders together in one shortlist.'], ['compare', 'See the full picture', 'Compare asking prices, mileage and supported specifications, with sources close at hand.'], ['spark', 'Choose your priorities', 'Find your match on value, cost, comfort and more. Understand the reasons and the trade-off.']].map(([icon, title, text]) => <div key={title}><span className="landing-step-icon"><Icon name={icon} size={28} /></span><h3>{title}</h3><p>{text}</p></div>)}</div></section>
-          <section className="final-cta"><h2>Make room for a better decision.</h2><p>Start with a car you already have your eye on.</p><button type="button" onClick={startImport}>Import your first car <Icon name="arrow" size={20} /></button></section>
-        </section>
-      </>}
+      {page === 'import' && <Dashboard importForm={importForm} onStart={startImport} onShowCosts={() => { if (cars.length) { setMode('cost'); navigate('decide'); } else showSteps(); }} />}
       {page === 'compare' && <VehicleComparison scenario={scenario} setScenario={setScenario} onSaveDetails={saveVehicleDetails} cars={cars} view={comparisonView} onViewChange={setComparisonView} notice={notice} retryResearch={retryResearch} clearSavedSpecs={() => { modelSpecCache.clear(); setNotice('Saved model specifications cleared. Your current comparison is unchanged.'); }} importForm={importForm} navigate={navigate} removeCar={id => { for (const controller of enrichmentTasks.current) if (controller.vehicleId === id) controller.abort(); const remaining = cars.filter(car => car.legacyItemId !== id); setCars(remaining); setComparisonView(previous => reconcileComparisonView(previous, remaining)); setNotice('Car removed. You can import a replacement.'); }} clearCars={() => { for (const controller of enrichmentTasks.current) controller.abort(); setCars([]); setComparisonView(emptyComparisonView()); setNotice('Comparison cleared.'); }} />}
       {page === 'decide' && <DecisionDashboard scenario={scenario} setScenario={setScenario} cars={cars} retryResearch={retryResearch} mode={mode} setMode={setMode} />}
     </m.div></main><footer><Brand className="footer-brand" small /><span>A clearer road to your next car.</span><span className="prototype-label">Temporary shortlist · Refresh clears your shortlist</span></footer>
   </div></MotionConfig></LazyMotion>;
+}
+
+export default function App() {
+  return <ThemeProvider><Application /></ThemeProvider>;
 }

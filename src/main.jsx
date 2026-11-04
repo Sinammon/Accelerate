@@ -1,13 +1,9 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
-import './theme.css';
-import './styles.css';
-import './landing.css';
-import './evidence.css';
-import './homepage.css';
-import './decision.css';
-import './comparison.css';
+import './app.css';
+import { applyTheme, initialTheme } from './theme.js';
 
 // Mount our homepage inside the root div in index.html.
+applyTheme(initialTheme());
 createRoot(document.getElementById('root')).render(<App />);

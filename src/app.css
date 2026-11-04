@@ -1,0 +1,11 @@
+@import 'tailwindcss';
+@config '../tailwind.config.js';
+@custom-variant dark (&:where(.dark, .dark *));
+@import './theme.css' layer(base);
+@import './styles.css' layer(components);
+@import './landing.css' layer(components);
+@import './evidence.css' layer(components);
+@import './homepage.css' layer(components);
+@import './decision.css' layer(components);
+@import './comparison.css' layer(components);
+@import './dashboard.css' layer(components);

@@ -2,7 +2,17 @@
 
 Formerly Dilemma and Core. The app is now Accelerate; its GitHub repository and existing deployment URLs remain the same.
 
-A temporary, in-memory eBay.ca used-car comparison for a Grade 12 CS demo. React + JavaScript + CSS, Vite, and a minimal Node.js API. Import up to four cars, view real photos, compare available fields and specifications, and read seller descriptions as safe plain text.
+A temporary, in-memory eBay.ca used-car comparison for a Grade 12 CS demo. React, Tailwind CSS, Vite, and a minimal Node.js API. Import up to four cars, view real photos, compare available fields and specifications, and read seller descriptions as safe plain text.
+
+## Cinematic dashboard and themes
+
+`/dashboard` is the redesigned entry page; `/` and the existing Import, Compare and Decide hash links remain compatible. The electric-blue/navy design keeps the working listing composer, comparisons, estimates and decision logic. The menu-bar theme switch follows the system preference when unset, remembers an explicit light/dark choice and synchronizes across tabs. Changing themes does not reset the shortlist.
+
+Colors live in `src/data/config/colors.js` and are consumed by `tailwind.config.js`, including the CSS variables used by atmospheric artwork and existing workspace components. Self-hosted Satoshi and Clash Grotesk remain the fonts. See [PRODUCT.md](PRODUCT.md) and [DESIGN.md](DESIGN.md) for the current product and design contracts.
+
+Annual fuel/charging costs and comfort remain populated using references, model estimates or offline baselines. Estimates can affect provisional rankings; passenger/cargo space and daily usability belong to Practicality. The landing-page numbers describe actual app limits and capabilities, not marketing-performance claims or partnerships.
+
+For the requested development port, run `npm run dev -- --port 6006` alongside `npm run server`, then open `http://127.0.0.1:6006/dashboard`. The production rewrite covers only `/dashboard` and `/dashboard/`; API routing is preserved.
 
 ## Project layout
 

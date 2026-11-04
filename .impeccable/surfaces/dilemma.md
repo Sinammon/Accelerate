@@ -1,5 +1,7 @@
 # Accelerate redesign direction contract
 
+Historical contract: the user-approved cinematic redesign supersedes this visual direction. Use [the dashboard contract](src-dashboard-jsx.md) for current work; this record is retained as history.
+
 Pinned user-approved direction, implemented 2 November 2026. The historic filename is retained; the current product name is Accelerate. Code-led implementation; no comp artifact. The approved Aerotime reference supersedes the previous Core blue-black refinement and provisional concept seed `seed:dc39d1b894f0064b`.
 
 ## Direction contract

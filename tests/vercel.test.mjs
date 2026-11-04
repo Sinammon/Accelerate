@@ -111,5 +111,6 @@ test('health is safe and Vercel config preserves API routes without an SPA catch
   assert.equal(config.framework, 'vite');
   assert.equal(config.outputDirectory, 'dist');
   assert.ok(config.functions['api/import.js'].maxDuration >= 60);
-  assert.equal(config.rewrites, undefined); // Hash links need no SPA rewrite that might swallow /api.
+  assert.deepEqual(config.rewrites, [{ source: '/dashboard', destination: '/index.html' }, { source: '/dashboard/', destination: '/index.html' }]);
+  assert.ok(config.rewrites.every(rule => !rule.source.includes(':') && !rule.source.includes('*')), 'dashboard deep links cannot swallow API routes');
 });

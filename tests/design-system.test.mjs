@@ -1,10 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { semanticColors, primary, secondary, neutral } from '../src/data/config/colors.js';
 
-test('light indigo text and states meet normal-text contrast across workspaces and landing fields', async () => {
-  const css = await readFile('src/theme.css', 'utf8');
-  const tokens = Object.fromEntries([...css.matchAll(/--([\w-]+):\s*(#[a-f\d]{6});/gi)].map(m => [m[1], m[2]]));
+test('shared blue/navy themes keep text, controls and states readable in both modes', () => {
   const luminance = hex => {
     const channels = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(v => v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4);
     return channels.reduce((sum, v, i) => sum + v * [.2126, .7152, .0722][i], 0);
@@ -13,11 +12,16 @@ test('light indigo text and states meet normal-text contrast across workspaces a
     const [low, high] = [luminance(a), luminance(b)].sort((a, b) => a - b);
     return (high + .05) / (low + .05);
   };
-  for (const foreground of ['text', 'text-secondary', 'accent', 'success', 'warning', 'error']) {
-    for (const background of ['background', 'surface', 'surface-raised', 'surface-hover', 'hero-field', 'preview-field']) assert.ok(contrast(tokens[foreground], tokens[background]) >= 4.5, `${foreground} on ${background}`);
+  for (const [mode, tokens] of Object.entries(semanticColors)) {
+    for (const foreground of ['text', 'text-secondary', 'accent', 'success', 'warning', 'error']) {
+      for (const background of ['background', 'surface', 'surface-raised', 'surface-hover', 'hero-field', 'preview-field']) assert.ok(contrast(tokens[foreground], tokens[background]) >= 4.5, `${mode}: ${foreground} on ${background}`);
+    }
+    for (const background of ['action', 'accent']) assert.ok(contrast(tokens.ink, tokens[background]) >= 4.5, `${mode}: button ink on ${background}`);
+    for (const state of ['success', 'warning', 'error']) assert.ok(contrast(tokens[state], tokens[`${state}-surface`]) >= 4.5, `${mode}: ${state}`);
+    assert.ok(contrast(tokens.border, tokens.background) >= 3, `${mode}: input boundary`);
   }
-  for (const background of ['action', 'accent']) assert.ok(contrast(tokens.ink, tokens[background]) >= 4.5, `button ink on ${background}`);
-  for (const state of ['success', 'warning', 'error']) assert.ok(contrast(tokens[state], tokens[`${state}-surface`]) >= 4.5, state);
+  assert.ok(contrast(neutral[200], secondary[950]) >= 4.5, 'hero supporting text');
+  assert.ok(contrast(neutral.white, primary[600]) >= 4.5, 'composer submit action');
 });
 
 test('self-hosted variable fonts and their original license notices ship with the app', async () => {
