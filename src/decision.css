@@ -25,6 +25,7 @@
 .decision-reasons li { display: flex; align-items: flex-start; gap: 12px; margin: 16px 0; }
 .decision-reasons li > svg { color: var(--success); margin-top: 2px; }
 .decision-reasons li.model-context > svg { color: var(--accent); }
+.ownership-match-action { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 44px; padding: 12px 20px; margin-top: 24px; background: var(--action); color: var(--ink); text-align: center; }
 .decision-reasons small { display: block; color: var(--text-secondary); line-height: 1.6; margin-top: 4px; }
 .decision-tradeoff { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; padding-top: 20px; border-top: 1px solid var(--border); }
 .decision-tradeoff svg { color: var(--warning); }

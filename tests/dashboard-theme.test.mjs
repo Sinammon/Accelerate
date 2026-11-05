@@ -56,7 +56,10 @@ test('dashboard themes persist across the real import, comparison and decision w
       window.dispatchEvent(new window.HashChangeEvent('hashchange'));
     });
     assert.equal(document.querySelectorAll('.mode-card').length, 5);
-    assert.match(document.querySelector('.vehicle-experience').textContent, /CAD\/year.*Ride quality.*Seat cushioning.*Seat heating.*Cabin quietness/s);
+    assert.match(document.querySelector('.vehicle-experience').textContent, /CAD\/year/);
+    assert.equal(document.querySelector('.decision-match .experience-comfort'), null);
+    await act(async () => document.querySelector('[data-mode="comfort"]').click());
+    assert.match(document.querySelector('.vehicle-experience').textContent, /Ride quality.*Seat cushioning.*Seat heating.*Cabin quietness/s);
     assert.equal(document.documentElement.dataset.theme, 'dark');
     assert.equal(document.querySelectorAll('.ranking-row').length, count);
     await act(async () => {

@@ -128,7 +128,8 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(document.querySelector('.experience-cost strong').textContent, validCost);
     await go('decide');
     assert.equal(document.querySelector('.scenario-panel input').value, '10000', 'last valid assumptions persist across routes');
-    assert.match(document.querySelector('.vehicle-experience').textContent, /CAD\/year.*Ride quality.*Seat cushioning.*Seat heating.*Cabin quietness/s);
+    assert.match(document.querySelector('.vehicle-experience').textContent, /CAD\/year/);
+    assert.equal(document.querySelector('.decision-match .experience-comfort'), null, 'full comfort details are limited to Comfort');
     await change('.scenario-panel input', '15000');
     await go('compare');
     await tab('specifications');
@@ -165,6 +166,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.match(document.querySelector('.decision-reason').textContent, /More comparable information/);
     await act(async () => document.querySelector('.mode-card[data-mode="comfort"]').click());
     assert.ok(document.querySelector('.best-match'), 'unresearched listings receive provisional estimates');
+    assert.match(document.querySelector('.vehicle-experience').textContent, /Ride quality.*Seat cushioning.*Seat heating.*Cabin quietness/s);
     await go('compare');
     await add('333333333333', 100, 2025, 'Engine problems. Coolant leak. Not running.');
     assert.match(document.querySelector('.car-card:last-child .warning-details').textContent, /Engine concern.*Coolant leak/s, 'condition warnings remain visible while evidence sections are collapsed');
@@ -172,6 +174,9 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     await act(async () => document.querySelector('.mode-card[data-mode="cost"]').click());
     assert.equal(document.querySelector('.best-match h2').textContent, '2025 Example 3');
     assert.equal(document.querySelectorAll('.best-match .warning-details b').length, 3);
+    assert.equal(document.querySelector('.decision-match .experience-comfort'), null);
+    assert.match(document.querySelector('.decision-match-copy .decision-reasons').textContent, /Estimated annual fuel cost.*CAD\/year.*15,000 km\/year/s);
+    assert.equal(document.querySelector('.decision-match-copy .ownership-match-action').getAttribute('href'), '#ownership');
     assert.match(document.querySelector('.ownership-costs').textContent, /Insurance.*Personal quote needed/s);
     assert.match(document.querySelector('.ownership-scope').textContent, /not estimated or included in the ranking/);
     await act(async () => document.querySelector('.ownership-scenario button').click());

@@ -1,5 +1,16 @@
 import { CONFIG_FIELDS, MODEL_SPEC_FIELDS, modelSpecsInput, modelFieldValue } from '../shared/model-specs.js';
 
+export function validateDetailOptions({ referenceMarket, mileageOverride } = {}) {
+  if (referenceMarket && !['CA', 'US'].includes(referenceMarket)) throw new Error('Choose CA or US for the reference market.');
+  const result = { referenceMarket: referenceMarket || undefined, mileageOverride: undefined };
+  if (mileageOverride != null) {
+    const { amount, unit } = mileageOverride;
+    if (!['string', 'number'].includes(typeof amount) || String(amount).trim() === '' || !Number.isFinite(Number(amount)) || Number(amount) < 0 || Number(amount) > Number.MAX_SAFE_INTEGER || !['km', 'mi'].includes(unit)) throw new Error('Enter a nonnegative mileage and choose km or miles.');
+    result.mileageOverride = { amount: Number(amount), unit };
+  }
+  return result;
+}
+
 export function validateOverrides(raw, identity) {
   const result = {};
   for (const [field, value] of Object.entries(raw || {})) {

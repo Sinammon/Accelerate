@@ -59,6 +59,13 @@ const units = values => [...new Set(values.flat().map(unitType).filter(Boolean))
 const km = candidate => candidate.amount * (candidate.unit === 'mi' ? 1.609344 : 1);
 
 export function resolveMileage(car) {
+  const override = car.mileageOverride;
+  if (override && typeof override.amount === 'number' && Number.isFinite(override.amount) && override.amount >= 0 && override.amount <= Number.MAX_SAFE_INTEGER && ['km', 'mi'].includes(override.unit)) {
+    const original = resolveMileage({ ...car, mileageOverride: undefined });
+    return { raw: String(override.amount), originalRaw: original.originalRaw, amount: override.amount, unit: override.unit, status: 'known', source: 'Your details', userEntered: true, sellerReported: false, assumedUnit: false,
+      evidence: [{ ...override, source: 'Your details', quote: `${override.amount} ${override.unit}`, sellerReported: false }], originalEvidence: original.evidence,
+      reason: 'User-entered odometer reading and unit. Original imported evidence is preserved.' };
+  }
   const aspects = (car.itemSpecifics || []).filter(aspect => mileageField.test(aspect.name?.trim()));
   const structured = [
     ...[car.mileage?.raw].flat().map(raw => ({ raw, source: 'Original mileage' })),
@@ -111,5 +118,7 @@ export function mileageDisplay(car) {
   if (!result.unit) return `${String(result.raw)} \u00b7 unit not stated`;
   const parsed = reading(result.raw);
   const value = parsed ? `${String(result.raw)}${parsed.unit ? '' : ` ${result.unit}`}` : `${result.amount.toLocaleString('en-CA')} ${result.unit}`;
-  return `${value}${result.assumedUnit ? ' (assumed)' : ''}`;
+  return `${value}${result.assumedUnit ? ' (assumed)' : ''}${result.userEntered ? ' · User-entered' : ''}`;
 }
+
+export const mileageEvidenceLabel = result => result.userEntered ? 'User-entered mileage' : result.assumedUnit ? 'Seller reading · kilometres assumed' : 'Seller-reported mileage';

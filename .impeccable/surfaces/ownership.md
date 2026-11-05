@@ -15,7 +15,7 @@ THESIS: Compare purchase funding and actual running expenses separately, then ex
 
 OWN-WORLD: Extend the existing electric-blue/navy workspace, self-hosted fonts, semantic theme roles, flat tables, labeled inputs and explicit evidence wording. No new identity or imagery.
 
-STORY: Open from Decide, start with Cash, edit the acquisition and running assumptions for every contender, then enter a salary. Finance is optional; savings goals are a separate disclosure.
+STORY: Open from the Affordability explanation beside the match photo, start with Cash, edit the acquisition and running assumptions for every contender, then enter a salary. Finance is optional; savings goals are a separate disclosure.
 
 FIRST VIEWPORT: Shared compact workspace heading and back link, Cash/Finance controls, a collapsed assumptions panel, and the start of the purchase comparison. The running comparison and salary guide follow in reading order. On phones each table scrolls locally while cost labels stay fixed.
 
@@ -34,3 +34,7 @@ Cash is the default. Cash salary guidance covers running costs only and always i
 - Automated verification: all seven ownership tests passed. After the finish correction, `npm test` passed 188/188 and `npm run build` passed with 492 modules. Existing Motion directive and >500kB bundle-chunk advisories remain. The detector ran once and reported two 20px type advisories; both were corrected to the existing 18px role.
 - Independent finish review: the only finding was the Decide ownership action's missing flex layout. `display: flex` and `justify-content: space-between` resolve it in `src/ownership.css`; the reviewer confirmed pass with the bounded verdict **Ship for reviewed source findings**.
 - Verification limits: browser and native access hosts were unavailable. No screenshots exist. Desktop/phone rendering, ownership contrast, 200% zoom and whole-surface visual approval remain unverified; source review and JSDOM tests do not certify those checks. The previously documented legacy photo-credits palette drift remains outside this extension.
+
+## Entry update: 5 November 2026
+
+The calculator action now appears inside the Affordability match explanation. The generic promotion at the bottom of every priority is removed. The calculator route, shared shortlist, assumptions and private input lifecycle are unchanged; the ownership journey regression covers the new entry and retained inputs.

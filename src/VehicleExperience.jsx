@@ -33,11 +33,11 @@ export function ExperienceAssumptions({ experience }) {
   return <details className="experience-assumptions"><summary>Estimate assumptions &amp; sources</summary><p>{experience.energy.rationale}</p>{assumptions.map(text => <p key={text}>{text}</p>)}<p>Model estimates and general baselines fill gaps and can affect rankings. They do not verify installed equipment or current condition.</p>{sources.map(source => <p key={source.url}><a href={safeUrl(source.url)} target="_blank" rel="noopener noreferrer">{source.source || source.publisher || 'Reference source'}</a></p>)}</details>;
 }
 
-export default function VehicleExperience({ car, scenario = DEFAULT_SCENARIO, showPracticality = false }) {
+export default function VehicleExperience({ car, scenario = DEFAULT_SCENARIO, showPracticality = false, showComfort = true }) {
   const experience = resolveVehicleExperience(car, scenario);
-  return <section className="vehicle-experience" aria-label="Running costs and comfort">
+  return <section className="vehicle-experience" aria-label={showComfort ? 'Running costs and comfort' : 'Running costs'}>
     <h3>{annualCostLabel(experience.energy)}</h3><ExperienceCost experience={experience} scenario={scenario} />
-    <h3>Comfort</h3><dl className="experience-comfort">{COMFORT_TOPICS.map(([topic, label]) => <div key={topic}><dt>{label}</dt><dd><ComfortDetail experience={experience} topic={topic} /></dd></div>)}</dl>
+    {showComfort && <><h3>Comfort</h3><dl className="experience-comfort">{COMFORT_TOPICS.map(([topic, label]) => <div key={topic}><dt>{label}</dt><dd><ComfortDetail experience={experience} topic={topic} /></dd></div>)}</dl></>}
     {showPracticality && <><h3>Practicality</h3><PracticalitySummary experience={experience} /></>}
     <ExperienceAssumptions experience={experience} />
   </section>;

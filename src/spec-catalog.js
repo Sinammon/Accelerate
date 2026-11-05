@@ -46,7 +46,7 @@ export function catalogModelMatches(listing, candidate) {
   return key(listing) === key(base) || key(listingBase) === key(candidate);
 }
 
-export function matchSpecCatalog(specs, candidates, selectedId) {
+export function matchSpecCatalog(specs, candidates, selectedId, referenceMarket) {
   const get = field => specs[field]?.value;
   const empty = reason => ({ status: 'unmatched', values: {}, candidates: [], reason, version: CATALOG_VERSION });
   if (['year', 'make', 'model'].some(field => get(field) == null)) return empty('Add the year, make and model to find reference configurations.');
@@ -56,6 +56,7 @@ export function matchSpecCatalog(specs, candidates, selectedId) {
     const modelName = model => key(get('make')) === 'mazda' ? String(model).replace(/^mazda\s*/i, '') : model;
     if (Number(get('year')) !== value.year || key(get('make')) !== key(value.make) || !catalogModelMatches(modelName(get('model')), modelName(value.model))) return false;
     if (get('market') && get('market') !== candidate.market) return false;
+    if (referenceMarket && referenceMarket !== candidate.market) return false;
     if (get('transmissionCode') && value.transmissionCode && get('transmissionCode') !== value.transmissionCode) return false;
     return ['displacement', 'cylinders', 'drivetrain', 'fuelType', 'bodyType', 'transmission', 'transmissionSpeeds'].every(field => {
       if (get(field) == null || value[field] == null) return true;
@@ -63,7 +64,7 @@ export function matchSpecCatalog(specs, candidates, selectedId) {
       return typeof value[field] === 'number' ? Math.abs(value[field] - get(field)) < (field === 'displacement' ? 0.06 : 0.001) : key(value[field]) === key(get(field));
     });
   });
-  if (!compatible.length) return empty('No supported catalog match. Check the vehicle details, enter missing specifications, or research the model.');
+  if (!compatible.length) return empty(`No supported ${referenceMarket ? `${referenceMarket} reference ` : 'catalog '}match. Check the reference market and original market, enter missing specifications, or research the model.`);
   const selected = compatible.find(candidate => candidate.id === selectedId);
   if (selectedId && !selected) return { ...empty('The previous configuration no longer matches these details. Choose a compatible reference or clear the selection.'), candidates: compatible };
   const pool = selected ? [selected] : compatible;

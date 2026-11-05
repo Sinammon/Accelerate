@@ -17,6 +17,10 @@ import { modelSpecCache } from './spec-cache.js';
 import { makeDemoCars } from './demo-cars.js';
 import { emptyComparisonView, reconcileComparisonView } from './comparison-view.js';
 import { DEFAULT_SCENARIO } from '../shared/experience.js';
+import { validateDetailOptions } from './vehicle-overrides.js';
+import { extractVehicleSpecs } from './vehicle-specs.js';
+import { matchSpecCatalog } from './spec-catalog.js';
+import { referenceMarket } from './reference-market.js';
 
 const route = () => ['compare', 'decide', 'ownership'].includes(window.location.hash.slice(1)) ? window.location.hash.slice(1) : 'import';
 function Application() {
@@ -106,9 +110,14 @@ function Application() {
     };
     void enrichVehicle(car, { signal: controller.signal, onUpdate: apply, skipVin: true, force: true }).then(apply).catch(() => {}).finally(() => enrichmentTasks.current.delete(controller));
   }
-  function saveVehicleDetails(car, specOverrides, catalogSelection) {
+  function saveVehicleDetails(car, specOverrides, catalogSelection, detailOptions) {
+    const choices = validateDetailOptions(detailOptions);
+    const source = { ...car, specOverrides, ...choices, enrichment: { vin: car.enrichment?.vin } };
+    const specs = extractVehicleSpecs(source).specs;
+    const candidates = car.enrichment?.catalogRows || car.enrichment?.catalog?.candidates || [];
+    if (catalogSelection && !matchSpecCatalog(specs, candidates, catalogSelection, referenceMarket(source, specs)).selectedId) catalogSelection = undefined;
     for (const controller of enrichmentTasks.current) if (controller.vehicleId === car.legacyItemId) controller.abort();
-    const edited = { ...car, specOverrides, catalogSelection, enrichmentToken: undefined, enrichment: { vin: car.enrichment?.vin, status: 'loading-model' } };
+    const edited = { ...source, catalogSelection, enrichmentToken: undefined, enrichment: { vin: car.enrichment?.vin, status: 'loading-model' } };
     setCars(current => current.map(item => item.legacyItemId === car.legacyItemId ? edited : item));
     setNotice('Details saved. Specifications are being checked for this configuration.');
     enrichImported(edited);

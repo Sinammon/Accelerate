@@ -10,7 +10,7 @@ export const MODEL_FIELDS = [...MODEL_SPEC_FIELDS, ...MODEL_FEATURES.map(name =>
 export const CONFIG_FIELDS = ['year', 'make', 'model', 'trim', 'market', 'displacement', 'cylinders', 'bodyType', 'transmission', 'transmissionSpeeds', 'drivetrain', 'fuelType'];
 export const DISCRIMINATORS = CONFIG_FIELDS.filter(key => !['year', 'make', 'model'].includes(key));
 export const RESEARCH_MODES = ['value', 'cost', 'comfort', 'balanced', 'practical', 'performance'];
-export const RESEARCH_CATEGORIES = [...RESEARCH_MODES, 'safety', 'issues', 'strengths'];
+export const RESEARCH_CATEGORIES = [...RESEARCH_MODES, 'safety', 'issues', 'strengths', 'reliability'];
 export const RESEARCH_STATUSES = ['matched', 'partial', 'complete', 'unavailable', 'not-configured', 'model-unavailable', 'invalid-request', 'quota', 'timeout', 'no-sources', 'insufficient'];
 const relevantFields = {
   horsepower: ['trim', 'market', 'displacement', 'cylinders', 'bodyType', 'fuelType', 'transmission'],
@@ -129,9 +129,21 @@ export function validResearchInsight(insight, input) {
     && typeof insight.text === 'string' && insight.text.length >= 15 && insight.text.length <= 260
     && ['advantage', 'drawback', 'neutral'].includes(insight.tone) && applicable
     && Array.isArray(insight.categories) && insight.categories.length > 0 && insight.categories.every(c => RESEARCH_CATEGORIES.includes(c))
-    && Array.isArray(insight.evidence) && insight.evidence.length > 0 && insight.evidence.every(e => e?.quote && e.source && /^https:\/\//.test(e.url))
+    && Array.isArray(insight.evidence) && insight.evidence.length > 0 && insight.evidence.every(e => typeof e?.quote === 'string' && e.quote.trim() && e.source && /^https:\/\//.test(e.url))
     && !/[$€£]\s*\d|\d\s*%|\b\d[\d,.]*\s*(?:CAD|USD|dollars|percent)\b|\b(?:this (?:car|vehicle) (?:has never|has no|is accident|is reliable)|guaranteed|failure rate|frequency|frequently|insurance|owners?|unscheduled repair)\b/i.test(insight.text)
-    && (!/\breliab|\bdependab/i.test(insight.text) || /\breview|\brating|\bsurvey|\breported|\breputation/i.test(insight.text));
+    && (!/\breliab|\bdependab/i.test(insight.text) || /\breview|\brating|\bsurvey|\breported|\breputation/i.test(insight.text))
+    && validReliabilityInsight(insight, input);
+}
+
+function validReliabilityInsight(insight, input) {
+  const engineSpecific = /\bengine\b|\b(?:[BNMS]\d{2}[A-Z0-9]*|EA\d{3}|[12]JZ|K\d{2}[A-Z0-9]*)\b/i.test(insight.text);
+  if (!insight.categories.includes('reliability') && !insight.engineFamily && !/\breliab|\bdependab/i.test(insight.text)) return true;
+  if (!engineSpecific && !insight.engineFamily) return true;
+  // Do not attach engine reputation to an unresolved model/engine choice.
+  return !insight.contextOnly && typeof insight.engineFamily === 'string' && /^[A-Za-z0-9 -]{2,40}$/.test(insight.engineFamily)
+    && ['displacement', 'cylinders'].every(key => input[key] != null && sameConfigurationValue(insight.scope[key], input[key]))
+    && insight.evidence.some(e => e.quote.toLowerCase().includes(insight.engineFamily.toLowerCase())
+      && e.quote.includes(String(input.year)) && modelKey(e.quote).includes(modelKey(input.make)) && modelKey(e.quote).includes(modelKey(input.model)));
 }
 
 export function researchAssessment(insights) {

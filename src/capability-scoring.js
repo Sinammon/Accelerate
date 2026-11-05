@@ -1,5 +1,6 @@
 import { extractVehicleSpecs, specEvidenceLabel, researchVinMismatches } from './vehicle-specs.js';
 import { resolveMileage, numeric } from './vehicle-data.js';
+import { mileageEvidenceLabel } from './mileage.js';
 import { researchGuidance } from './model-research.js';
 import { resolveVehicleExperience, experienceLabel } from './vehicle-experience.js';
 import { CONFIG_FIELDS, sameConfigurationValue, approximateScopeMatches } from '../shared/model-specs.js';
@@ -64,7 +65,7 @@ export function rankCapabilities(cars, mode, year, scenario, detectWarnings) {
     };
     values.seatComfort = experience.seatComfort;
     values.passengerSpace = experience.passengerSpace;
-    const labels = { price: 'Seller-reported asking price', age: specEvidenceLabel(specs.year), mileage: mileage.assumedUnit ? 'Seller reading · kilometres assumed' : 'Seller-reported mileage', fuel: 'NRCan configuration reference + your scenario', seats: specEvidenceLabel(specs.seats), body: specEvidenceLabel(specs.bodyType), power: specEvidenceLabel(specs.horsepower), torque: specEvidenceLabel(specs.torque), powerToWeight: `Derived hp/tonne · ${specEvidenceLabel(specs.horsepower)} + ${specEvidenceLabel(specs.curbWeightKg)}` };
+    const labels = { price: 'Seller-reported asking price', age: specEvidenceLabel(specs.year), mileage: mileageEvidenceLabel(mileage), fuel: 'NRCan configuration reference + your scenario', seats: specEvidenceLabel(specs.seats), body: specEvidenceLabel(specs.bodyType), power: specEvidenceLabel(specs.horsepower), torque: specEvidenceLabel(specs.torque), powerToWeight: `Derived hp/tonne · ${specEvidenceLabel(specs.horsepower)} + ${specEvidenceLabel(specs.curbWeightKg)}` };
     const evidence = { power: specs.horsepower.evidence, torque: specs.torque.evidence, powerToWeight: [...specs.horsepower.evidence, ...specs.curbWeightKg.evidence] };
     const coverage = { fuel: experience.energy.quality === 'estimated' || experience.energy.stale ? 0 : 1 };
     labels.fuel = `${experienceLabel(experience.energy)} + your scenario`;

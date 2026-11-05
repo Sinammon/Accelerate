@@ -78,6 +78,7 @@
 .app-shell .decision-match-copy :is(.decision-reason, .evidence-coverage, .decision-reasons small, .decision-tradeoff > span) { @apply text-primary-100; }
 .app-shell .decision-match-copy a { @apply text-primary-200 hover:text-white; }
 .app-shell .decision-match-copy a:focus-visible { @apply outline-primary-300; }
+.app-shell .decision-match-copy .ownership-match-action { @apply bg-primary-300 text-secondary-950 hover:bg-primary-200 hover:text-secondary-950; }
 .app-shell .decision-match-copy .recommendation-badge { @apply border-secondary-600 bg-secondary-800 text-primary-100; }
 .app-shell .decision-match-copy .recommendation-badge.caution { @apply border-primary-200 text-white; }
 .app-shell .decision-match-copy .decision-reasons li > svg,

@@ -7,6 +7,7 @@ import { bundledModelSpecs } from './bundled-model-specs.js';
 import { modelSpecCache } from './spec-cache.js';
 import { CORE_SPEC_FIELDS, mergeResearch } from '../shared/model-specs.js';
 import { loadEpaYear, nrcanCandidate, matchSpecCatalog } from './spec-catalog.js';
+import { referenceMarket } from './reference-market.js';
 
 export async function enrichVehicle(car, { fetcher = fetch, signal, researchSignal, factoryMatcher = matchFactorySpecs, onUpdate, cache = modelSpecCache, force = false, scheduler, skipVin = false } = {}) {
   const cacheGeneration = cache.generation;
@@ -51,10 +52,10 @@ export async function enrichVehicle(car, { fetcher = fetch, signal, researchSign
     const nrcan = results[1].status === 'fulfilled' && results[1].value ? results[1].value.map(nrcanCandidate) : [];
     const all = [...epa, ...nrcan];
     const sourceSpecs = catalogSpecs();
-    state.catalog = matchSpecCatalog(sourceSpecs, all, car.catalogSelection);
+    state.catalog = matchSpecCatalog(sourceSpecs, all, car.catalogSelection, referenceMarket(car, sourceSpecs));
     state.catalog.lookupAvailable = !!all.length;
     if (!all.length) state.catalog.reason = 'Reference data could not be loaded for this year. Edit details or research the model; existing values remain available.';
-    state.catalogRows = ['year', 'make', 'model'].some(field => sourceSpecs[field].value == null) ? all : state.catalog.candidates;
+    state.catalogRows = all;
     state.factorySpecs = factory();
     emit('catalog');
   })();
@@ -84,7 +85,7 @@ export async function enrichVehicle(car, { fetcher = fetch, signal, researchSign
       rows = results[1].status === 'fulfilled' ? results[1].value : null;
       state.catalogRows = [...(results[0].status === 'fulfilled' ? results[0].value : []), ...(rows || []).map(nrcanCandidate)];
     }
-    if (state.catalogRows?.length) state.catalog = { ...matchSpecCatalog(catalogSpecs(), state.catalogRows, car.catalogSelection), lookupAvailable: true };
+    if (state.catalogRows?.length) state.catalog = { ...matchSpecCatalog(catalogSpecs(), state.catalogRows, car.catalogSelection, referenceMarket(car, catalogSpecs())), lookupAvailable: true };
     state.fuel = rows ? matchFuelEconomy(candidate(), rows) : { status: 'unavailable', reason: 'Canadian fuel reference data is unavailable.', source: NRCAN_SOURCE };
     emit('vin');
   })();

@@ -1,9 +1,11 @@
-import { rankDecisionMode } from './decision-engine.js';
+import { rankDecisionMode, DEFAULT_SCENARIO } from './decision-engine.js';
 import { extractVehicleSpecs, specEvidenceLabel } from './vehicle-specs.js';
 import { DIMENSION_LABELS, supportedPowerToWeight } from './capability-scoring.js';
 import { researchGuidance } from './model-research.js';
 import { resolveVehicleExperience, experienceLabel } from './vehicle-experience.js';
-import { resolveMileage, numeric } from './vehicle-data.js';
+import { resolveMileage, numeric, vehicleName } from './vehicle-data.js';
+import { mileageEvidenceLabel } from './mileage.js';
+import { ownershipContext } from './ownership-context.js';
 
 export const PRIMARY_MODES = [
   { id: 'value', label: 'Best Value', icon: 'trophy' },
@@ -63,6 +65,20 @@ function valueReasons(summary, entry) {
   return reasons.slice(0, 3);
 }
 
+export function performanceComparison(summary, entry) {
+  const ratio = entry.values.powerToWeight;
+  if (!Number.isFinite(ratio)) return null;
+  const peer = summary.ranking.ranked.find(other => other !== entry && !other.identityMismatch && Number.isFinite(other.values.powerToWeight)
+    && entry.values.power < other.values.power && entry.specs.curbWeightKg.value < other.specs.curbWeightKg.value && ratio > other.values.powerToWeight);
+  if (!peer) return null;
+  const metric = summary.requested.criteria.find(c => c.key === 'acceleration' && c.active);
+  const acceleration = metric && Number.isFinite(entry.values.acceleration) && entry.values.acceleration < peer.values.acceleration
+    ? ` Comparable ${metric.label} figures are quicker: ${entry.values.acceleration} s versus ${peer.values.acceleration} s (${entry.specs[summary.requested.accelerationMetric].measurementMethod}).`
+    : ' Power-to-weight indicates acceleration potential; it does not establish which car is faster.';
+  return { text: `Despite ${number(entry.values.power)} hp versus ${number(peer.values.power)} hp in the ${vehicleName(peer.car)}, its lower weight (${number(entry.specs.curbWeightKg.value)} versus ${number(peer.specs.curbWeightKg.value)} kg) gives it a higher power-to-weight ratio: ${ratio.toFixed(1)} versus ${peer.values.powerToWeight.toFixed(1)} hp/tonne.${acceleration}`,
+    label: `Derived from compatible power and curb weight · ${entry.labels.powerToWeight}` };
+}
+
 export function entrySummary(summary, entry) {
   const { ranking, requested, kind } = summary;
   const model = requested.research.find(item => item.car === entry.car)?.guidance;
@@ -85,6 +101,22 @@ export function entrySummary(summary, entry) {
   if (!entry.identityMismatch && requested.mode.id === 'comfort') reasons = comfortReasons(entry.car).slice(0, 3);
   if (!entry.identityMismatch && requested.mode.id === 'practical') reasons = [{ text: `Passenger room: ${entry.experience.passengerSpace.toFixed(1)} / 5. ${entry.experience.ratings.frontPassengerSpace.rationale}`, label: experienceLabel(entry.experience.ratings.frontPassengerSpace) }, { text: `Usable cargo space: ${entry.experience.ratings.cargoSpace.rationale}`, label: experienceLabel(entry.experience.ratings.cargoSpace) }, { text: entry.experience.practicality.rationale, label: experienceLabel(entry.experience.practicality) }];
   if (!reasons.length) reasons = (model?.claims || []).filter(c => !c.contextOnly).slice(0, 2).map(c => ({ text: c.text, label: 'Model context | not a comparative score', source: c.sources[0] }));
+  if (!entry.identityMismatch && ['value', 'cost'].includes(requested.mode.id)) {
+    const context = ownershipContext(entry.car, requested.mode.id);
+    if (requested.mode.id === 'cost') {
+      const energy = entry.experience.energy, scenario = { ...DEFAULT_SCENARIO, ...requested.scenario };
+      const label = energy.powertrain === 'electric' ? 'charging' : energy.powertrain === 'liquid' ? 'fuel' : 'fuel / charging';
+      const cost = Number.isFinite(energy.annualCost) ? `${money(energy.annualCost)}/year` : 'check driving and energy-price assumptions';
+      const prices = [energy.powertrain !== 'electric' && `$${scenario.pricePerLitre.toFixed(2)}/L`, energy.powertrain !== 'liquid' && `$${scenario.pricePerKwh.toFixed(2)}/kWh`, energy.powertrain === 'phev' && `${scenario.electricShare}% electric driving`].filter(Boolean).join(' · ');
+      const source = energy.evidence?.find(e => e.url);
+      const fuel = { text: `Estimated annual ${label} cost: ${cost}.`, label: `${experienceLabel(energy)} · ${number(scenario.annualKm)} km/year · ${prices} · energy only`, source: source && { url: source.url, publisher: source.source } };
+      reasons = [...(entry.values.price != null ? [{ text: `Purchase price: ${money(entry.values.price)}.`, label: 'Seller-reported asking price' }] : []), fuel, ...context];
+    } else if (context.length) reasons = [...reasons.slice(0, 2), ...context];
+  }
+  if (!entry.identityMismatch && requested.mode.id === 'performance') {
+    const comparison = performanceComparison(summary, entry);
+    if (comparison) reasons = [comparison, ...reasons.filter(reason => !reason.text.startsWith('Power-to-weight'))].slice(0, 3);
+  }
   if (!entry.identityMismatch && ['value', 'comfort'].includes(requested.mode.id) && !comfortReasons(entry.car).length) {
     const check = { text: 'Ride quality and seat comfort still need checking. On a test drive, check bump absorption, seat support and rear-seat comfort.', label: 'What to check in this car' };
     reasons = [...reasons.slice(0, 2), check];
@@ -113,7 +145,7 @@ export function keyFacts(car, mode = 'value') {
   const engineFields = [specs.displacement, specs.cylinders].filter(s => s.value != null);
   if (engine) facts.push({ icon: 'engine', label: 'Engine', value: engine, source: engineFields.some(s => s.quality === 'estimated') ? 'Includes estimated model specs; unverified' : engineFields.some(s => s.status === 'model-reference') ? 'Includes typical model specs · cited sources' : engineFields.every(s => s.status === 'vin-record') ? 'Original VIN record' : engineFields.every(s => s.status === 'seller-reported') ? 'Seller-reported' : 'Seller / original VIN evidence' });
   const mileage = resolveMileage(car);
-  if (mileage.unit && mileage.amount != null) facts.push({ icon: 'mileage', label: 'Mileage', value: `${number(mileage.amount)} ${mileage.unit}`, source: mileage.assumedUnit ? 'Seller reading · kilometres assumed' : 'Seller-reported' });
+  if (mileage.unit && mileage.amount != null) facts.push({ icon: 'mileage', label: 'Mileage', value: `${number(mileage.amount)} ${mileage.unit}`, source: mileageEvidenceLabel(mileage) });
   const amenities = Object.entries(features).filter(([, f]) => f.value === true).map(([label]) => label);
   if (amenities.length) facts.push({ icon: 'seat', label: 'Reported features', value: amenities.slice(0, 3).join(', '), source: amenities.some(name => features[name].status === 'model-reference') ? 'Includes typical standard equipment · confirm on this car' : 'Seller-reported · confirm on this car' });
   else if (specs.transmission.value) facts.push({ icon: 'transmission', label: 'Transmission', value: specs.transmission.value, source: specEvidenceLabel(specs.transmission) });

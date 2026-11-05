@@ -157,10 +157,11 @@ test('ownership journey preserves private inputs, cleans removed cars, resets on
     await go('decide');
     for (const mode of document.querySelectorAll('.mode-card')) {
       await React.act(async () => mode.click());
-      assert.equal(document.querySelector('.ownership-cta a').getAttribute('href'), '#ownership');
+      assert.equal(!!document.querySelector('.decision-match-copy a[href="#ownership"]'), mode.dataset.mode === 'cost');
     }
+    await React.act(async () => document.querySelector('[data-mode="cost"]').click());
     await React.act(async () => {
-      document.querySelector('.ownership-cta a').click();
+      document.querySelector('.decision-match-copy a[href="#ownership"]').click();
       await new Promise(resolve => setTimeout(resolve, 30));
     });
     assert.equal(window.location.hash, '#ownership');

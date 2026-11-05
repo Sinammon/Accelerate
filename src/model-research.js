@@ -40,7 +40,9 @@ export function liveResearchForCar(car) {
   if (!['matched', 'partial'].includes(car.enrichment?.modelSpecs?.status)) return none;
   const { specs } = extractVehicleSpecs({ ...car, enrichment: { ...car.enrichment, modelSpecs: undefined } });
   if (CONFIG_FIELDS.some(key => specs[key]?.status === 'conflict')) return none;
-  const input = modelSpecsInput({ ...Object.fromEntries(CONFIG_FIELDS.filter(key => specs[key]?.value != null).map(key => [key, specs[key].value])), fields: MODEL_FIELDS });
+  const catalog = car.enrichment?.catalog;
+  const selected = catalog?.candidates?.find(candidate => candidate.id === catalog.selectedId);
+  const input = modelSpecsInput({ ...Object.fromEntries(CONFIG_FIELDS.filter(key => specs[key]?.value != null).map(key => [key, specs[key].value])), ...(selected ? { model: selected.values?.model || specs.model.value, market: specs.market.value || selected.market } : {}), fields: MODEL_FIELDS });
   return input ? validatedResearch(car.enrichment.modelSpecs, input) : none;
 }
 export function dimensionRatingsForCar(car) {
@@ -55,6 +57,6 @@ export function liveResearchClaim(insight, checked) {
 export function researchGuidance(car, mode) {
   const research = researchForCar(car);
   const live = liveResearchForCar(car);
-  const claims = [...live.insights.filter(c => c.categories.includes(mode)).map(c => liveResearchClaim(c, live.checked)), ...research.claims.filter(c => (modeCategories[mode] || modeCategories.value).includes(c.category))];
+  const claims = [...live.insights.filter(c => c.categories.includes(mode) || ['value', 'cost'].includes(mode) && c.categories.includes('reliability')).map(c => liveResearchClaim(c, live.checked)), ...research.claims.filter(c => (modeCategories[mode] || modeCategories.value).includes(c.category))];
   return { ...research, status: claims.length ? 'matched' : research.status, claims, assessment: live.assessments[mode], checks: [...live.insights.filter(c => c.categories.includes('issues')).map(c => liveResearchClaim(c, live.checked)), ...research.claims.filter(c => c.category === 'issues')] };
 }
