@@ -2,7 +2,7 @@
 version: 1
 slug: "src-dashboard-jsx"
 primary_target: "src/Dashboard.jsx"
-related_targets: ["src/App.jsx", "src/ImportComposer.jsx", "src/Shortlist.jsx", "src/WorkspaceTabs.jsx", "src/VehicleComparison.jsx", "src/DecisionDashboard.jsx", "src/OwnershipCalculator.jsx", "src/compact.css", "src/app.css", "src/data/config/colors.js"]
+related_targets: ["src/App.jsx", "src/ImportComposer.jsx", "src/CarManagement.jsx", "src/HeroImportComposer.jsx", "src/WorkspaceTabs.jsx", "src/VehicleComparison.jsx", "src/DecisionDashboard.jsx", "src/OwnershipCalculator.jsx", "src/compact.css", "src/app.css", "src/data/config/colors.js"]
 ---
 
 # Accelerate compact workspace
@@ -31,7 +31,11 @@ Preserve the four-car limit, validation, removal/replacement, async cancellation
 
 ## Verification evidence - 5 November 2026
 
-- Final automated verification: npm test passed 198/198; npm run build passed with 496 modules. Existing Motion use-client and >500kB chunk advisories remain. git diff --check passed before documentation edits; documentation whitespace/JSON is checked separately.
+- Final automated verification: npm test passed 198/198; npm run build passed with 497 modules. Existing Motion use-client and >500kB chunk advisories remain. git diff --check passed before documentation edits; documentation whitespace/JSON is checked separately.
 - The detector ran once. Its 8px-radius and 36px/28px-import-heading advisories are intentional approved compact choices, recorded in DESIGN frontmatter, prose and sidecar.
 - Independent finish verdict: ship for two resolved SOURCE findings only. Removed low-contrast legacy navy panels and focused the destination cost tab after programmatic switches. The reviewer also accepted the source correction preserving original listing location/mileage in Sources & checks. This is not whole-surface visual approval.
 - Browser and native access hosts were unavailable. No screenshots exist. Actual desktop/1366x768 fit, phone rendering, contrast across the whole rendered surface and 200% zoom remain unverified. Source inspection and JSDOM journeys cannot certify these checks.
+
+## User-directed restoration
+
+The home dashboard restores the pre-compact blue hero, floating import composer, source strip, editorial metrics, walkthrough and horizon. Its Persuade composition is isolated from the retained compact Operate working screens. No left shortlist rail remains on any route: the header Cars menu provides removal and selected-car source access. Working content uses a single 1280px column. Compare shows a 144px-high contained photograph per car, 104px on phones, preserving proportions and complete silhouettes. This instruction supersedes earlier rail and short-entry composition statements in this brief. All data, evidence, tab/state and calculator constraints remain.

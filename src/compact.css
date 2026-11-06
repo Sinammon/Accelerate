@@ -1,6 +1,6 @@
 /* Compact task workspace. Existing semantic tokens remain the palette authority. */
 .compact-workspace { min-height: 100dvh; }
-.compact-workspace .site-header { max-width: none; min-height: 64px; padding: 8px 24px; grid-template-columns: 232px minmax(0,1fr) auto; column-gap: 24px; background: var(--surface); border-bottom: 1px solid var(--border-subtle); }
+.compact-workspace .site-header { max-width: none; min-height: 64px; padding: 8px 24px; grid-template-columns: auto minmax(0,1fr) auto; column-gap: 24px; background: var(--surface); border-bottom: 1px solid var(--border-subtle); }
 .compact-workspace .site-header .brand { font-size: 24px; }
 .compact-workspace .site-header nav { display: flex; grid-column: 2; grid-row: 1; justify-content: flex-start; gap: 8px; padding: 0; }
 .compact-workspace .site-header .nav-link { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 16px; border-radius: 8px; color: var(--text-secondary); }
@@ -8,7 +8,7 @@
 .compact-workspace .header-actions { grid-column: 3; gap: 8px; }
 .compact-workspace .nav-button { border-radius: 8px; }
 .compact-workspace .nav-menu-toggle { display: none; }
-.workspace-layout { display: grid; grid-template-columns: 232px minmax(0,1fr); gap: 24px; max-width: 1600px; margin: auto; padding: 24px; align-items: start; }
+.workspace-layout { display: block; max-width: 1280px; margin: auto; padding: 24px; align-items: start; }
 .compact-workspace main { min-width: 0; margin: 0; padding: 0; max-width: none; }
 .compact-workspace .page-section { padding: 0; max-width: none; }
 .compact-workspace .workspace-heading { margin: 0 0 16px; padding: 0; background: none; color: var(--text); border-radius: 0; display: flex; flex-direction: row; gap: 16px; align-items: center; justify-content: space-between; }
@@ -17,37 +17,6 @@
 .compact-workspace .workspace-heading-copy { min-width: 0; }
 .compact-workspace .workspace-heading .back-link { color: var(--accent); white-space: nowrap; }
 .compact-workspace h2, .compact-workspace h3, .compact-workspace h4 { font-family: var(--font-sans); }
-.compact-workspace .workspace-heading .shortlist-count { display: none; }
-.shortlist-rail { position: sticky; top: calc(var(--header-height) + 24px); padding: 16px; border: 1px solid var(--border-subtle); border-radius: 12px; background: var(--surface); min-width: 0; }
-.shortlist-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.shortlist-heading h2 { font-size: 16px; font-weight: 700; margin: 0 0 16px; display: flex; flex-wrap: wrap; gap: 8px; }
-.shortlist-heading h2 span { font-size: 14px; color: var(--text-secondary); font-weight: 500; }
-.shortlist-toggle { display: none; }
-.shortlist-list { list-style: none; margin: 0; padding: 0; }
-.shortlist-list li { position: relative; display: grid; grid-template-columns: 56px minmax(0,1fr); gap: 10px; min-height: 104px; padding: 12px 0; border-top: 1px solid var(--border-subtle); }
-.shortlist-list li:first-child { border-top: 0; padding-top: 0; }
-.shortlist-list .vehicle-image { width: 56px; height: 40px; border-radius: 4px; }
-.shortlist-list .source-pill { display: none; }
-.shortlist-list .image-placeholder { font-size: 0; gap: 0; }
-.shortlist-list .image-placeholder svg { width: 24px; height: 24px; }
-.shortlist-list .photo-next { display: none; }
-.shortlist-car-copy { min-width: 0; }
-.shortlist-car-name { display: block; text-align: left; width: 100%; padding: 0; min-height: 44px; border: 0; border-radius: 4px; background: transparent; color: var(--text); font-size: 14px; font-weight: 650; overflow-wrap: anywhere; line-height: 1.4; }
-.shortlist-car-name:hover { color: var(--accent); background: var(--surface-hover); }
-.shortlist-car-copy > strong { display: block; font-size: 14px; font-variant-numeric: tabular-nums; }
-.shortlist-car-copy > small { display: block; font-size: 12px; color: var(--text-secondary); }
-.shortlist-warning { padding: 4px 0; min-height: 44px; text-align: left; font-size: 12px; border: 0; border-radius: 4px; background: transparent; color: var(--warning); text-decoration: underline; text-underline-offset: 3px; }
-.shortlist-remove { position: absolute; left: 6px; bottom: 2px; min-width: 44px; min-height: 44px; border: 0; border-radius: 8px; }
-.shortlist-add { width: 100%; margin-top: 12px; background: var(--surface-hover); color: var(--accent); border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 14px; }
-.shortlist-add:hover { background: var(--surface-raised); }
-.shortlist-empty { margin: 0; font-size: 14px; color: var(--text-secondary); }
-.shortlist-hint, .shortlist-credits { margin: 12px 0 0; font-size: 12px; color: var(--text-secondary); }
-.shortlist-credits { display: inline-flex; align-items: center; min-height: 44px; }
-.import-workspace { max-width: 760px; margin: 56px auto 0; }
-.import-introduction { margin-bottom: 24px; max-width: 65ch; }
-.import-introduction h1 { font-family: var(--font-sans); font-size: 36px; font-weight: 650; margin: 0 0 12px; color: var(--text); }
-.import-introduction p { color: var(--text-secondary); margin: 0; }
-.import-surface { background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 24px; }
 .compact-workspace .compact-composer > label { display: block; margin: 0 0 8px; font-size: 14px; }
 .compact-workspace .compact-composer .input-row { display: flex; align-items: center; gap: 12px; padding: 0; border: 0; background: transparent; border-radius: 0; }
 .compact-workspace .compact-composer .input-row > svg { color: var(--accent); }
@@ -59,13 +28,6 @@
 .compact-workspace .demo-entry { border-top: 1px solid var(--border-subtle); margin-top: 20px; padding-top: 12px; }
 .compact-workspace .demo-entry .nav-demo { display: inline-flex; padding-left: 0; color: var(--accent); font-size: 14px; }
 .compact-workspace .demo-entry p { color: var(--text-secondary); margin: 0; font-size: 14px; }
-.import-next { color: var(--text-secondary); font-size: 14px; margin: 16px 0 24px; }
-.workspace-help { border-top: 1px solid var(--border-subtle); }
-.compact-workspace .workspace-help > summary { padding: 12px 0; font-size: 14px; }
-.help-content { padding: 8px 0 16px; max-width: 75ch; }
-.help-content h2 { font-size: 22px; }
-.help-content p, .help-content li { color: var(--text-secondary); }
-.help-content .dashboard-preview { margin-top: 20px; }
 .workspace-tabs, .compact-workspace .compare-tabs { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--border-subtle); margin: 0 0 16px; padding: 0 0 8px; }
 .workspace-tabs button, .compact-workspace .compare-tabs button { background: transparent; color: var(--text-secondary); padding: 10px 12px; min-height: 44px; font-size: 14px; border-radius: 8px; text-decoration: none; }
 .workspace-tabs button:hover, .compact-workspace .compare-tabs button:hover { color: var(--text); background: var(--surface-raised); }
@@ -79,13 +41,12 @@
 .compact-workspace .comparison-import { margin: 0 0 16px; padding: 16px; }
 .compact-workspace .compare-panel { margin-top: 0; }
 .compact-workspace .comparison-notice, .compact-workspace .demo-notice, .compact-workspace .decision-demo-note, .compact-workspace .decision-status { font-size: 12px; line-height: 1.5; padding: 6px 0; margin: 0 0 8px; border: 0; background: transparent; }
-.compact-workspace .shortlist-review { padding-bottom: 8px; font-size: 14px; }
 .compact-workspace .comparison-table th, .compact-workspace .comparison-table td { padding: 8px 12px; font-size: 14px; }
 .compact-workspace .comparison-table th:first-child { width: 144px; }
 .compact-workspace .comparison-table table { min-width: 0; }
 .compact-workspace .comparison-table thead th { background: var(--surface-hover); }
 .compact-workspace .comparison-table .car-card { display: grid; grid-template-columns: minmax(0,1fr) 56px; align-items: center; gap: 4px; border: 0; border-radius: 0; background: transparent; overflow: visible; }
-.compact-workspace .comparison-table .vehicle-image { height: 56px; max-width: 120px; border-radius: 4px; margin-bottom: 8px; }
+.compact-workspace .comparison-table .vehicle-image { grid-column: 1 / -1; height: 144px; max-width: none; border-radius: 8px; margin-bottom: 8px; background: var(--photo-mat); }
 .compact-workspace .comparison-table .source-pill { display: none; }
 .compact-workspace .comparison-table .image-placeholder { font-size: 12px; flex-direction: row; gap: 4px; }
 .compact-workspace .comparison-table .image-placeholder svg { width: 16px; }
@@ -166,8 +127,7 @@
 .compact-workspace .ownership-error { color: var(--error); }
 @media (max-width: 1100px) {
   .compact-workspace .site-header { grid-template-columns: auto minmax(0,1fr) auto; gap: 8px; padding-inline: 16px; }
-  .workspace-layout { grid-template-columns: 200px minmax(0,1fr); gap: 16px; padding: 16px; }
-  .shortlist-rail { padding: 12px; top: calc(var(--header-height) + 16px); }
+  .workspace-layout { padding: 16px; }
   .compact-workspace .site-header .nav-link { padding-inline: 10px; }
   .compact-workspace .workspace-heading { align-items: flex-start; flex-wrap: wrap; }
   .compact-workspace .desktop-decide { display: none; }
@@ -185,30 +145,17 @@
   .compact-workspace .site-header nav.is-open { display: flex; }
   .compact-workspace .site-header .nav-link { padding-inline: 8px; font-size: 14px; }
   .workspace-layout { display: block; padding: 16px; }
-  .shortlist-rail { position: static; margin-bottom: 20px; padding: 8px 12px; }
-  .shortlist-heading h2 { margin: 0; }
-  .shortlist-toggle { display: inline-flex; padding: 8px; border: 0; font-size: 12px; }
-  .shortlist-content { display: none; }
-  .is-expanded .shortlist-content { display: block; padding-top: 12px; }
-  .shortlist-list li { grid-template-columns: 72px minmax(0,1fr); padding-right: 44px; }
-  .shortlist-list .vehicle-image { width: 72px; }
-  .shortlist-car-copy { padding-bottom: 0; }
-  .shortlist-remove { left: auto; right: 0; bottom: auto; top: 8px; }
-  .import-workspace { margin-top: 24px; }
-  .import-introduction h1 { font-size: 28px; }
-  .import-surface { padding: 16px; }
   .compact-workspace .compact-composer .input-row { flex-wrap: wrap; gap: 8px; }
   .compact-workspace .compact-composer .input-row > svg { display: none; }
   .compact-workspace .compact-composer input { width: 100%; flex: auto; }
   .compact-workspace .compact-composer .input-row > button { width: 100%; }
-  .import-next { line-height: 1.7; }
   .compact-workspace .workspace-heading h1 { font-size: 24px; }
   .compact-workspace .comparison-management { width: 100%; justify-content: flex-end; }
   .compact-workspace .compare-tabs { flex-wrap: wrap; }
   .compact-workspace .compare-tabs button { padding-inline: 8px; }
   .compact-workspace .comparison-table th:first-child { width: auto; }
   .compact-workspace .comparison-table th, .compact-workspace .comparison-table td { padding: 10px 8px; }
-  .compact-workspace .comparison-table .vehicle-image { max-width: 100%; height: 48px; }
+  .compact-workspace .comparison-table .vehicle-image { max-width: 100%; height: 104px; }
   .compact-workspace .comparison-table .vehicle-name { font-size: 14px; }
   .compact-workspace .comparison-table .image-placeholder { font-size: 0; }
   .compact-workspace .comparison-table .evidence-link { min-height: 44px; }
@@ -232,4 +179,23 @@
   .compact-workspace .comparison-table .car-card { grid-template-columns: 1fr; }
   .compact-workspace .comparison-table .view-details { justify-self: start; }
   .compact-workspace .decision-card-foot .contender-controls { width: auto; margin-left: 0; }
+}
+
+/* Car management is available in the header without a sidebar. */
+.car-management { position: relative; color: var(--text); }
+.car-management > summary { min-height: 44px; padding: 10px 8px; font-size: 14px; white-space: nowrap; }
+.car-management[open] > summary { margin-bottom: 0; border-bottom: 0; }
+.car-management-popover { position: absolute; right: 0; top: 100%; width: 320px; max-width: calc(100vw - 32px); padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; z-index: 40; }
+.car-management ul { list-style: none; padding: 0; margin: 0; }
+.car-management li { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.managed-car-name { flex: 1; justify-content: flex-start; text-align: left; font-size: 14px; padding: 8px; }
+.managed-car-remove { flex-shrink: 0; }
+.car-management-popover p { font-size: 12px; color: var(--text-secondary); margin: 12px 0 0; }
+.compact-workspace .comparison-table .vehicle-image img { width: 100%; height: 100%; object-fit: contain; object-position: center; }
+@media (max-width: 767px) {
+  .compact-workspace .site-header { grid-template-columns: 1fr; }
+  .compact-workspace .header-actions { grid-column: 1; grid-row: 2; justify-content: space-between; }
+  .compact-workspace .site-header nav { grid-row: 3; }
+  .compact-workspace .site-header .brand { grid-column: 1; grid-row: 1; }
+  .car-management-popover { left: 0; right: auto; }
 }

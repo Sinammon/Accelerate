@@ -11,7 +11,7 @@ import ThemeSwitch from './ThemeSwitch.tsx';
 import { ThemeProvider } from './ThemeProvider.jsx';
 import Icon from './Icons.jsx';
 import Brand from './Brand.jsx';
-import Shortlist from './Shortlist.jsx';
+import CarManagement from './CarManagement.jsx';
 import { enrichVehicle } from './enrichment.js';
 import { mergeResearch } from '../shared/model-specs.js';
 import { modelSpecCache } from './spec-cache.js';
@@ -88,7 +88,7 @@ function Application() {
       setOwnershipTab('summary');
       setDecisionView({ tab: 'summary', selectedId: null });
     }
-    requestAnimationFrame(() => (document.querySelector('.shortlist-remove') || document.querySelector('.shortlist-add'))?.focus());
+    requestAnimationFrame(() => (document.querySelector('.managed-car-remove') || document.querySelector('.car-management > summary') || document.querySelector('.nav-button'))?.focus());
   }
   function clearCars() {
     for (const controller of enrichmentTasks.current) controller.abort();
@@ -100,6 +100,7 @@ function Application() {
   function showSources(car) {
     setComparisonView(previous => ({ ...previous, tab: 'sources', sourceId: car.legacyItemId }));
     navigate('compare');
+    requestAnimationFrame(() => document.querySelector('.vehicle-summary')?.focus());
   }
   function enrichImported(imported) {
     const controller = new AbortController();
@@ -181,22 +182,22 @@ function Application() {
   }
   const importForm = <ImportComposer cars={cars} page={page} url={url} setUrl={setUrl} loading={loading} error={error} notice={notice} onSubmit={handleSubmit} onDemo={loadDemo} />;
   const enter = { initial: { opacity: reduced ? 1 : 0 }, animate: { opacity: 1 }, transition: { duration: reduced ? 0 : 0.18 } };
-  return <LazyMotion features={domAnimation} strict><MotionConfig reducedMotion="user"><div className="site-shell app-shell compact-workspace">
+  return <LazyMotion features={domAnimation} strict><MotionConfig reducedMotion="user"><div className={`site-shell app-shell ${page === 'import' ? 'landing-shell' : 'compact-workspace'}`}>
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); document.getElementById('main-content')?.focus(); }}>Skip to content</a>
     <header className="site-header" onKeyDown={event => { if (event.key === 'Escape' && menuOpen) { setMenuOpen(false); menuToggle.current?.focus(); } }}>
       <Brand />
       <nav id="primary-navigation" className={menuOpen ? 'is-open' : ''} aria-label="Main navigation">{[['compare', 'Compare'], ['decide', 'Recommendation'], ['ownership', 'Costs']].map(([id, label]) => <a className="nav-link" key={id} href={`#${id}`} aria-current={page === id ? 'page' : undefined} onClick={() => setMenuOpen(false)}>{label}</a>)}</nav>
-      <div className="header-actions"><ThemeSwitch /><button className="nav-button" type="button" disabled={cars.length >= 4 || loading} onClick={() => { setMenuOpen(false); startImport(); }}>Add car <Icon name="link" size={16} /></button><button className="nav-menu-toggle" type="button" ref={menuToggle} aria-expanded={menuOpen} aria-controls="primary-navigation" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} onClick={() => setMenuOpen(open => !open)}><Icon name={menuOpen ? 'close' : 'menu'} size={20} /></button></div>
+      <div className="header-actions">{page !== 'import' && <CarManagement cars={cars} onRemove={removeCar} onDetails={showSources} />}<ThemeSwitch overHero={page === 'import'} /><button className={page === 'import' ? 'nav-button size-11 p-0 sm:h-auto sm:w-auto sm:px-4' : 'nav-button'} aria-label="Add car" type="button" disabled={cars.length >= 4 || loading} onClick={() => { setMenuOpen(false); startImport(); }}><span className={page === 'import' ? 'hidden sm:inline' : undefined}>Add car</span><Icon name="link" size={16} /></button><button className="nav-menu-toggle" type="button" ref={menuToggle} aria-expanded={menuOpen} aria-controls="primary-navigation" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} onClick={() => setMenuOpen(open => !open)}><Icon name={menuOpen ? 'close' : 'menu'} size={20} /></button></div>
     </header>
-    <div className="workspace-layout">
-    <Shortlist cars={cars} onAdd={startImport} onRemove={removeCar} onDetails={showSources} loading={loading} />
+    <div className={page === 'import' ? 'dashboard-layout' : 'workspace-layout'}>
     <main id="main-content" tabIndex={-1}><m.div key={page} className="page-transition" {...enter}>
-      {page === 'import' && <Dashboard importForm={importForm} onStart={startImport} />}
+      {page === 'import' && <Dashboard importForm={importForm} onStart={startImport} onShowCosts={() => { if (cars.length) { setMode('cost'); navigate('decide'); } else requestAnimationFrame(() => document.getElementById('how-it-works')?.scrollIntoView({ block: 'center', behavior: reduced ? 'instant' : 'smooth' })); }} />}
       {page === 'compare' && <VehicleComparison scenario={scenario} setScenario={setScenario} onSaveDetails={saveVehicleDetails} cars={cars} view={comparisonView} onViewChange={setComparisonView} notice={notice} retryResearch={retryResearch} clearSavedSpecs={() => { modelSpecCache.clear(); setNotice('Saved model specifications cleared. Your current comparison is unchanged.'); }} importForm={importForm} navigate={navigate} removeCar={removeCar} clearCars={clearCars} />}
       {page === 'decide' && <DecisionDashboard scenario={scenario} setScenario={setScenario} cars={cars} retryResearch={retryResearch} mode={mode} setMode={next => { setMode(next); setDecisionView(previous => ({ ...previous, selectedId: null })); }} view={decisionView} onViewChange={setDecisionView} />}
       {page === 'ownership' && <OwnershipCalculator cars={cars} scenario={scenario} setScenario={setScenario} state={ownership} setState={setOwnership} tab={ownershipTab} onTabChange={setOwnershipTab} />}
     </m.div></main>
     </div>
+    {page === 'import' && <footer><Brand className="footer-brand" /><span>A clearer road to your next car.</span><span>Temporary comparison · Refresh clears your cars</span></footer>}
   </div></MotionConfig></LazyMotion>;
 }
 

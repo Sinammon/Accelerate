@@ -30,20 +30,18 @@ test('dashboard themes persist across the real import, comparison and decision w
     await act(async () => root.render(React.createElement(App)));
     assert.equal(window.location.pathname, '/dashboard');
     assert.equal(document.documentElement.dataset.theme, 'dark');
-    assert.ok(document.querySelector('label[for="listing-url"]'));
-    assert.equal(document.querySelector('.workflow'), null);
-    assert.match(document.querySelector('h1').textContent, /Find the right car/);
-    const originalHero = document.querySelector('.import-surface').innerHTML;
+    assert.equal(document.querySelectorAll('[aria-label="What Accelerate offers"] > div').length, 4);
+    assert.match(document.querySelector('h1').textContent, /Find the right car.*Without the guesswork/);
+    const originalHero = document.querySelector('.dashboard-hero').innerHTML;
     await act(async () => document.querySelector('.theme-switch').click());
     assert.equal(document.documentElement.classList.contains('dark'), false);
     assert.equal(window.localStorage.getItem(THEME_STORAGE_KEY), 'light');
-    assert.equal(document.querySelector('.import-surface').innerHTML, originalHero, 'theme changes preserve geometry and product controls');
-    await act(async () => document.querySelector('.workspace-help > summary').click());
-    await act(async () => document.querySelector('.dashboard-preview > summary').click());
+    assert.equal(document.querySelector('.dashboard-hero').innerHTML, originalHero, 'theme changes preserve geometry and product controls');
+    await act(async () => [...document.querySelectorAll('.value-section button')].find(button => button.textContent.includes('Explore the comparison')).click());
     assert.equal(document.querySelector('.dashboard-preview').open, true);
-    assert.equal(document.querySelector('.workspace-help').open, true);
+    assert.equal(document.activeElement, document.querySelector('.dashboard-preview > summary'));
     await act(async () => {
-      document.querySelector('.compact-composer .demo-entry button').click();
+      document.querySelector('.hero-composer .demo-entry button').click();
       await new Promise(resolve => setTimeout(resolve, 30));
     });
     const count = document.querySelectorAll('.car-card').length;

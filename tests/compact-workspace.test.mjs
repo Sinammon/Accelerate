@@ -23,7 +23,7 @@ test('compact workspace preserves tab choices and private edits across the compl
       const id = JSON.parse(options.body).url.match(/(\d+)$/)[1];
       return new Promise(resolve => { releaseImport = () => resolve(Response.json({ vehicle: {
         legacyItemId: id, year: '2018', make: 'Example', model: id.slice(0, 1),
-        priceCAD: { value: '20000', currency: 'CAD' }, location: { city: 'Toronto', country: 'CA' }, images: [], itemSpecifics: [],
+        priceCAD: { value: '20000', currency: 'CAD' }, location: { city: 'Toronto', country: 'CA' }, images: ['https://images.example.test/front.jpg', 'https://images.example.test/rear.jpg'], itemSpecifics: [],
         ...(id.startsWith('4') ? { description: 'Engine problems. Not running.' } : {}),
       } })); });
     }
@@ -54,11 +54,10 @@ test('compact workspace preserves tab choices and private edits across the compl
     await React.act(async () => root.render(React.createElement(App)));
     assert.deepEqual([...document.querySelectorAll('#primary-navigation a')].map(a => a.textContent), ['Compare', 'Recommendation', 'Costs']);
     assert.equal(document.querySelector('.workflow'), null);
-    assert.equal(document.querySelector('.dashboard-hero'), null);
-    assert.equal(document.querySelector('.workspace-help').open, false);
-    assert.equal(document.querySelector('.shortlist-toggle').getAttribute('aria-expanded'), 'false');
-    await click('.shortlist-toggle');
-    assert.equal(document.querySelector('.shortlist-toggle').getAttribute('aria-expanded'), 'true');
+    assert.ok(document.querySelector('.dashboard-hero'));
+    assert.equal(document.querySelector('.shortlist-rail'), null);
+    assert.equal(document.querySelector('.workspace-help'), null);
+    assert.equal(document.querySelector('.dashboard-preview').open, false);
     await change('#listing-url', 'https://example.test/invalid');
     await submit();
     assert.match(document.querySelector('#import-error').textContent, /eBay.ca/);
@@ -70,10 +69,23 @@ test('compact workspace preserves tab choices and private edits across the compl
     assert.match(document.querySelector('.comparison-table').textContent, /General baseline/);
     for (const id of ['222222222222', '333333333333', '444444444444']) await add(id);
     assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 4);
+    document.querySelector('.car-management').open = true;
+    await React.act(async () => {
+      const remove = document.querySelector('.managed-car-remove');
+      remove.focus();
+      remove.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    });
+    assert.equal(document.querySelector('.car-management').open, false);
+    assert.equal(document.activeElement, document.querySelector('.car-management > summary'));
     assert.equal(document.querySelector('.nav-button').disabled, true);
-    assert.equal(document.querySelector('.shortlist-add').disabled, true);
     assert.match(document.querySelector('.card-warnings summary').textContent, /Engine concern/);
-    assert.match(document.querySelector('.shortlist-warning').textContent, /concerns? to review/);
+    assert.equal(document.querySelector('.shortlist-rail'), null);
+    assert.equal(document.querySelectorAll('.comparison-table .vehicle-image').length, 4);
+    assert.equal(document.querySelector('.comparison-table .vehicle-image img').getAttribute('src'), 'https://images.example.test/front.jpg');
+    await click('.comparison-table .photo-next');
+    assert.equal(document.querySelector('.comparison-table .vehicle-image img').getAttribute('src'), 'https://images.example.test/rear.jpg');
+    await React.act(async () => document.querySelector('.comparison-table .vehicle-image img').dispatchEvent(new dom.window.Event('error')));
+    assert.ok(document.querySelector('.comparison-table .image-placeholder'));
 
     await click('#compare-tab-specifications');
     await go('decide');
@@ -119,12 +131,13 @@ test('compact workspace preserves tab choices and private edits across the compl
     assert.equal(document.querySelector('[data-field="purchasePrice"]').value, '25000');
     assert.doesNotMatch(JSON.stringify(requests), /salary|insuranceAnnual|purchasePrice|120000/);
 
-    await click('.shortlist-remove');
+    document.querySelector('.car-management').open = true;
+    await click('.managed-car-remove');
     assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 3);
     assert.equal(document.querySelector('[data-field="insuranceAnnual"]').value, '2218');
     assert.equal(document.querySelector('[data-field="salary"]').value, '120000');
-    assert.equal(document.activeElement.classList.contains('shortlist-remove'), true);
-    await click('.shortlist-car-name');
+    assert.equal(document.activeElement.classList.contains('managed-car-remove'), true);
+    await click('.managed-car-name');
     assert.equal(window.location.hash, '#compare');
     assert.equal(document.querySelector('#compare-tab-sources').getAttribute('aria-selected'), 'true');
     assert.match(document.querySelector('.source-listing-context').textContent, /Listing location: Toronto, CA.*Mileage:/);
@@ -133,9 +146,12 @@ test('compact workspace preserves tab choices and private edits across the compl
       assert.equal(tab.tabIndex, tab.getAttribute('aria-selected') === 'true' ? 0 : -1);
     }
     await go('ownership');
-    await click('.shortlist-remove');
-    await click('.shortlist-remove');
-    await click('.shortlist-remove');
+    document.querySelector('.car-management').open = true;
+    await click('.managed-car-remove');
+    document.querySelector('.car-management').open = true;
+    await click('.managed-car-remove');
+    document.querySelector('.car-management').open = true;
+    await click('.managed-car-remove');
     assert.match(document.querySelector('.empty-state').textContent, /Add cars/);
     await add('555555555555');
     await go('ownership');

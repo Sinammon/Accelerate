@@ -32,7 +32,11 @@ Valid driving and energy edits update the shared Compare/Recommendation scenario
 ## Verification evidence - 5 November 2026
 
 - Source authority: src/OwnershipCalculator.jsx, src/ownership-calculator.js, src/ownership.css, src/compact.css, src/WorkspaceTabs.jsx, route/state ownership in src/App.jsx, and Affordability entry in src/DecisionDashboard.jsx.
-- Final full suite: npm test passed 198/198; npm run build passed with 496 modules. Existing Motion use-client and >500kB chunk advisories remain. These supersede the historical 4 November totals; no old test count is a current gate.
+- Final full suite: npm test passed 198/198; npm run build passed with 497 modules. Existing Motion use-client and >500kB chunk advisories remain. These supersede the historical 4 November totals; no old test count is a current gate.
 - The detector ran once for the compact implementation. Its 8px-corner and 36px/28px-heading advisories are intentional approved system choices captured in DESIGN.md and the sidecar.
 - Independent finish verdict: ship for two resolved source findings only, covering the removed legacy low-contrast navy panels and programmatic cost-tab destination focus. It is not a whole-surface rendered approval.
 - Browser/native hosts were unavailable. No screenshots exist; actual 1366x768 fit, phone rendering, whole-surface contrast and 200% zoom remain unverified. Existing photograph credits are preserved; no new raster work was required.
+
+## User-directed restoration
+
+The home dashboard restores the pre-compact blue hero, floating import composer, source strip, editorial metrics, walkthrough and horizon. Its Persuade composition is isolated from the retained compact Operate working screens. No left shortlist rail remains on any route: the header Cars menu provides removal and selected-car source access. Working content uses a single 1280px column. Compare shows a 144px-high contained photograph per car, 104px on phones, preserving proportions and complete silhouettes. This instruction supersedes earlier rail and short-entry composition statements in this brief. All data, evidence, tab/state and calculator constraints remain.

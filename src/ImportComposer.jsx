@@ -1,7 +1,10 @@
 import React from 'react';
 import Icon from './Icons.jsx';
+import HeroImportComposer from './HeroImportComposer.jsx';
 
-export default function ImportComposer({ cars, url, setUrl, loading, error, notice, onSubmit, onDemo }) {
+export default function ImportComposer(props) {
+  if (props.page === 'import') return <HeroImportComposer {...props} />;
+  const { cars, url, setUrl, loading, error, notice, onSubmit, onDemo } = props;
   const full = cars.length >= 4;
   const submitLabel = loading ? 'Adding car…' : full ? 'Shortlist full' : 'Add car';
   return <form className="url-form compact-composer" onSubmit={onSubmit} aria-busy={loading}>

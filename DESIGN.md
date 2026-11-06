@@ -1,6 +1,6 @@
 ---
 name: Accelerate
-description: A compact, evidence-led car-shopping workspace in electric blue and deep navy.
+description: A familiar blue home dashboard with compact, evidence-led car-shopping workspaces.
 colors:
   primary-50: "#EFF7FF"
   primary-100: "#DCEFFF"
@@ -40,12 +40,14 @@ colors:
 typography:
   import-headline:
     fontFamily: "Satoshi, sans-serif"
-    fontSize: "36px"
-    fontWeight: 650
+    fontSize: "72px"
+    fontWeight: 500
+    lineHeight: 1
   import-headline-phone:
     fontFamily: "Satoshi, sans-serif"
-    fontSize: "28px"
-    fontWeight: 650
+    fontSize: "48px"
+    fontWeight: 500
+    lineHeight: 1
   workspace-headline:
     fontFamily: "Satoshi, sans-serif"
     fontSize: "24px"
@@ -85,6 +87,8 @@ rounded:
   control: "8px"
   surface: "12px"
   inherited-card: "16px"
+  composer: "24px"
+  full: "calc(infinity * 1px)"
 spacing:
   xs: "4px"
   sm: "8px"
@@ -112,17 +116,25 @@ components:
     textColor: "{colors.secondary-950}"
     rounded: "{rounded.control}"
     padding: "12px"
-  import-surface:
+  hero-composer:
     backgroundColor: "{colors.neutral-white}"
     textColor: "{colors.secondary-950}"
-    rounded: "{rounded.surface}"
-    padding: "24px"
-  shortlist:
+    rounded: "{rounded.composer}"
+    padding: "16px"
+  car-management:
     backgroundColor: "{colors.neutral-white}"
     textColor: "{colors.secondary-950}"
     rounded: "{rounded.surface}"
     padding: "16px"
-    width: "232px"
+  source-chip:
+    backgroundColor: "{colors.neutral-100}"
+    textColor: "{colors.secondary-900}"
+    rounded: "{rounded.full}"
+    padding: "0 12px"
+    height: "32px"
+  metric-grid:
+    backgroundColor: "transparent"
+    textColor: "{colors.secondary-950}"
   tab-selected:
     backgroundColor: "{colors.primary-50}"
     textColor: "{colors.primary-700}"
@@ -151,9 +163,9 @@ components:
 
 **Creative North Star: "The Clear Shortlist"**
 
-Accelerate is a compact task workspace. Electric blue identifies actions and selection; deep navy anchors text and dark-theme surfaces. White and pale surfaces, fine dividers and restrained spacing keep comparisons and evidence easy to scan.
+Accelerate pairs its restored blue home dashboard with compact task workspaces. Electric blue identifies actions and selection; deep navy anchors text and dark-theme surfaces. White and pale surfaces, fine dividers and restrained spacing keep comparisons and evidence easy to scan.
 
-The slanted Accelerate wordmark and self-hosted Satoshi/Clash Grotesk pairing retain the identity. Brand expression comes through typography, palette and useful vehicle photographs. The approved compact system replaces the cinematic hero, atmospheric bands, floating composer and long editorial landing page.
+The slanted Accelerate wordmark and self-hosted Satoshi/Clash Grotesk pairing retain the identity. Brand expression comes through typography, palette and useful vehicle photographs. The user restored the previous home dashboard: navy hero with electric-blue lighting, floating composer, bright editorial section, source strip and matching horizon. Its atmosphere is isolated to the home route; Compare, Recommendation and Costs remain calm working screens without a left sidebar.
 
 **Key Characteristics:**
 
@@ -162,9 +174,9 @@ The slanted Accelerate wordmark and self-hosted Satoshi/Clash Grotesk pairing re
 - Progressive disclosure for explanation without hiding trade-offs or warnings.
 - Theme-aware evidence labels and contained, credited vehicle photography.
 
-Source authority: `src/data/config/colors.js` and `tailwind.config.js` define palettes and semantic theme roles. `src/theme.css` supplies foundations; `src/app.css` imports `src/compact.css` last in the component layer to define current density and composition. `src/workspace.css` has been removed. The [dashboard brief](.impeccable/surfaces/src-dashboard-jsx.md) owns the Operate flow; [PRODUCT.md](PRODUCT.md) owns product and data truth.
+Source authority: `src/data/config/colors.js` and `tailwind.config.js` define palettes and semantic theme roles. `src/theme.css` supplies foundations; `src/app.css` imports `src/compact.css` last in the component layer to define current density and composition. `src/workspace.css` has been removed. The [dashboard brief](.impeccable/surfaces/src-dashboard-jsx.md) owns the restored home and retained Operate flow; [PRODUCT.md](PRODUCT.md) owns product and data truth.
 
-Verification, 5 November 2026: `npm test` passed 198/198 and `npm run build` passed (496 modules). Existing Motion `use client` and >500 kB chunk advisories remain. The independent finish verdict is **ship for two resolved source findings only**: removed legacy low-contrast navy panels, and focused the destination tab after programmatic cost-tab switches. The reviewer also accepted preservation of original location/mileage in Sources & checks. The detector ran once; its 8px-corner and 36px/28px-heading advisories describe the intentional approved compact system recorded here. Browser/native access was unavailable. There are no screenshots, no verified 1366x768 fit, phone or 200%-zoom rendering, and no whole-surface visual approval. Automated tests and source review do not establish those checks.
+Verification, 5 November 2026: all 198 tests passed and the production build passed with 497 modules. The follow-up source reviewer confirmed the two narrow-layout corrections: the Cars menu anchors inside the phone viewport, and the restored landing uses its original icon-only Add car control below sm. The detector returned no findings for this refinement. Existing Motion use-client and large-chunk advisories remain. Browser/native access is unavailable, so actual image sizing, desktop/phone fit and 200% zoom remain unverified; this is not rendered approval.
 
 ## Colors
 
@@ -176,7 +188,7 @@ Exactly two chromatic families remain: Electric Blue (`primary-*`) and Deep Navy
 
 ### Secondary
 
-- **Deep Navy:** light-theme reading text and dark-theme canvas/surfaces. It supplies structure rather than large decorative panels around pale text.
+- **Deep Navy:** light-theme reading text and dark-theme canvas/surfaces. It frames the home hero and horizon, and supplies structure to compact working screens.
 
 ### Neutral
 
@@ -210,23 +222,25 @@ Self-hosted Satoshi is the working interface family. Clash Grotesk supplies the 
 
 ### Hierarchy
 
-The compact ramp is 12/14/16/18/22/24px. Evidence and notes use the smallest role; tables, tabs, names and concise reasons use the interface role. Body copy uses regular weight and the base line height. Cost totals use the fact role; section/match titles use the section role; page titles use the workspace headline role. Import alone uses the larger headline and its phone variant. These are intentional approved roles, replacing the obsolete display/hero/metric ramp.
+The compact ramp is 12/14/16/18/22/24px. Evidence and notes use the smallest role; tables, tabs, names and concise reasons use the interface role. Body copy uses regular weight and the base line height. Cost totals use the fact role; section/match titles use the section role; page titles use the workspace headline role. The restored home uses Satoshi 48px/60px/72px display headings, 36px/48px editorial headings and 48px/60px metrics. These home roles stay separate from the compact working type ramp.
 
 The wordmark retains `skewX(-9deg)`, tight tracking and an accessible home link. It reduces to 22px below 768px. Workspace page headings use Satoshi bold; a legacy heading stylesheet must not override that division. Supporting prose keeps observed 65-75ch reading limits where relevant. Use tabular numerals for prices, quantities and cost totals.
 
-**The Compact Hierarchy Rule.** Use the documented compact roles; reserve the larger import headline for the short entry task.
+**The Compact Hierarchy Rule.** Use the documented compact roles; reserve larger display and metric type for the restored home dashboard.
 
 ## Layout
 
-The application is desktop-first. The shared header has a 64px minimum height, a wordmark, Compare/Recommendation/Costs navigation, theme control and Add car. Its measured height anchors the sticky shortlist. The workspace has a 1600px cap, 24px outer padding and column gap, with a 232px shortlist beside a flexible main area. At widths up to 1100px, the rail is 200px and gutters/gap become 16px. Below 768px, the rail is a collapsed disclosure above the content and navigation moves behind a labeled menu.
+The home route uses the previous full-width dashboard composition, overlaid navigation, a 64rem hero content cap, a 42rem working composer, source strip and 80rem editorial section. It has no sidebar. The hero and horizon retain their existing blue atmosphere in both themes.
 
-The entry task has a 760px cap, 56px top margin (24px on phones), one introduction and a bordered import surface. Help contains source explanation and the fictional walkthrough. Page titles use a 16px bottom gap; tabs and short summaries precede detail. Compare retains two selected contenders on phones and the full shortlist. Costs retains all contenders in locally scrolling tables with sticky row labels; desktop minimum width is 144px plus 180px per car (128px label on phones). Preserve safe-area space for the existing mobile decision bar.
+Compare, Recommendation and Costs use a centered single-column workspace capped at 1280px, with 24px desktop and 16px phone gutters. The compact header has a 64px minimum height, navigation, Cars menu, theme switch and Add car. Below 768px, actions and navigation wrap into labeled rows. No left shortlist rail or phone shortlist disclosure remains.
 
-The spacing scale is compact and primarily 4px-based. Source-specific 10px rail gaps and larger empty-state/expanded-detail spacing remain contextual, not a replacement global rhythm. Responsive rules are implementation facts, not verified screen-fit claims.
+Compare retains two selected contenders on phones while preserving all four in the Cars menu. Each column starts with a 144px-high photograph, reduced to 104px on phones; centered object-fit: contain preserves complete silhouettes and intrinsic proportions. Photo cycling, missing-image fallback and source labels remain supported. Costs keeps all contenders in locally scrolling tables with sticky row labels.
+
+These responsive source rules do not establish verified desktop, phone or zoom rendering.
 
 ## Elevation & Depth
 
-Current workspaces are flat. Solid semantic surfaces, one-pixel boundaries, selected fields and restrained hierarchy establish grouping. The removed hero bloom, floating-composer shadow and horizon are no longer design-system examples. Image dialogs retain a modal backdrop (`color-mix(in srgb, var(--text) 72%, transparent)`) rather than decorative lift.
+Current workspaces are flat. Solid semantic surfaces, one-pixel boundaries, selected fields and restrained hierarchy establish grouping. The restored home retains its blue bloom, floating-composer soft shadow and horizon. These atmospheric treatments stay off the working screens. Image dialogs retain a modal backdrop (`color-mix(in srgb, var(--text) 72%, transparent)`) rather than decorative lift.
 
 Controls transition background/border over 160ms. Route entry and comparison-panel fades use 180ms. Deliberate navigation may scroll smoothly; reduced motion disables smooth scrolling and minimizes transitions while preserving focus and state feedback. No decorative motion is required to complete a task.
 
@@ -234,7 +248,7 @@ Controls transition background/border over 160ms. Route entry and comparison-pan
 
 ## Shapes
 
-The intentional compact system uses 8px corners for navigation, tabs, priority selectors and compact import controls, and 12px corners for the shortlist, import surface and recommendation container. Vehicle thumbnails retain 4px corners. Inherited base fields, evidence containers and dialogs may retain 12px/16px source radii; do not apply a broad global reset to these retained contexts. Vehicle photographs use contain sizing and semantic mats, preserving the whole car and its credits.
+The intentional compact system uses 8px corners for navigation, tabs, priority selectors and compact import controls, and 12px corners for the Cars menu and recommendation container. The home composer uses 24px corners and rounded chips. Vehicle thumbnails retain 4px corners. Inherited base fields, evidence containers and dialogs may retain 12px/16px source radii; do not apply a broad global reset to these retained contexts. Vehicle photographs use contain sizing and semantic mats, preserving the whole car and its credits.
 
 ## Components
 
@@ -250,13 +264,17 @@ The listing input has a visible label, 48px minimum height, compact corners, can
 
 Selected top navigation uses `aria-current`, accent text and a semantic hover field. Comparison tabs are Overview, Specifications and Sources & checks. Recommendation tabs are Summary, Ranking & evidence and Assumptions; Costs tabs are Summary, Purchase, Running costs and Salary guide. Tab controls have a 44px minimum height, selected accent/field treatment and visible focus. Arrow keys, Home and End move selection and focus; panels have stable labels. Cost summary shortcuts focus the destination tab. Tab choices and selected recommendation contender survive route navigation in App memory.
 
-### Shortlist
+### Cars menu
 
-The compact rail keeps thumbnail, name, price, concern count, research status and removal available beside the task. Names and concerns open that car's Sources & checks. Add is disabled at four cars or during import. The phone disclosure exposes the same cars and controls. Refresh clears the temporary shortlist and calculator inputs.
+The working-screen header has a Cars count disclosure with every contender, removal controls and links to selected-car Sources & checks. Escape closes the menu and returns focus to its summary. Removal focuses another remove control or the menu summary; the last removal resets private calculator inputs. This menu replaces the left sidebar.
+
+### Home dashboard
+
+Dashboard.jsx and HeroImportComposer.jsx restore the previous hero, floating URL composer, research-source strip, editorial metrics, fictional walkthrough and blue horizon. Import remains functional with validation, full-list status, loading feedback, demo access and the shared shortlist. The larger display typography and atmosphere are specific to this route.
 
 ### Comparison table
 
-Overview has six rows: asking price, mileage, annual fuel/charging cost, Comfort (ride/seats), Practicality (passenger/cargo room) and horsepower. Dense values use interface text with smaller explicit evidence labels. Specifications retains all supported details; Sources & checks retains photos, source selection, original listing location/mileage, configuration editing, warnings, seller specifics and safe plain-text description. Keep local overflow within a labeled keyboard-focusable data region.
+Each car column begins with a contained, proportionally scaled vehicle photo and a Details action. Overview has six rows: asking price, mileage, annual fuel/charging cost, Comfort (ride/seats), Practicality (passenger/cargo room) and horsepower. Dense values use interface text with smaller explicit evidence labels. Specifications retains all supported details; Sources & checks retains photos, source selection, original listing location/mileage, configuration editing, warnings, seller specifics and safe plain-text description. Keep local overflow within a labeled keyboard-focusable data region.
 
 ### Recommendation
 
@@ -278,7 +296,9 @@ Cash/Finance controls stay above the four cost tabs. Summary separates upfront f
 
 ### Don't:
 
-- **Don't** restore cinematic hero bands, atmospheric panels or floating-composer examples as current workspace guidance.
+- **Don't** add a left shortlist sidebar or carry the home's atmospheric hero into the working screens.
 - **Don't** replace evidence wording with color alone or imply individual condition is verified.
 - **Don't** treat source checks, test passes or CSS breakpoints as rendered desktop, phone or zoom approval.
 - **Don't** add new identity assets, palette families or decorative raster work to this compact system.
+
+The home restoration and Compare-photo update passed all 198 tests and the production build. Browser/native access remains unavailable; no new screenshots or rendered approval are claimed.
