@@ -16,10 +16,11 @@ test('compact workspace preserves tab choices and private edits across the compl
   dom.window.scrollTo = () => {};
   dom.window.Element.prototype.scrollIntoView = () => {};
   const requests = [];
-  let releaseImport;
+  let releaseImport, failImport = false;
   globalThis.fetch = async (url, options = {}) => {
     requests.push({ url, body: options.body });
     if (url === '/api/import') {
+      if (failImport) return Response.json({ error: 'Synthetic listing unavailable' }, { status: 502 });
       const id = JSON.parse(options.body).url.match(/(\d+)$/)[1];
       return new Promise(resolve => { releaseImport = () => resolve(Response.json({ vehicle: {
         legacyItemId: id, year: '2018', make: 'Example', model: id.slice(0, 1),
@@ -42,12 +43,22 @@ test('compact workspace preserves tab choices and private edits across the compl
   });
   const submit = () => React.act(async () => { document.querySelector('form').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true })); });
   const add = async id => {
+    const inline = window.location.hash === '#compare';
     if (!document.querySelector('#listing-url')) await click('.nav-button');
     await change('#listing-url', `https://www.ebay.ca/itm/${id}`);
     await submit();
     assert.equal(document.querySelector('form').getAttribute('aria-busy'), 'true');
     assert.equal(document.querySelector('.nav-button').disabled, true);
+    if (inline) {
+      assert.equal(window.location.hash, '#compare');
+      assert.equal(document.querySelector('.compare-add').disabled, true);
+    }
     await React.act(async () => { releaseImport(); await new Promise(resolve => setTimeout(resolve, 25)); });
+    if (inline) {
+      await React.act(async () => { await new Promise(resolve => dom.window.requestAnimationFrame(resolve)); });
+      assert.equal(document.querySelector('#comparison-import').hidden, true);
+      assert.equal(document.activeElement.dataset.carId, id);
+    }
   };
   try {
     const { default: App } = await vite.ssrLoadModule('/src/App.jsx');
@@ -67,6 +78,31 @@ test('compact workspace preserves tab choices and private edits across the compl
     assert.equal(window.location.hash, '#compare');
     assert.equal(document.querySelector('.comparison-table tbody').rows.length, 6);
     assert.match(document.querySelector('.comparison-table').textContent, /General baseline/);
+    await click('.compare-add');
+    assert.equal(window.location.hash, '#compare');
+    assert.equal(document.activeElement.id, 'listing-url');
+    await change('#listing-url', 'https://example.test/invalid');
+    await submit();
+    assert.equal(document.querySelector('#comparison-import').hidden, false);
+    assert.match(document.querySelector('#import-error').textContent, /eBay.ca/);
+    const importCount = requests.filter(request => request.url === '/api/import').length;
+    await change('#listing-url', 'https://www.ebay.ca/itm/111111111111');
+    await submit();
+    assert.match(document.querySelector('#import-error').textContent, /already/);
+    assert.equal(requests.filter(request => request.url === '/api/import').length, importCount);
+    failImport = true;
+    await change('#listing-url', 'https://www.ebay.ca/itm/999999999999');
+    await submit();
+    assert.equal(document.querySelector('#comparison-import').hidden, false);
+    assert.ok(document.querySelector('#import-error').textContent);
+    assert.equal(window.location.hash, '#compare');
+    failImport = false;
+    await click('.comparison-import-cancel');
+    assert.equal(document.activeElement, document.querySelector('.compare-add'));
+    await click('.nav-button');
+    assert.equal(window.location.hash, '#compare');
+    assert.equal(document.activeElement.id, 'listing-url');
+    assert.equal(document.querySelector('#listing-url').value, 'https://www.ebay.ca/itm/999999999999');
     for (const id of ['222222222222', '333333333333', '444444444444']) await add(id);
     assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 4);
     document.querySelector('.car-management').open = true;
@@ -78,6 +114,8 @@ test('compact workspace preserves tab choices and private edits across the compl
     assert.equal(document.querySelector('.car-management').open, false);
     assert.equal(document.activeElement, document.querySelector('.car-management > summary'));
     assert.equal(document.querySelector('.nav-button').disabled, true);
+    assert.equal(document.querySelector('.compare-add').disabled, true);
+    assert.match(document.querySelector('#comparison-full-note').textContent, /Remove a car/);
     assert.match(document.querySelector('.card-warnings summary').textContent, /Engine concern/);
     assert.equal(document.querySelector('.shortlist-rail'), null);
     assert.equal(document.querySelectorAll('.comparison-table .vehicle-image').length, 4);
@@ -87,6 +125,15 @@ test('compact workspace preserves tab choices and private edits across the compl
     await React.act(async () => document.querySelector('.comparison-table .vehicle-image img').dispatchEvent(new dom.window.Event('error')));
     assert.ok(document.querySelector('.comparison-table .image-placeholder'));
 
+    await click('[data-car-id="444444444444"] .compare-remove');
+    assert.equal(document.querySelector('[data-car-id="444444444444"]'), null);
+    assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 3);
+    const pair = [...document.querySelectorAll('.mobile-pair select')].map(select => select.value);
+    assert.equal(new Set(pair).size, 2);
+    assert.ok(!pair.includes('444444444444'));
+    assert.ok(document.activeElement.matches('.car-card.pair-visible .compare-remove'));
+    assert.equal(document.querySelector('.compare-add').disabled, false);
+    await add('444444444444');
     await click('#compare-tab-specifications');
     await go('decide');
     assert.equal(document.querySelectorAll('.mode-card').length, 6);
@@ -150,9 +197,11 @@ test('compact workspace preserves tab choices and private edits across the compl
     await click('.managed-car-remove');
     document.querySelector('.car-management').open = true;
     await click('.managed-car-remove');
-    document.querySelector('.car-management').open = true;
-    await click('.managed-car-remove');
-    assert.match(document.querySelector('.empty-state').textContent, /Add cars/);
+    await go('compare');
+    await click('#compare-tab-overview');
+    await click('.car-card .compare-remove');
+    assert.match(document.querySelector('.empty-state').textContent, /shortlist starts/);
+    assert.equal(document.activeElement.id, 'listing-url');
     await add('555555555555');
     await go('ownership');
     assert.equal(document.querySelector('#costs-tab-summary').getAttribute('aria-selected'), 'true');

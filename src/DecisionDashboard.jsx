@@ -53,17 +53,6 @@ function MatchCard({ summary, selectedId, onSelect }) {
   const label = entry.score == null ? 'What we know so far' : entry.reviewRequired ? 'Review before choosing'
     : !endorsed ? 'Other contender' : summary.provisional ? 'Provisional match' : summary.shared ? 'Equal match' : 'Best category fit';
   const explanation = notes.explanation;
-  function compactReason(reason, index) {
-    const e = entry.experience;
-    if (reason.topic) {
-      const key = { 'Ride quality': 'rideQuality', 'Seat cushioning': 'seatComfort', 'Seat heating': 'seatHeating', 'Cabin quietness': 'cabinQuietness' }[reason.topic];
-      if (key && key !== 'seatHeating') return `${reason.topic}: ${(key === 'seatComfort' ? e.seatComfort : e.ratings[key].rating).toFixed(1)} / 5`;
-    }
-    if (summary.requested.mode.id === 'practical' && index < 2) return index === 0 ? `Passenger room: ${e.passengerSpace.toFixed(1)} / 5` : `Cargo room: ${e.ratings.cargoSpace.rating.toFixed(1)} / 5`;
-    if (reason.text.startsWith('Despite ') && Number.isFinite(entry.values.powerToWeight)) return `Power-to-weight: ${entry.values.powerToWeight.toFixed(1)} hp/tonne`;
-    return reason.text;
-  }
-
   const canView = (car.images || []).some((_, i) => vehicleImageUrl(car, i));
   return <>
     <article className={`decision-match ${endorsed ? 'best-match' : ''}`} data-basis={summary.kind}>
@@ -71,8 +60,7 @@ function MatchCard({ summary, selectedId, onSelect }) {
       <div className="decision-match-copy"><div className="match-topline"><span className={`recommendation-badge ${!endorsed ? 'neutral' : ''} ${entry.warnings.length ? 'caution' : ''}`}><Icon name={endorsed && summary.kind === 'supported' && !entry.warnings.length ? 'trophy' : 'info'} size={18} />{summary.requested.mode.title.toLowerCase()} &middot; {label}</span></div>
         <h2>{vehicleName(car)}</h2><p className="decision-reason">{explanation}</p>
         <p className="evidence-coverage">{entry.score == null ? 'Available details and next checks.' : summary.provisional ? 'Tentative recommendation · estimates may affect the result.' : 'Based on comparable vehicle details.'} Confirm this car’s equipment and condition.</p>
-        <ul className="decision-reasons">{notes.reasons.slice(0, 2).map((reason, index) => <li key={reason.text} className={reason.source || reason.context ? 'model-context' : ''}><Icon name={reason.source ? 'book' : reason.context ? 'info' : 'check-circle'} size={21} /><span>{compactReason(reason, index)}<small>{reason.label}{reason.source && <> &middot; <a href={reason.source.url} target="_blank" rel="noopener noreferrer">{reason.source.publisher} <Icon name="arrow" size={14} /></a></>}</small></span></li>)}</ul>
-        {!!notes.reasons.length && <details className="additional-reasons"><summary>Full explanation &amp; model context</summary><ul className="decision-reasons">{notes.reasons.map(reason => <li key={reason.text}><span>{reason.text}<small>{reason.label}{reason.source && <> · <a href={reason.source.url} target="_blank" rel="noopener noreferrer">{reason.source.publisher}</a></>}</small></span></li>)}</ul></details>}
+        <ul className="decision-reasons">{notes.reasons.map(reason => <li key={reason.text} className={reason.source || reason.context ? 'model-context' : ''}><Icon name={reason.source ? 'book' : reason.context ? 'info' : 'check-circle'} size={21} /><span>{reason.text}<small>{reason.label}{reason.source && <> &middot; <a href={reason.source.url} target="_blank" rel="noopener noreferrer">{reason.source.publisher} <Icon name="arrow" size={14} /></a></>}</small></span></li>)}</ul>
         <div className="decision-tradeoff"><Icon name="balance" size={23} /><b>Trade-off</b><span>{notes.tradeoff}{notes.tradeoffSource && <small><a href={notes.tradeoffSource.url} target="_blank" rel="noopener noreferrer">{notes.tradeoffSource.publisher} <Icon name="arrow" size={14} /></a></small>}</span></div>
         <ListingWarnings entry={entry} />
         {summary.requested.mode.id === 'cost' && <a className="decision-primary ownership-match-action" href="#ownership">Calculate cost of ownership <Icon name="arrow" size={21} /></a>}

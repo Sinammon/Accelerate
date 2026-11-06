@@ -8,7 +8,7 @@ A temporary, in-memory eBay.ca used-car comparison for a Grade 12 CS demo. React
 
 `/` and `/dashboard` enter the same desktop-first workspace. The header provides **Compare**, **Recommendation**, **Costs**, **Add car** and the theme switch. Existing `#import`, `#compare`, `#decide` and `#ownership` links remain compatible. The original home dashboard is restored: navy/blue hero, floating import form, source strip, editorial section and fictional walkthrough. The working screens have no left sidebar; the header Cars menu provides removal and source access for all four contenders.
 
-Compare shows each car photo above its column in a consistent 144px frame (104px on phones), using centered contain scaling to preserve the whole image without stretching or cropping. It opens with six rows: asking price, mileage, annual fuel/charging cost, Comfort ride/seats, Practicality passenger/cargo room and horsepower. Specifications and Sources & checks retain the full details, original listing location/mileage, photos, configuration editing, warnings and evidence. Phones compare two selected contenders while retaining all four in the shortlist. Recommendation exposes all six priorities and three tabs: Summary, Ranking & evidence and Assumptions. Two short reasons lead into a full-explanation disclosure; the trade-off and warnings remain visible.
+Compare shows each car photo above its column in a consistent 144px frame (104px on phones), using centered contain scaling to preserve the whole image without stretching or cropping. It opens with six rows: asking price, mileage, annual fuel/charging cost, Comfort ride/seats, Practicality passenger/cargo room and horsepower. Specifications and Sources & checks retain the full details, original listing location/mileage, photos, configuration editing, warnings and evidence. Phones compare two selected contenders while retaining all four in the shortlist. Recommendation exposes all six priorities and three tabs: Summary, Ranking & evidence and Assumptions. Complete reasons and model context appear once in the main card; the trade-off and warnings remain visible.
 
 The theme switch follows the system preference when unset, remembers an explicit light/dark choice and synchronizes across tabs. Switching themes preserves the shortlist. Colors remain in `src/data/config/colors.js`, exported by `tailwind.config.js`; `src/theme.css` supplies foundations and `src/compact.css`, imported last through `src/app.css`, supplies current workspace density. The old `src/workspace.css` is removed. Self-hosted Satoshi and Clash Grotesk and existing credited photographs remain. See [PRODUCT.md](PRODUCT.md), [DESIGN.md](DESIGN.md) and the [workspace brief](.impeccable/surfaces/src-dashboard-jsx.md).
 
@@ -53,7 +53,7 @@ Run `npm test` and `npm run build` for offline regression and DOM-journey valida
 
 ### Category recommendations and retry
 
-Best Value, Affordability, Comfort, Practicality, Performance and Balanced are all visible priority choices. Summary shows two compact reasons, a full-explanation/model-context disclosure, one visible trade-off and separate warnings. Detailed facts, full model research and citations remain available in disclosures and Ranking & evidence.
+Best Value, Affordability, Comfort, Practicality, Performance and Balanced are all visible priority choices. Summary shows one fully visible explanation with complete reasons, model context and citations, one visible trade-off and separate warnings. Detailed facts, full model research and citations remain available in disclosures and Ranking & evidence.
 
 Comfort now scores cited ride quality (35%), cabin quietness (30%), seat comfort (25%) and passenger space (10%), using the same 0-5 cross-class anchors. Front and rear occupants are weighted equally within seating and space. Advertised gadgets, price and brand do not establish comfort. Ratings require applicable professional-review evidence; manufacturer marketing cannot supply a refinement score.
 
@@ -311,3 +311,13 @@ node --test .\tests\ebay-feasibility.test.mjs
 Exit code `0` means the requests completed, including an empty/inconclusive search. Exit code `1` means configuration, request or detail failure. Assess feasibility from the printed inventory and field availability, not the exit code alone.
 
 Validation in this workspace includes a successful Production search and URL import, plus offline regression checks. Credentials remain in the ignored local `.env` file.
+
+## Inline Compare controls
+
+Compare has an Add car button beside its heading; the shared header Add car action opens the same inline form while on Compare. The form focuses the URL field, remains open for validation/import errors, and closes after successful import while focusing the newly added car. Cancel keeps the URL draft and returns focus to Add car. The four-car limit and loading state disable adding; a full comparison explains that a car must be removed.
+
+Each car's comparison header has Details and Remove actions alongside its photograph; Sources & checks also provides Remove this car for the selected contender. Removal uses the existing cancellation/state cleanup and reconciles phone pairs. Focus moves to a remaining selected car's Remove action or, after the final removal, the import field. No home, sidebar, API, scoring or storage changes are introduced.
+
+Help me decide shows its complete reasons and model context once, fully visible in the main card with source labels and links. The separate repeated Full explanation & model context disclosure is removed. Trade-offs, purchase warnings and the separate detailed vehicle/estimate evidence remain available.
+
+Latest inline-controls verification: all 199 tests and the production build passed (497 modules). The design detector returned no findings, and the independent review accepted the source changes. Browser/native access remained unavailable; rendered desktop/phone layout and zoom are unverified.

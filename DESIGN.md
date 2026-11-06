@@ -278,11 +278,20 @@ Each car column begins with a contained, proportionally scaled vehicle photo and
 
 ### Recommendation
 
-All six priorities are visible. The Summary card holds the vehicle photograph, match status, short explanation, two compact reasons and a full-explanation/model-context disclosure. The trade-off and purchase warnings remain separate and visible. Detailed facts and experience sources use another disclosure; Ranking & evidence retains comparison and citations; Assumptions retains scenario inputs and scoring explanation. Affordability links to Costs beside its explanation. Browsing contenders and switching tabs preserve the shopper's context without changing the ranking engine.
+All six priorities are visible. The Summary card holds the vehicle photograph, match status, short explanation, one fully visible list of complete reasons and model context. The trade-off and purchase warnings remain separate and visible. Detailed facts and experience sources use another disclosure; Ranking & evidence retains comparison and citations; Assumptions retains scenario inputs and scoring explanation. Affordability links to Costs beside its explanation. Browsing contenders and switching tabs preserve the shopper's context without changing the ranking engine.
 
 ### Costs
 
 Cash/Finance controls stay above the four cost tabs. Summary separates upfront funding from monthly running expenses, then links to editable Purchase, Running costs and Salary guide. Expanded assumptions share valid driving/energy changes with Compare and Recommendation. All-car tables preserve source/estimate wording, fixed row labels and editable amounts. Cash purchase savings remain separate from expenses; Finance includes loan payments with a separately funded down payment. Private salary and overrides live only in App memory across navigation and research updates, resetting when the shortlist is cleared.
+
+### Inline Compare controls
+
+Compare has an Add car button beside its heading; the shared header Add car action opens the same inline form while on Compare. The form focuses the URL field, remains open for validation/import errors, and closes after successful import while focusing the newly added car. Cancel keeps the URL draft and returns focus to Add car. The four-car limit and loading state disable adding; a full comparison explains that a car must be removed.
+
+Each car's comparison header has Details and Remove actions alongside its photograph; Sources & checks also provides Remove this car for the selected contender. Removal uses the existing cancellation/state cleanup and reconciles phone pairs. Focus moves to a remaining selected car's Remove action or, after the final removal, the import field. No home, sidebar, API, scoring or storage changes are introduced.
+
+Help me decide shows its complete reasons and model context once, fully visible in the main card with source labels and links. The separate repeated Full explanation & model context disclosure is removed. Trade-offs, purchase warnings and the separate detailed vehicle/estimate evidence remain available.
+
 
 ## Do's and Don'ts
 
@@ -302,3 +311,5 @@ Cash/Finance controls stay above the four cost tabs. Summary separates upfront f
 - **Don't** add new identity assets, palette families or decorative raster work to this compact system.
 
 The home restoration and Compare-photo update passed all 198 tests and the production build. Browser/native access remains unavailable; no new screenshots or rendered approval are claimed.
+
+Latest inline-controls verification: all 199 tests and the production build passed (497 modules). The design detector returned no findings, and the independent review accepted the source changes. Browser/native access remained unavailable; rendered desktop/phone layout and zoom are unverified.

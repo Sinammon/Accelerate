@@ -645,7 +645,7 @@
   ],
   "narrative": {
     "northStar": "A familiar welcome, a clear comparison",
-    "overview": "The restored navy/electric-blue home dashboard welcomes shoppers with its floating import composer, source strip, editorial section and horizon. Working screens remain compact and use the full content width, with no left sidebar. Compare displays contained vehicle photos above the six-row overview. A header Cars menu keeps removal and selected-car source access available.",
+    "overview": "The restored navy/electric-blue home dashboard welcomes shoppers with its floating import composer, source strip, editorial section and horizon. Working screens remain compact and use the full content width, with no left sidebar. Compare displays contained vehicle photos above the six-row overview. A header Cars menu keeps removal and selected-car source access available. Compare supports inline import from its heading or the header action, plus per-car removal beside each photo. Recommendations present complete reasons and model context once in the main card, with no repeated explanation disclosure.",
     "keyCharacteristics": [
       "Compact hierarchy, flat surfaces and explicit selected states.",
       "Satoshi interface text with the retained Clash Grotesk wordmark.",
@@ -672,6 +672,11 @@
         "name": "The Task Depth Rule",
         "body": "Use tonal separation and boundaries for working content; reserve overlay depth for an actual dialog or menu.",
         "section": "elevation"
+      },
+      {
+        "name": "Direct comparison actions",
+        "body": "Keep adding and removing cars on Compare; show the recommendation explanation once and fully, with citations and visible trade-offs and warnings.",
+        "section": "components"
       }
     ],
     "dos": [

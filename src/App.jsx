@@ -70,13 +70,14 @@ function Application() {
   }, []);
   function navigate(next) { window.location.hash = next; setPage(next); }
   function startImport() {
-    navigate('import');
+    if (page === 'compare') setComparisonView(previous => ({ ...previous, importOpen: true }));
+    else navigate('import');
     requestAnimationFrame(() => {
       document.getElementById('listing-url')?.focus({ preventScroll: true });
       document.getElementById('listing-url')?.scrollIntoView({ behavior: reduced ? 'instant' : 'smooth', block: 'center' });
     });
   }
-  function removeCar(id) {
+  function removeCar(id, focusInComparison = false) {
     for (const controller of enrichmentTasks.current) if (controller.vehicleId === id) controller.abort();
     const remaining = cars.filter(car => car.legacyItemId !== id);
     setCars(remaining);
@@ -88,7 +89,12 @@ function Application() {
       setOwnershipTab('summary');
       setDecisionView({ tab: 'summary', selectedId: null });
     }
-    requestAnimationFrame(() => (document.querySelector('.managed-car-remove') || document.querySelector('.car-management > summary') || document.querySelector('.nav-button'))?.focus());
+    requestAnimationFrame(() => {
+      const target = focusInComparison
+        ? document.querySelector('.car-card.pair-visible .compare-remove') || document.querySelector('.compare-remove') || document.getElementById('listing-url') || document.querySelector('.compare-add')
+        : document.querySelector('.car-management[open] .managed-car-remove') || document.querySelector('.car-management > summary') || document.querySelector('.nav-button');
+      target?.focus();
+    });
   }
   function clearCars() {
     for (const controller of enrichmentTasks.current) controller.abort();
@@ -192,7 +198,7 @@ function Application() {
     <div className={page === 'import' ? 'dashboard-layout' : 'workspace-layout'}>
     <main id="main-content" tabIndex={-1}><m.div key={page} className="page-transition" {...enter}>
       {page === 'import' && <Dashboard importForm={importForm} onStart={startImport} onShowCosts={() => { if (cars.length) { setMode('cost'); navigate('decide'); } else requestAnimationFrame(() => document.getElementById('how-it-works')?.scrollIntoView({ block: 'center', behavior: reduced ? 'instant' : 'smooth' })); }} />}
-      {page === 'compare' && <VehicleComparison scenario={scenario} setScenario={setScenario} onSaveDetails={saveVehicleDetails} cars={cars} view={comparisonView} onViewChange={setComparisonView} notice={notice} retryResearch={retryResearch} clearSavedSpecs={() => { modelSpecCache.clear(); setNotice('Saved model specifications cleared. Your current comparison is unchanged.'); }} importForm={importForm} navigate={navigate} removeCar={removeCar} clearCars={clearCars} />}
+      {page === 'compare' && <VehicleComparison importLoading={loading} scenario={scenario} setScenario={setScenario} onSaveDetails={saveVehicleDetails} cars={cars} view={comparisonView} onViewChange={setComparisonView} notice={notice} retryResearch={retryResearch} clearSavedSpecs={() => { modelSpecCache.clear(); setNotice('Saved model specifications cleared. Your current comparison is unchanged.'); }} importForm={importForm} navigate={navigate} removeCar={removeCar} clearCars={clearCars} />}
       {page === 'decide' && <DecisionDashboard scenario={scenario} setScenario={setScenario} cars={cars} retryResearch={retryResearch} mode={mode} setMode={next => { setMode(next); setDecisionView(previous => ({ ...previous, selectedId: null })); }} view={decisionView} onViewChange={setDecisionView} />}
       {page === 'ownership' && <OwnershipCalculator cars={cars} scenario={scenario} setScenario={setScenario} state={ownership} setState={setOwnership} tab={ownershipTab} onTabChange={setOwnershipTab} />}
     </m.div></main>

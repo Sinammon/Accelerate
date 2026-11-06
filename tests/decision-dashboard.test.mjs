@@ -94,7 +94,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
       });
       if (document.querySelectorAll('[data-shortlist-id]').length > beforeCount) {
         assert.equal(document.querySelector('#compare-tab-overview').getAttribute('aria-selected'), 'true', 'imports start with the essentials');
-        assert.equal(document.querySelector('#comparison-import'), null, 'successful import leaves the focused comparison');
+        assert.equal(document.querySelector('#comparison-import').hidden, true, 'successful import collapses the inline form');
       }
       if (document.querySelector('#compare-tab-specifications')) await tab('specifications');
     };
@@ -676,4 +676,33 @@ test('main cards explain value and comfort while calculations stay in disclosure
   } finally {
     await vite.close();
   }
+});
+
+test('all six priorities show each complete reason once in the main explanation', async () => {
+  const React = await import('react');
+  const { renderToStaticMarkup } = await import('react-dom/server');
+  const vite = await createServer({ server: { middlewareMode: true, hmr: false, ws: false }, appType: 'custom' });
+  try {
+    const { default: Dashboard } = await vite.ssrLoadModule('/src/DecisionDashboard.jsx');
+    const { decisionSummary, entrySummary } = await vite.ssrLoadModule('/src/decision-summary.js');
+    const cars = [ratedCar('leader', 4, '200 hp. Curb weight: 1500 kg.', 15000), ratedCar('peer', 2, '150 hp. Curb weight: 1600 kg.', 25000)];
+    for (const mode of ['value', 'cost', 'comfort', 'practical', 'performance', 'balanced']) {
+      const summary = decisionSummary(cars, mode, new Date().getFullYear());
+      const notes = entrySummary(summary, summary.ranking.ranked[0]);
+      const dom = new JSDOM(renderToStaticMarkup(React.createElement(Dashboard, { cars, mode })));
+      const card = dom.window.document.querySelector('.decision-match-copy');
+      const reasons = [...card.querySelectorAll(':scope > .decision-reasons > li')];
+      assert.equal(card.querySelectorAll('.decision-reasons').length, 1, mode);
+      assert.equal(card.querySelector('.additional-reasons'), null, mode);
+      assert.equal(reasons.length, notes.reasons.length, mode);
+      notes.reasons.forEach((reason, index) => {
+        assert.ok(reasons[index].textContent.startsWith(reason.text), mode);
+        assert.ok(reasons[index].textContent.includes(reason.label), mode);
+        assert.equal(reasons[index].closest('details'), null, mode);
+        if (reason.source) assert.ok([...reasons[index].querySelectorAll('a')].some(link => link.getAttribute('href') === reason.source.url), mode);
+      });
+      assert.ok(card.querySelector('.decision-tradeoff').textContent.includes(notes.tradeoff), mode);
+      dom.window.close();
+    }
+  } finally { await vite.close(); }
 });
