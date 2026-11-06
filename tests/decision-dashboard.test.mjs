@@ -189,8 +189,8 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(document.querySelector('.decision-match .experience-comfort'), null);
     assert.match(document.querySelector('.decision-match-copy .decision-reasons').textContent, /Estimated annual fuel cost.*CAD\/year.*15,000 km\/year/s);
     assert.equal(document.querySelector('.decision-match-copy .ownership-match-action').getAttribute('href'), '#ownership');
-    assert.match(document.querySelector('.ownership-costs').textContent, /Insurance.*Personal quote needed/s);
-    assert.match(document.querySelector('.ownership-scope').textContent, /not estimated or included in the ranking/);
+    assert.match(document.querySelector('.ownership-costs').textContent, /Insurance.*Generic Ontario average/s);
+    assert.match(document.querySelector('.ownership-scope').textContent, /annual running expenses \(20%\)/);
     await act(async () => { document.querySelector('.ownership-scenario button').click(); await new Promise(resolve => setTimeout(resolve, 20)); });
     assert.equal(document.querySelector('.scenario-panel').open, true);
     assert.equal(document.activeElement, document.querySelector('.scenario-panel input'));
@@ -261,7 +261,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
       if (String(input).startsWith('/data/')) return Response.json({ columns: [], rows: [] });
       if (input === '/api/model-specs') {
         const config = JSON.parse(init.body);
-        if (config.domain === 'experience') return Response.json({ modelSpecs: { status: 'partial', fields: {} } });
+        if (['experience', 'ownership'].includes(config.domain)) return Response.json({ modelSpecs: { status: 'partial', fields: {} } });
         if (config.phase === 'research') return Response.json(savedResponses.get(config.model) || { modelSpecs: { status: 'unavailable', fields: {} } });
         return new Promise(resolve => researchPending.push({ signal: init.signal, resolve: async response => {
           const data = await response.json(); if (!init.signal.aborted) savedResponses.set(config.model, data); resolve(Response.json(data));
@@ -295,7 +295,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(document.querySelector('.decision-match').dataset.basis, 'supported');
     assert.match(document.querySelector('.decision-reasons').textContent, /158 hp.*Typical model spec/);
     assert.match(document.querySelector('.score-parts').textContent, /Typical model spec/);
-    assert.equal(document.querySelectorAll('.decision-reasons > li').length <= 3, true);
+    assert.equal(document.querySelectorAll('.decision-reasons > li:not(.model-context)').length <= 3, true);
     assert.equal(document.querySelectorAll('.decision-key-facts > div').length <= 3, true);
     // Retry research without reimporting; a failed retry preserves known specifications.
     await go('compare');
@@ -387,7 +387,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     await tab('sources');
     assert.equal(demoRequests.length, 3);
     assert.match(document.querySelector('.demo-notice').textContent, /fictional/i);
-    assert.match(document.querySelector('.source-status-grid').textContent, /Reference specifications and your entries.*Seller-reported claims.*Typical model information.*Still to verify on this car/s);
+    assert.match(document.querySelector('.source-status-grid').textContent, /Reference specifications and your entries.*Seller-reported claims.*Model advice.*Still to verify on this car/s);
     assert.ok(document.querySelector('.model-research a[href="https://www.caranddriver.com/honda/civic-2018"]'));
     await tab('specifications');
     // Fuel references load from disk asynchronously. Wait for their table row;
@@ -548,7 +548,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     };
     await change('#listing-url', 'https://www.ebay.ca/itm/999999999999');
     await submit();
-    assert.equal(detailRequests.length, 1, 'ambiguous engines allow model-level experience without selecting a base engine');
+    assert.deepEqual(detailRequests.map(request => request.domain).sort(), ['experience', 'ownership'], 'ambiguous engines allow model-level experience and ownership without selecting a base engine');
     assert.equal(detailRequests[0].domain, 'experience');
     await showSource();
     await act(async () => document.querySelector('.vehicle-summary .research-control button').click());
@@ -696,7 +696,7 @@ test('all six priorities show each complete reason once in the main explanation'
       assert.equal(card.querySelector('.additional-reasons'), null, mode);
       assert.equal(reasons.length, notes.reasons.length, mode);
       notes.reasons.forEach((reason, index) => {
-        assert.ok(reasons[index].textContent.startsWith(reason.text), mode);
+        assert.ok(reasons[index].textContent.includes(reason.text), mode);
         assert.ok(reasons[index].textContent.includes(reason.label), mode);
         assert.equal(reasons[index].closest('details'), null, mode);
         if (reason.source) assert.ok([...reasons[index].querySelectorAll('a')].some(link => link.getAttribute('href') === reason.source.url), mode);

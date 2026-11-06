@@ -1,6 +1,6 @@
 # Accelerate redesign direction contract
 
-Historical contract: the user-approved cinematic redesign supersedes this visual direction. Use [the dashboard contract](src-dashboard-jsx.md) for current work; this record is retained as history.
+Historical visual contract: the user-approved cinematic redesign supersedes this visual direction. Use [the dashboard contract](src-dashboard-jsx.md) for current composition; this record retains the earlier direction and the current ownership-planning behavior below.
 
 Pinned user-approved direction, implemented 2 November 2026. The historic filename is retained; the current product name is Accelerate. Code-led implementation; no comp artifact. The approved Aerotime reference supersedes the previous Core blue-black refinement and provisional concept seed `seed:dc39d1b894f0064b`.
 
@@ -32,10 +32,20 @@ Overview is the default; Specifications preserves supported fields and Sources &
 
 Preserve keyboard tabs, focus behavior, inline import completion, pair switching, memory across navigation and reconciliation after removal. Retain configuration confirmation and editable details with save/reset and provenance. Use brief feedback, manual preview transitions and deliberate in-page smooth scrolling. Respect reduced motion; do not replay movement on every research update.
 
+## Ownership-planning extension, 5 November 2026
+
+Costs and Recommendation remain compact Operate surfaces in the established electric-blue/navy workspace. Preserve the restored home, contained vehicle photographs, inline Compare Add/Remove controls and sidebar-free layout. No new identity, palette or token family is introduced.
+
+Costs Summary shows annual insurance, annual maintenance/tyres/repair reserve and gross salary using the same assessment as Salary guide. Finance explicitly covers loan payments plus running expenses; upfront purchase funding or down payment stays separate. Running costs exposes editable central amounts with a Planning range & assumptions disclosure for low/central/high values, date, rationale and assumptions. Central estimates update only untouched fields; Reset to estimate clears one field's override. Missing model estimates retain clearly generic FSRA June 2026 Ontario insurance ($2,218/year) and $0.10/km maintenance labels. Incomplete amounts remain visible as Incomplete.
+
+Affordability uses 80% seller asking price and 20% all annual running expenses: fuel/charging, insurance, maintenance, parking/tolls and other costs. Ranking and Costs share their resolver and valid shopper overrides. Estimates make the result provisional; incomplete totals exclude the expense factor for every eligible contender. Other priorities retain their scoring, including Balanced's existing price/fuel affordability subscore.
+
+One fully visible model brief joins the existing recommendation reasons: overview, benefits, problems to investigate and engine/reliability context. Prefer applicable sourced observations with citations; date and label fallback text AI model guidance—not independently verified. Unresolved engine variants keep an explicit model-level caveat. Present the same brief in Sources & checks. Do not repeat existing reasons or the trade-off in another expandable explanation; retain separate seller-history attribution and purchase warnings.
+
 ## Hard constraints
 
-Preserve hash routes, import validation and async cancellation, four-car limit, removal/replacement, all six priorities, VIN compatibility, factory power enrichment, supported evidence and purchase warnings. Missing data stays unknown. No new backend/schema APIs, paid fallback, persistence or deployment changes. No page-level horizontal overflow, cropped vehicle photos, autoplay, invented proof or unsupported claims.
+Preserve hash routes, import validation and async cancellation, four-car limit, removal/replacement, all six priorities, VIN compatibility, factory power enrichment, supported evidence and purchase warnings. Missing data stays unknown. The latest scope authorizes quick ownership-domain requests on the existing model-specs API, structured ownership estimates/model advice and a seven-day allowlisted model-only cache. Salary, driver identity, VINs, listing descriptions and calculator overrides are excluded from those requests and persistence. No paid fallback, new personal-data storage or deployment changes. No page-level horizontal overflow, cropped vehicle photos, autoplay, invented proof or unsupported claims.
 
 ## Verification
 
-Source review returned ship at SOURCE-ONLY scope, with no material findings. All 157 tests and the production build passed; existing Motion use-client and bundle-size advisories remain. Contrast regression covers text, actions, links and semantic state foregrounds across landing and workspace fields. Browser-host inspection and native `@oai/sky` were unavailable. No desktop/mobile screenshot approval or verified responsive rendering is claimed. Rendered checks at desktop, tablet, phone and 200% zoom remain a recapture item.
+For the ownership-planning extension, the detector ran once and returned no findings. Independent source review returned ship at SOURCE-ONLY scope with no material findings. Regression and production-build results are reported with the completed implementation. Browser/native access was confirmed unavailable in this turn; no screenshots, desktop/phone rendering or 200% zoom approval are claimed. Rendered checks remain a recapture item.

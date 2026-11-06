@@ -1,3 +1,4 @@
+import { validatedOwnershipEstimates, validatedModelAdvice } from '../shared/ownership-estimates.js';
 import { CATALOG_VERSION } from '../shared/catalog-version.js';
 import { CONFIG_FIELDS, MODEL_FIELDS, cosmeticTrim, modelKey, modelSpecsInput, usableModelFinding, mergeResearch, validatedResearch } from '../shared/model-specs.js';
 import { validatedExperience, hasExperience } from '../shared/experience.js';
@@ -35,7 +36,7 @@ export function createSpecCache({ storage, now = Date.now, maxEntries = 200 } = 
       const saved = JSON.parse(getStorage()?.getItem(STORAGE_KEY) || '[]');
       for (const entry of Array.isArray(saved) ? saved.slice(-maxEntries) : []) {
         const input = modelSpecsInput({ ...scopeOnly(entry?.input), fields: MODEL_FIELDS });
-        if (entry?.catalogVersion === CATALOG_VERSION && input && typeof entry.savedAt === 'number' && entry.savedAt <= now()) entries.set(specCacheKey(input), { catalogVersion: CATALOG_VERSION, input: scopeOnly(input), fields: entry.fields || {}, experience: validatedExperience(entry.experience, input), dimensionRatings: validatedResearch({ dimensionRatings: entry.dimensionRatings }, input).dimensionRatings, savedAt: entry.savedAt });
+        if (entry?.catalogVersion === CATALOG_VERSION && input && typeof entry.savedAt === 'number' && entry.savedAt <= now()) entries.set(specCacheKey(input), { catalogVersion: CATALOG_VERSION, input: scopeOnly(input), fields: entry.fields || {}, experience: validatedExperience(entry.experience, input), dimensionRatings: validatedResearch({ dimensionRatings: entry.dimensionRatings }, input).dimensionRatings, ownershipEstimates: validatedOwnershipEstimates(entry.ownershipEstimates, input, now()), modelAdvice: validatedModelAdvice(entry.modelAdvice, input, now()), savedAt: entry.savedAt });
       }
     } catch {}
   };
@@ -60,7 +61,9 @@ export function createSpecCache({ storage, now = Date.now, maxEntries = 200 } = 
       };
       const experience = mapExperience(validatedExperience(entry.experience, input), record => ageRecord(record, true));
       const dimensionRatings = Object.fromEntries(Object.entries(validatedResearch({ dimensionRatings: entry.dimensionRatings }, input).dimensionRatings).map(([key, record]) => [key, ageRecord(record, false)]).filter(([, record]) => record));
-      return Object.keys(fields).length || hasExperience(experience) || Object.keys(dimensionRatings).length ? { status: 'partial', fields, experience, dimensionRatings, reason: 'Saved model details are available; older results are labeled when used during an outage.' } : null;
+      const ownershipEstimates = validatedOwnershipEstimates(entry.ownershipEstimates, input, now());
+      const modelAdvice = validatedModelAdvice(entry.modelAdvice, input, now());
+      return ownershipEstimates || modelAdvice || Object.keys(fields).length || hasExperience(experience) || Object.keys(dimensionRatings).length ? { status: 'partial', fields, experience, dimensionRatings, ownershipEstimates, modelAdvice, reason: 'Saved model details are available; older results are labeled when used during an outage.' } : null;
     },
     save(input, research) {
       load(); const key = specCacheKey(input), previous = entries.get(key);
@@ -75,8 +78,12 @@ export function createSpecCache({ storage, now = Date.now, maxEntries = 200 } = 
       const stamp = record => ({ ...record, cachedAt: record.cachedAt ?? now(), stale: undefined, fromCache: undefined });
       const experience = mapExperience(validatedExperience(combined.experience, input), stamp);
       const dimensionRatings = Object.fromEntries(Object.entries(validatedResearch({ dimensionRatings: combined.dimensionRatings }, input).dimensionRatings).map(([key, record]) => [key, stamp(savedRating(record))]));
-      if (!Object.keys(fields).length && !hasExperience(experience) && !Object.keys(dimensionRatings).length) return;
-      entries.delete(key); entries.set(key, { catalogVersion: CATALOG_VERSION, input: scopeOnly(input), fields, experience, dimensionRatings, savedAt: now() });
+      const cleanEstimates = validatedOwnershipEstimates(combined.ownershipEstimates, input, now());
+      const ownershipEstimates = cleanEstimates && { ...cleanEstimates, ...Object.fromEntries(['insuranceAnnual', 'maintenancePerKm'].filter(k => cleanEstimates[k]).map(k => [k, stamp(cleanEstimates[k])])) };
+      const cleanAdvice = validatedModelAdvice(combined.modelAdvice, input, now());
+      const modelAdvice = cleanAdvice && stamp(cleanAdvice);
+      if (!ownershipEstimates && !modelAdvice && !Object.keys(fields).length && !hasExperience(experience) && !Object.keys(dimensionRatings).length) return;
+      entries.delete(key); entries.set(key, { catalogVersion: CATALOG_VERSION, input: scopeOnly(input), fields, experience, dimensionRatings, ownershipEstimates, modelAdvice, savedAt: now() });
       while (entries.size > maxEntries) entries.delete(entries.keys().next().value);
       persist();
     },

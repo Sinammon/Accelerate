@@ -1,3 +1,4 @@
+import { ownershipModelData } from './ownership-estimates.js';
 import React from 'react';
 import { resolveMileage, mileageEvidenceLabel } from './mileage.js';
 import { extractVehicleSpecs, FIELD_LABELS } from './vehicle-specs.js';
@@ -39,8 +40,9 @@ export function ResearchAction({ car, retryResearch, compact = false, onViewResu
   const specs = Object.keys(research?.fields || {}).length, notes = research?.insights?.length || 0;
   const dimensions = Object.keys(research?.dimensionRatings || {}).length;
   const estimatesReady = hasExperience(research?.experience);
-  const ready = specs + notes + dimensions > 0 || estimatesReady;
-  const readySummary = specs + notes + dimensions > 0 ? `Research ready: ${specs} specifications` : 'Comfort and running-cost estimates ready';
+  const planning = ownershipModelData(car);
+  const ready = specs + notes + dimensions > 0 || estimatesReady || planning.estimates || planning.advice;
+  const readySummary = specs + notes + dimensions > 0 ? `Research ready: ${specs} specifications` : planning.estimates || planning.advice ? 'Ownership estimates and model advice ready' : 'Comfort and running-cost estimates ready';
   const failed = research && !['matched', 'partial', 'complete', 'loading'].includes(research.status);
   function showResults() {
     if (onViewResults) { onViewResults(); return; }

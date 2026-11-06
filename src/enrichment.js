@@ -40,6 +40,18 @@ export async function enrichVehicle(car, { fetcher = fetch, signal, researchSign
     emit('specs');
   })().catch(() => {});
 
+  const ownershipTask = (async () => {
+    if (car.demo) return;
+    const request = experienceResearchRequest(candidate());
+    if (!request) return;
+    const prior = cache.read(request);
+    state.modelSpecs = mergeResearch(state.modelSpecs, prior || {});
+    if (!force && prior?.ownershipEstimates?.insuranceAnnual && prior.ownershipEstimates.maintenancePerKm && prior.modelAdvice) { emit('specs'); return; }
+    const result = await loadModelSpecs(candidate(), { fetcher, signal: specsSignal, phase: 'quick', domain: 'ownership', cache: phaseCache, scheduler });
+    state.modelSpecs = mergeResearch(state.modelSpecs, result);
+    emit('specs');
+  })().catch(() => {});
+
   const initialYear = extractVehicleSpecs(candidate()).specs.year.value;
   const initialFuelRows = loadFuelYear(initialYear, { fetcher, signal }).catch(() => null);
 
@@ -131,7 +143,7 @@ export async function enrichVehicle(car, { fetcher = fetch, signal, researchSign
     state.modelSpecs = mergeResearch(state.modelSpecs, { status: 'unavailable', fields: {}, reason: 'Specification lookup could not finish. Existing values remain available.' });
     state.specsStatus = 'failed'; emit('specs');
   });
-  await Promise.all([vinTask, specsTask, catalogTask, experienceTask]);
+  await Promise.all([vinTask, specsTask, catalogTask, experienceTask, ownershipTask]);
   signal?.throwIfAborted();
   state.status = 'complete';
   return { ...state };

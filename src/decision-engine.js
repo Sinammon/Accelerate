@@ -82,13 +82,13 @@ export function rankCars(cars, priorities = DEFAULT_PRIORITIES, currentYear = ne
 
 export const DECISION_MODES = [
   { id: 'value', title: 'BEST VALUE', description: 'What each car offers for the asking price.', weights: { capability: 50, price: 35, age: 10, mileage: 5 } },
-  { id: 'cost', title: 'AFFORDABILITY', description: 'Compare asking price and fuel or charging, then check insurance and the wider costs of ownership.', weights: { price: 80, fuel: 20 } },
+  { id: 'cost', title: 'AFFORDABILITY', description: 'Compare asking price and annual running expenses, including insurance and maintenance estimates.', weights: { price: 80, running: 20 } },
   { id: 'practical', title: 'EVERYDAY PRACTICALITY', description: 'Seating needs, passenger space, body preference and usable cargo capacity.' },
   { id: 'performance', title: 'PERFORMANCE', description: 'Acceleration, power-to-weight and supported engine output.' },
   { id: 'comfort', title: 'COMFORT', description: 'Ride quality, seat cushioning, heating and cabin quietness.' },
   { id: 'balanced', title: 'BALANCED CHOICE', description: 'Overall capability and everyday usability, with less emphasis on price.', weights: { capability: 75, affordability: 15, age: 5, mileage: 5 } },
 ];
 export { DEFAULT_SCENARIO } from '../shared/experience.js';
-export function rankDecisionMode(cars, modeId, year = new Date().getFullYear(), scenario = DEFAULT_SCENARIO) {
-  return rankCapabilities(cars, DECISION_MODES.find(mode => mode.id === modeId) || DECISION_MODES[0], year, scenario, detectWarnings);
+export function rankDecisionMode(cars, modeId, year = new Date().getFullYear(), scenario = DEFAULT_SCENARIO, ownership = {}) {
+  return rankCapabilities(cars, DECISION_MODES.find(mode => mode.id === modeId) || DECISION_MODES[0], year, scenario, detectWarnings, ownership);
 }

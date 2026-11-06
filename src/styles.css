@@ -58,3 +58,18 @@
 .details-fields input, .details-fields select, .configuration-choice select { width: 100%; min-width: 0; min-height: 44px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-control); padding: 10px; font: inherit; }
 .details-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .configuration-choice small, .details-editor-content small { color: var(--text-secondary); }
+
+/* Model planning data stays subordinate to editable costs and primary reasons. */
+.ownership-estimate-details { margin-top: .5rem; font-size: .875rem; }
+.ownership-estimate-details p { margin: .5rem 0; max-width: 70ch; }
+.ownership-range { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: .75rem 0; font-variant-numeric: tabular-nums; }
+.ownership-range > div { min-width: 5rem; }
+.ownership-range dt { color: var(--text-secondary); }
+.ownership-range dd { margin: 0; font-weight: 650; }
+.ownership-reset { margin-block: .35rem; }
+.model-advice-topic { display: block; margin-bottom: .2rem; font-size: .875rem; }
+.model-advice ul { padding-left: 1.25rem; }
+.model-advice li { margin-block: .75rem; max-width: 70ch; overflow-wrap: anywhere; }
+.model-advice li p { margin-block: .25rem; }
+.model-advice li small { display: block; color: var(--text-secondary); }
+.model-advice li a { margin-right: .75rem; }

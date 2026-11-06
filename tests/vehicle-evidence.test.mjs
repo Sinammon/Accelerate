@@ -247,7 +247,7 @@ test('enrichment gracefully handles missing VIN, API outages and static-data fai
   const result = await enrichVehicle(car, { fetcher: async url => { calls.push(url); return Response.json(data); } });
   assert.equal(result.vin.status, 'missing');
   assert.equal(result.fuel.status, 'matched');
-  assert.equal(calls.filter(url => url === '/api/model-specs').length, 4);
+  assert.equal(calls.filter(url => url === '/api/model-specs').length, 5);
   assert.ok(calls.includes('/data/fuel/2018.json'));
   assert.deepEqual(car, before);
   const outage = await enrichVehicle({ ...car, vin }, { fetcher: async () => new Response('Unavailable', { status: 503 }) });
@@ -319,8 +319,8 @@ test('fuel estimates and mixed grades remain comparable alongside seating and bo
   const result = rankDecisionMode([a, b], 'cost');
   assert.equal(result.best[0].car.legacyItemId, 'B');
   assert.equal(result.best[0].score, 60); // equal price: 50 × .8; best fuel: 100 × .2
-  assert.equal(rankDecisionMode([a, listing({ legacyItemId: 'B' })], 'cost').criteria.find(c => c.key === 'fuel').active, true);
-  assert.equal(rankDecisionMode([a, { ...b, enrichment: { fuel: { ...b.enrichment.fuel, fuel: 'Z' } } }], 'cost').criteria.find(c => c.key === 'fuel').active, true);
+  assert.equal(rankDecisionMode([a, listing({ legacyItemId: 'B' })], 'cost').criteria.find(c => c.key === 'running').active, true);
+  assert.equal(rankDecisionMode([a, { ...b, enrichment: { fuel: { ...b.enrichment.fuel, fuel: 'Z' } } }], 'cost').criteria.find(c => c.key === 'running').active, true);
   const suv = listing({ legacyItemId: 'SUV', itemSpecifics: aspects({ 'Body type': 'SUV', Seats: '7' }) });
   const practical = rankDecisionMode([listing(), suv], 'practical', 2026, { annualKm: 15000, pricePerLitre: 1.7, minSeats: 7, bodyType: 'SUV' });
   assert.equal(practical.best[0].car.legacyItemId, 'SUV');

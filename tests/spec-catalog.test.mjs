@@ -108,7 +108,7 @@ test('an old AI engine estimate cannot steer catalog matching or survive a real 
   } });
   assert.equal(result.catalog.status, 'ambiguous');
   assert.equal(extractVehicleSpecs({ ...car, enrichment: result }).specs.displacement.value, null);
-  assert.equal(providerCalls, 1, 'model-level experience remains available without selecting a reference engine');
+  assert.equal(providerCalls, 2, 'model-level experience and ownership remain available without selecting a reference engine');
 });
 
 test('optional research domain is validated and omission retains the combined API contract', async () => {

@@ -201,3 +201,56 @@ test('ownership journey preserves private inputs, cleans removed cars, resets on
     assert.ok([...Array(window.localStorage.length)].every((_, i) => !/salary|ownership/.test(window.localStorage.key(i))));
   } finally { globalThis.fetch = originalFetch; await ctx.close(); }
 });
+
+test('automatic model costs preserve edits, reset individual fields and keep Summary salary identical to Salary guide', async () => {
+  const ctx = await setup();
+  try {
+    const { React, vite, root, change } = ctx;
+    const { default: Calculator } = await vite.ssrLoadModule('/src/OwnershipCalculator.jsx');
+    const { createOwnershipState } = await vite.ssrLoadModule('/src/ownership-calculator.js');
+    const { DEFAULT_SCENARIO } = await vite.ssrLoadModule('/shared/experience.js');
+    const { ownershipCar } = await import('./fixtures/ownership-fixtures.mjs');
+    let replaceCars, settings;
+    function Harness() {
+      const [state, setState] = React.useState(createOwnershipState);
+      const [scenario, setScenario] = React.useState(DEFAULT_SCENARIO);
+      const [cars, setCars] = React.useState([ownershipCar()]);
+      replaceCars = setCars; settings = state;
+      return React.createElement(Calculator, { cars, state, setState, scenario, setScenario });
+    }
+    await React.act(async () => root.render(React.createElement(Harness)));
+    const field = key => document.querySelector(`[data-field="${key}"]`);
+    const summarySalary = () => document.querySelector('[data-summary-salary]').textContent;
+    const salaryGuide = () => [...document.querySelectorAll('.ownership-results dt')].find(dt => dt.textContent.startsWith('Gross salary')).nextElementSibling.firstChild.textContent;
+    assert.equal(field('insuranceAnnual').value, '2600');
+    assert.equal(field('maintenancePerKm').value, '0.14');
+    assert.equal(summarySalary(), salaryGuide());
+    assert.match(document.querySelector('#costs-panel-summary').textContent, /Insurance \/ year.*\$2,600.*Maintenance.*\$2,100/s);
+    assert.match(document.querySelector('.ownership-estimate-details').textContent, /Low.*Central.*High.*Estimated.*deductibles/s);
+    await change(field('insuranceAnnual'), '1800');
+    await change(field('maintenancePerKm'), '0.08');
+    await React.act(async () => replaceCars([ownershipCar('a', { insurance: 3500, maintenance: .22 })]));
+    assert.equal(field('insuranceAnnual').value, '1800');
+    assert.equal(field('maintenancePerKm').value, '0.08');
+    assert.equal(document.querySelectorAll('.ownership-reset').length, 2);
+    await React.act(async () => document.querySelector('[aria-label^="Reset insurance"]').click());
+    assert.equal(field('insuranceAnnual').value, '3500');
+    assert.equal(field('maintenancePerKm').value, '0.08');
+    assert.equal(Object.hasOwn(settings.vehicles.a, 'insuranceAnnual'), false);
+    await change(field('annualKm'), '20000');
+    assert.match(document.querySelector('#costs-panel-summary').textContent, /Maintenance.*\$1,600/s);
+    await React.act(async () => document.querySelector('[aria-label^="Reset maintenance"]').click());
+    assert.equal(field('maintenancePerKm').value, '0.22');
+    assert.match(document.querySelector('#costs-panel-summary').textContent, /Maintenance.*\$4,400/s);
+    for (const method of ['Cash', 'Finance']) {
+      await React.act(async () => [...document.querySelectorAll('.ownership-method button')].find(b => b.textContent === method).click());
+      await change(field('takeHomePercent'), '80'); await change(field('comfortablePercent'), '12');
+      assert.equal(summarySalary(), salaryGuide(), method);
+      assert.match(document.querySelector('#costs-panel-summary').textContent, method === 'Finance' ? /Gross salary for comfortable loan \+ running costs/ : /Gross salary for comfortable running costs/);
+    }
+    await change(field('insuranceAnnual'), '');
+    assert.equal(summarySalary(), 'Incomplete'); assert.equal(salaryGuide(), 'Incomplete');
+    assert.equal(field('insuranceAnnual').getAttribute('aria-invalid'), 'true');
+    assert.equal(window.localStorage.length, 0);
+  } finally { await ctx.close(); }
+});

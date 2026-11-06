@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { createServer } from 'vite';
 import { JSDOM } from 'jsdom';
 
-test('ownership context distinguishes fuel scenarios, personal quotes and unavailable costs without inventing totals', async () => {
+test('ownership context shows complete running totals, generic fallbacks and incomplete amounts', async () => {
   const vite = await createServer({ server: { middlewareMode: true, hmr: false }, appType: 'custom' });
   try {
     const { default: OwnershipCosts } = await vite.ssrLoadModule('/src/OwnershipCosts.jsx');
@@ -16,20 +16,21 @@ test('ownership context distinguishes fuel scenarios, personal quotes and unavai
     const render = assumptions => new JSDOM(renderToStaticMarkup(React.createElement(OwnershipCosts, { cars: [car, missing], scenario: assumptions })));
     const page = render(scenario);
     const cards = page.window.document.querySelectorAll('.ownership-vehicles > li');
-    assert.match(cards[0].textContent, /\$1,530 CAD\/year.*\$128 CAD\/month average/s);
+    assert.match(cards[0].textContent, /\$1,530 CAD.*\$5,248 CAD\$437 CAD\/month average/s);
     assert.match(page.window.document.querySelector('.ownership-scenario').textContent, /\$1\.70 CAD\/L/);
     assert.match(cards[1].textContent, /General baseline/);
-    assert.match(cards[1].textContent, /CAD\/year/);
-    assert.doesNotMatch(cards[1].textContent, /\$0 CAD/);
-    for (const card of cards) assert.match(card.textContent, /Personal quote needed.*No premium has been estimated/s);
-    assert.match(page.window.document.querySelector('.ownership-scope').textContent, /does not establish the cheapest car to own/);
-    assert.match(page.window.document.querySelector('.ownership-checklist').textContent, /Insurance.*Servicing.*Taxes.*Financing.*Parking.*Depreciation/s);
-    assert.equal(page.window.document.querySelectorAll('.ownership-guides a[rel="noopener noreferrer"]').length, 3);
+    assert.match(cards[1].textContent, /Annual running expenses/);
+    assert.match(cards[1].textContent, /Insurance.*\$2,218 CAD/s);
+    for (const card of cards) assert.match(card.textContent, /Generic Ontario average.*Generic planning allowance/s);
+    assert.match(page.window.document.querySelector('.ownership-scope').textContent, /annual running expenses \(20%\)/);
+    assert.match(page.window.document.querySelector('.ownership-checklist').textContent, /insurance quotes.*service records.*taxes.*financing/s);
+    assert.equal(page.window.document.querySelectorAll('.ownership-checklist a[rel="noopener noreferrer"]').length, 1);
     page.window.close();
     for (const invalid of [{ ...scenario, annualKm: 0 }, { ...scenario, pricePerLitre: NaN }, { ...scenario, annualKm: Number.MAX_VALUE, pricePerLitre: 10 }]) {
       const page = render(invalid);
-      assert.doesNotMatch(page.window.document.body.textContent, /Infinity|NaN|\$0 CAD/);
-      assert.equal(page.window.document.querySelectorAll('.ownership-facts dd')[1].textContent, 'Check driving and price assumptions');
+      assert.doesNotMatch(page.window.document.body.textContent, /Infinity|NaN/);
+      assert.match(page.window.document.querySelectorAll('.ownership-facts dd')[1].textContent, /Incomplete/);
+      assert.match(page.window.document.querySelector('.ownership-vehicles li').textContent, /Annual running expensesIncomplete/);
       page.window.close();
     }
     assert.deepEqual({ car, missing, scenario }, before);

@@ -37,7 +37,7 @@ export function experienceResearchRequest(car) {
 let dailyCooldownUntil = 0;
 export async function loadModelSpecs(car, { fetcher = fetch, signal, phase = 'research', domain, requestedFields, cache, scheduler = specScheduler } = {}) {
   if (car.demo) return { status: 'skipped', fields: {}, reason: 'Fictional demo uses bundled references; no AI request is made.' };
-  const { input, reason } = domain === 'experience' ? { input: experienceResearchRequest(car), reason: 'Add year, make and model to improve general estimates.' } : researchConfiguration(car);
+  const { input, reason } = ['experience', 'ownership'].includes(domain) ? { input: experienceResearchRequest(car), reason: 'Add year, make and model to improve general estimates.' } : researchConfiguration(car);
   if (!input) return { status: 'insufficient', fields: {}, reason };
   if (phase === 'quick') input.fields = input.fields.filter(key => CORE_SPEC_FIELDS.includes(key));
   if (requestedFields) input.fields = input.fields.filter(key => requestedFields.includes(key));

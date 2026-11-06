@@ -1,3 +1,5 @@
+import { resolveOwnershipEstimates } from './ownership-estimates.js';
+import { OWNERSHIP_ASSUMPTIONS } from '../shared/ownership-estimates.js';
 import React, { useId, useState } from 'react';
 import WorkspaceHeading from './WorkspaceHeading.jsx';
 import WorkspaceTabs, { WorkspacePanel } from './WorkspaceTabs.jsx';
@@ -20,6 +22,16 @@ function EnergySources({ energy }) {
     {(energy.assumptions || []).map(text => <p key={text}>{text}</p>)}
     {sources.map(source => <p key={source.url}><a href={safeUrl(source.url)} target="_blank" rel="noopener noreferrer">{source.source || source.publisher || 'Energy reference'}</a></p>)}
   </details>;
+}
+
+function EstimateDetails({ estimate, perKm = false }) {
+  const amount = n => perKm ? `$${n.toFixed(3).replace(/0$/, '')}/km` : `${money(n)}/year`;
+  return estimate.low != null ? <details className="ownership-estimate-details"><summary>Planning range &amp; assumptions</summary>
+    <dl className="ownership-range">{[['Low', estimate.low], ['Central', estimate.central], ['High', estimate.high]].map(([label, n]) => <div key={label}><dt>{label}</dt><dd>{amount(n)}</dd></div>)}</dl>
+    <p>AI model estimate · not independently verified. Estimated {new Date(estimate.checked).toLocaleDateString('en-CA')}. Central amount used unless edited.</p>
+    <p>{estimate.rationale}</p>{estimate.assumptions.map(text => <p key={text}>{text}</p>)}<p>{OWNERSHIP_ASSUMPTIONS}</p>
+    {perKm && <p>Routine service, tyres and a repair reserve per kilometre. Annual reserve changes with your driving distance; this is not a repair forecast.</p>}
+  </details> : <small>{perKm ? 'Generic $0.10/km allowance; not a forecast for this car.' : <>Ontario average—not a quote for this vehicle. June 2026 · <a href={FSRA} target="_blank" rel="noopener noreferrer">FSRA</a></>}</small>;
 }
 
 function CostField({ name, label, context, value, onChange, hint, optional = false, bounds = OWNERSHIP_BOUNDS[name], error, step = '0.01', placeholder = optional ? 'Automatic' : undefined }) {
@@ -50,10 +62,19 @@ export default function OwnershipCalculator({ cars, scenario, setScenario, state
     const inputs = ownershipInputs(car, state.vehicles[car.legacyItemId]);
     const experience = resolveVehicleExperience(car, energyScenario);
     const costs = calculateOwnership({ inputs, settings: state, annualKm: energyScenario.annualKm, annualEnergyCost: experience.energy.annualCost });
-    return { car, inputs, experience, costs, assessment: assessOwnership(costs.monthlyBudget, state) };
+    return { car, inputs, experience, costs, estimates: resolveOwnershipEstimates(car), assessment: assessOwnership(costs.monthlyBudget, state) };
   });
   const settingField = (name, label, options = {}) => <CostField name={name} label={label} value={state[name]} onChange={value => update(name, value)} {...options} />;
   const carField = (record, name, label, hint, options = {}) => <CostField name={name} label={label} context={vehicleName(record.car)} value={record.inputs[name]} onChange={value => updateCar(record.car.legacyItemId, name, value)} hint={hint} {...options} />;
+  const estimateField = (r, name, label, perKm = false) => {
+    const edited = Object.hasOwn(state.vehicles[r.car.legacyItemId] || {}, name);
+    return <>{carField(r, name, label, edited ? 'Your estimate or quote; automatic updates will not replace it.' : r.estimates[name].label, perKm ? { step: '0.001' } : {})}
+      {edited && <button type="button" className="text-button ownership-reset" aria-label={`Reset ${perKm ? 'maintenance' : 'insurance'} to estimate for ${vehicleName(r.car)}`} onClick={() => setState(previous => {
+        const overrides = { ...previous.vehicles[r.car.legacyItemId] }; delete overrides[name];
+        return { ...previous, vehicles: { ...previous.vehicles, [r.car.legacyItemId]: overrides } };
+      })}>Reset to estimate</button>}
+      <EstimateDetails estimate={r.estimates[name]} perKm={perKm} /></>;
+  };
   const energyField = (name, label, step = '0.01') => <CostField name={name} label={label} step={step} bounds={SCENARIO_BOUNDS[name]} value={state.energyDrafts[name] ?? scenario[name]} onChange={value => {
     const valid = !blank(value) && validScenarioValue(name, Number(value)) && (step !== '1' || Number.isInteger(Number(value)));
     setState(previous => {
@@ -86,8 +107,8 @@ export default function OwnershipCalculator({ cars, scenario, setScenario, state
   ];
   const runningRows = [
     ['Fuel / electricity · annual', r => <>{value(r, 'energy')}<small>{r.inputs.energyOverride !== '' ? 'Your annual energy estimate' : experienceLabel(r.experience.energy)}</small>{carField(r, 'energyOverride', 'Annual energy override (CAD)', 'Optional: blank uses consumption and shared driving assumptions.', { optional: true })}<EnergySources energy={r.experience.energy} /></>],
-    ['Insurance · annual', r => carField(r, 'insuranceAnnual', 'Annual insurance (CAD)', Object.hasOwn(state.vehicles[r.car.legacyItemId] || {}, 'insuranceAnnual') ? 'Your estimate or quote; confirm coverage.' : <>Ontario average—not a quote for this vehicle. June 2026 · <a href={FSRA} target="_blank" rel="noopener noreferrer">FSRA</a></>)],
-    ['Maintenance, tyres & repairs', r => <>{value(r, 'maintenance')}<small>Annual reserve at your driving distance</small>{carField(r, 'maintenancePerKm', 'Reserve (CAD/km)', 'Generic planning estimate; not a forecast of repairs for this car.')}</>],
+    ['Insurance · annual', r => estimateField(r, 'insuranceAnnual', 'Annual insurance (CAD)')],
+    ['Maintenance, tyres & repairs', r => <>{value(r, 'maintenance')}<small>Annual reserve at your driving distance</small>{estimateField(r, 'maintenancePerKm', 'Reserve (CAD/km)', true)}</>],
     ['Parking & tolls · monthly', r => carField(r, 'parkingMonthly', 'Monthly parking and tolls (CAD)', 'Starting assumption: $0. Enter your expected costs.')],
     ['Other running costs · annual', r => carField(r, 'otherAnnual', 'Other annual costs (CAD)', 'Starting assumption: $0. Include any recurring fees or other expenses.')],
     ['Annual running costs', r => value(r, 'annualRunning'), true],
@@ -115,14 +136,18 @@ export default function OwnershipCalculator({ cars, scenario, setScenario, state
           <p>Upfront funding and monthly expenses are separate. These are planning estimates in CAD.</p>
           {table('cost-summary', [
             [finance ? 'Down payment · upfront' : 'Cash needed · upfront', r => value(r, finance ? 'down' : 'acquisition'), true],
+            ['Insurance / year', r => <>{value(r, 'insurance')}<small>{Object.hasOwn(state.vehicles[r.car.legacyItemId] || {}, 'insuranceAnnual') ? 'Your estimate or quote' : r.estimates.insuranceAnnual.label}</small></>],
+            ['Maintenance, tyres & repairs / year', r => <>{value(r, 'maintenance')}<small>{Object.hasOwn(state.vehicles[r.car.legacyItemId] || {}, 'maintenancePerKm') ? 'Your reserve × annual driving' : r.estimates.maintenancePerKm.label}</small></>],
             [finance ? 'Running expenses / month' : 'Running expenses / year', r => value(r, finance ? 'monthlyRunning' : 'annualRunning')],
             ...(finance ? [['Loan payment / month', r => value(r, 'payment')]] : []),
             [finance ? 'Loan + running / month' : 'Monthly running budget', r => value(r, 'monthlyBudget'), true],
+            [finance ? 'Gross salary for comfortable loan + running costs' : 'Gross salary for comfortable running costs', r => <strong className="ownership-amount" data-summary-salary={r.car.legacyItemId}>{r.assessment.requiredSalary == null ? 'Incomplete' : `${money(Math.ceil(r.assessment.requiredSalary))}/year`}</strong>],
+
           ])}
           <p className="ownership-note">Running expenses include fuel or charging, insurance, a maintenance and repair reserve, parking, and other costs. Cash purchase savings are excluded from the monthly budget.</p>
           <div className="cost-summary-actions"><button type="button" onClick={() => openTab('purchase')}>Edit purchase estimates</button><button type="button" className="text-button" onClick={() => openTab('running')}>Edit running costs</button><button type="button" className="text-button" onClick={() => openTab('salary')}>Check your salary</button></div>
           {records.some(r => r.costs.monthlyBudget == null) && <p role="status" className="ownership-error">Incomplete totals need attention. Check Purchase, Running costs, and the shared assumptions above. Missing amounts never count as zero.</p>}
-          <p className="ownership-note">Ontario starting scenario. Insurance uses a June 2026 population average, not a personal quote. <a href={FSRA} target="_blank" rel="noopener noreferrer">FSRA source</a>. All assumptions are editable.</p>
+          <p className="ownership-note">Provisional planning estimates. AI model amounts are unverified; generic allowances fill gaps. <a href={FSRA} target="_blank" rel="noopener noreferrer">FSRA generic insurance reference</a>. {OWNERSHIP_ASSUMPTIONS} All assumptions are editable.</p>
         </section>
       </WorkspacePanel>
       <WorkspacePanel id="costs" value="purchase" active={tab}>
@@ -141,7 +166,7 @@ export default function OwnershipCalculator({ cars, scenario, setScenario, state
         <details className="ownership-assumptions"><summary>Adjust the salary guide</summary><div className="ownership-fields">{settingField('comfortablePercent', 'Comfortable limit (% of take-home)')}{settingField('stretchedPercent', 'Stretched limit (% of take-home)', { error: rulesError })}</div><p>Comfortable: up to {state.comfortablePercent}% of take-home pay. Stretched: above {state.comfortablePercent}% through {state.stretchedPercent}%. Over budget: above {state.stretchedPercent}%. These are editable budgeting rules, not a lending assessment.</p></details>
         <ul className="ownership-results" aria-label="Salary guide for each car" aria-live="polite" aria-atomic="false">{records.map(({ car, costs, assessment: a }) => <li key={car.legacyItemId}>
           <div><h3>{vehicleName(car)}</h3><p className="ownership-result-status">{a.status === 'incomplete' ? 'Complete the estimates to assess this car' : a.status === 'no-salary' ? 'Enter your salary to see your situation' : labels[a.status]}</p></div>
-          <dl><div><dt>{finance ? 'Loan + running costs / month' : 'Running costs / month'}</dt><dd>{money(costs.monthlyBudget)}</dd></div><div><dt>{finance ? 'Gross salary for a comfortable monthly budget' : 'Gross salary for comfortable running costs'}</dt><dd>{a.requiredSalary == null ? 'Incomplete' : `${money(Math.ceil(a.requiredSalary))}/year`}<small>Using your take-home and budget assumptions</small></dd></div><div><dt>{finance ? 'Down payment needed separately' : 'Cash purchase needed separately'}</dt><dd>{money(finance ? costs.down : costs.acquisition)}</dd></div></dl>
+          <dl><div><dt>{finance ? 'Loan + running costs / month' : 'Running costs / month'}</dt><dd>{money(costs.monthlyBudget)}</dd></div><div><dt>{finance ? 'Gross salary for comfortable loan + running costs' : 'Gross salary for comfortable running costs'}</dt><dd>{a.requiredSalary == null ? 'Incomplete' : `${money(Math.ceil(a.requiredSalary))}/year`}<small>Using your take-home and budget assumptions</small></dd></div><div><dt>{finance ? 'Down payment needed separately' : 'Cash purchase needed separately'}</dt><dd>{money(finance ? costs.down : costs.acquisition)}</dd></div></dl>
           {a.share != null && <p className="ownership-personal">{a.share.toFixed(1)}% of estimated take-home pay · {money(Math.abs(a.margin))}/month {a.margin >= 0 ? 'below' : 'above'} your comfortable limit.</p>}
           {!finance && <p className="ownership-note">This result covers running costs. It does not establish whether your purchase savings are sufficient.</p>}
         </li>)}</ul>

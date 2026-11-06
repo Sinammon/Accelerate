@@ -1,3 +1,4 @@
+import { resolveRunningCosts, runningScenario } from './ownership-calculator.js';
 import { extractVehicleSpecs, specEvidenceLabel, researchVinMismatches } from './vehicle-specs.js';
 import { resolveMileage, numeric } from './vehicle-data.js';
 import { mileageEvidenceLabel } from './mileage.js';
@@ -46,11 +47,12 @@ export function supportedPowerToWeight(specs) {
   return specs.horsepower.value / (specs.curbWeightKg.value / 1000);
 }
 
-export function rankCapabilities(cars, mode, year, scenario, detectWarnings) {
+export function rankCapabilities(cars, mode, year, scenario, detectWarnings, ownership = {}) {
   if (cars.length > 4) throw new RangeError('Compare at most four cars.');
   const records = cars.map(car => {
     const { specs } = extractVehicleSpecs(car);
     const experience = resolveVehicleExperience(car, scenario), ratings = experience.ratings;
+    const running = resolveRunningCosts(car, runningScenario(scenario, ownership), ownership.vehicles?.[car.legacyItemId]);
     const mileage = resolveMileage(car);
     const identityMismatch = researchVinMismatches(car).length > 0 || CONFIG_FIELDS.some(key => specs[key]?.status === 'conflict');
     const values = {
@@ -60,7 +62,7 @@ export function rankCapabilities(cars, mode, year, scenario, detectWarnings) {
       power: specs.horsepower.value, torque: specs.torque.value, powerToWeight: supportedPowerToWeight(specs),
       seats: specs.seats.value == null || !Number.isFinite(scenario.minSeats) || scenario.minSeats < 1 ? null : Number(specs.seats.value >= scenario.minSeats),
       body: !scenario.bodyType || specs.bodyType.value == null ? null : Number(specs.bodyType.value === scenario.bodyType),
-      fuel: experience.energy.annualCost,
+      fuel: experience.energy.annualCost, running: running.annualRunning,
       ...Object.fromEntries(Object.entries(ratings).map(([key, rating]) => [key, rating.rating])),
     };
     values.seatComfort = experience.seatComfort;
@@ -68,6 +70,8 @@ export function rankCapabilities(cars, mode, year, scenario, detectWarnings) {
     const labels = { price: 'Seller-reported asking price', age: specEvidenceLabel(specs.year), mileage: mileageEvidenceLabel(mileage), fuel: 'NRCan configuration reference + your scenario', seats: specEvidenceLabel(specs.seats), body: specEvidenceLabel(specs.bodyType), power: specEvidenceLabel(specs.horsepower), torque: specEvidenceLabel(specs.torque), powerToWeight: `Derived hp/tonne · ${specEvidenceLabel(specs.horsepower)} + ${specEvidenceLabel(specs.curbWeightKg)}` };
     const evidence = { power: specs.horsepower.evidence, torque: specs.torque.evidence, powerToWeight: [...specs.horsepower.evidence, ...specs.curbWeightKg.evidence] };
     const coverage = { fuel: experience.energy.quality === 'estimated' || experience.energy.stale ? 0 : 1 };
+    coverage.running = 0;
+    labels.running = 'Planning estimates + your running-cost assumptions · provisional';
     labels.fuel = `${experienceLabel(experience.energy)} + your scenario`;
     for (const key of ['rideQuality', 'cabinQuietness', 'cargoSpace', 'seatComfort', 'seatHeating', 'passengerSpace']) {
       const parts = (key === 'seatComfort' ? [ratings.frontSeatComfort, ratings.rearSeatComfort] : key === 'passengerSpace' ? [ratings.frontPassengerSpace, ratings.rearPassengerSpace] : [ratings[key]]).filter(Boolean);
@@ -78,7 +82,7 @@ export function rankCapabilities(cars, mode, year, scenario, detectWarnings) {
     }
     const warnings = detectWarnings(car);
     const reviewRequired = identityMismatch || warnings.some(w => w.label !== 'VIN/listing mismatch');
-    return { car, specs, ratings, experience, identityMismatch, reviewRequired, warnings, values, labels, evidence, coverage };
+    return { car, specs, ratings, experience, running, identityMismatch, reviewRequired, warnings, values, labels, evidence, coverage };
   });
   const valid = r => !r.identityMismatch;
   const comfortDefinitions = Object.entries(COMFORT_WEIGHTS).map(([key, weight]) => criterion(key, DIMENSION_LABELS[key], weight, { absolute: true, scale: 20, higherBetter: true }));
@@ -106,7 +110,10 @@ export function rankCapabilities(cars, mode, year, scenario, detectWarnings) {
     records[index].evidence[key] = entry.breakdown.flatMap(f => f.evidence);
   }
   const capability = scoreGroup(records, [criterion('comfort', 'Comfort capability', 40, { absolute: true }), criterion('performance', 'Performance capability', 35, { absolute: true }), criterion('practical', 'Practicality capability', 25, { absolute: true })], r => valid(r) && ['comfort', 'performance', 'practical'].some(key => known(r.values[key])));
+  // Balanced deliberately retains its historical price/fuel affordability subscore.
+  // Only the Affordability mode uses complete running expenses.
   const affordability = scoreGroup(records, [criterion('price', 'Purchase price', 80), criterion('fuel', 'Annual fuel cost (scenario)', 20)], r => valid(r) && known(r.values.price));
+  const completeAffordability = scoreGroup(records, [criterion('price', 'Purchase price', 80), criterion('running', 'Annual running expenses', 20)], r => valid(r) && known(r.values.price));
   for (const [index, record] of records.entries()) {
     record.values.capability = capability.entries[index].score;
     record.coverage.capability = capability.coverage;
@@ -120,7 +127,7 @@ export function rankCapabilities(cars, mode, year, scenario, detectWarnings) {
   if (mode.id === 'comfort') result = comfort;
   else if (mode.id === 'performance') result = performance;
   else if (mode.id === 'practical') result = practical;
-  else if (mode.id === 'cost') result = affordability;
+  else if (mode.id === 'cost') result = completeAffordability;
   else result = scoreGroup(records, Object.entries(mode.weights).map(([key, weight]) => criterion(key, ({ capability: 'Supported capability', affordability: 'Affordability', price: 'Purchase price', age: 'Vehicle age', mileage: 'Mileage' })[key], weight, { absolute: ['capability', 'affordability'].includes(key) })), r => valid(r) && known(r.values.capability) && (mode.id !== 'value' || known(r.values.price)));
   const ranked = result.entries.map(entry => ({ ...entry, evidenceCoverage: result.coverage })).sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
   ranked.forEach((entry, index) => { entry.rank = entry.score == null ? null : index && ranked[index - 1].score === entry.score ? ranked[index - 1].rank : index + 1; });
@@ -131,7 +138,7 @@ export function rankCapabilities(cars, mode, year, scenario, detectWarnings) {
   const approximatePractical = r => practical.criteria.some(c => c.active && approximate(r.specs[({ seats: 'seats', body: 'bodyType' })[c.key]]));
   const approximateComfort = r => ['rideQuality', 'cabinQuietness', 'seatComfort', 'seatHeating'].some(key => r.coverage[key] < 1);
   const approximateSpace = r => ['passengerSpace', 'cargoSpace'].some(key => r.coverage[key] < 1);
-  const usesApproximation = records.some(r => mode.id === 'performance' ? approximatePerformance(r) : mode.id === 'comfort' ? approximateComfort(r) : mode.id === 'cost' ? r.coverage.fuel < 1 : mode.id === 'practical' ? approximatePractical(r) || approximateSpace(r) : ['value', 'balanced'].includes(mode.id) && (approximateComfort(r) || approximatePerformance(r) || approximatePractical(r) || approximateSpace(r) || mode.id === 'balanced' && r.coverage.fuel < 1));
+  const usesApproximation = records.some(r => mode.id === 'performance' ? approximatePerformance(r) : mode.id === 'comfort' ? approximateComfort(r) : mode.id === 'cost' ? r.coverage.running < 1 : mode.id === 'practical' ? approximatePractical(r) || approximateSpace(r) : ['value', 'balanced'].includes(mode.id) && (approximateComfort(r) || approximatePerformance(r) || approximatePractical(r) || approximateSpace(r) || mode.id === 'balanced' && r.coverage.fuel < 1));
   return { ranked, criteria: result.criteria, totalWeight: result.totalWeight, best, mode, scenario, research, commonFeatures: [], researchWeight: 0,
     evidenceCoverage: result.coverage, usesApproximation, provisional: usesApproximation || result.coverage < 0.8 || ranked.some(e => e.score == null) || cars.length < 2,
     accelerationMetric: accelerationMetric || null, performanceStrategy: accelerationMetric ? 'acceleration' : ratioComparable ? 'power-to-weight' : 'power-and-torque',
@@ -142,5 +149,5 @@ export function rankCapabilities(cars, mode, year, scenario, detectWarnings) {
         : mode.id === 'value' ? 'Capability 50%, asking price 35%, age 10%, mileage 5%. Capability combines Comfort 40%, Performance 35% and Practicality 25%. A preference score, not a market valuation.'
           : mode.id === 'balanced' ? 'Capability 75%, affordability 15%, age 5%, mileage 5%. Affordability uses price and comparable fuel scenarios. Capability combines Comfort 40%, Performance 35% and Practicality 25%.'
             : mode.id === 'practical' ? 'Supported seating-needs fit, preferred body style, passenger space and usable cargo capacity. Missing evidence is excluded, never treated as absent capability.'
-              : 'Asking price 80%, comparable fuel scenario 20%. Insurance, servicing, repairs, taxes, financing and resale value also affect ownership cost; they are not estimated or scored. Review the ownership guide and obtain personal quotes. Purchase warnings remain separate from category scores.' };
+              : 'Asking price 80%, annual running expenses 20%: fuel/charging, insurance, maintenance/tyres/repair reserve, parking and other running costs, including valid calculator overrides. Estimates make this provisional. Missing or invalid totals are excluded for all contenders. Financing, purchase savings, tax, depreciation and resale are outside the ranking. Obtain personal quotes and an inspection. Purchase warnings remain separate from category scores.' };
 }

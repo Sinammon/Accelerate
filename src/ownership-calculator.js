@@ -1,3 +1,5 @@
+import { resolveOwnershipEstimates } from './ownership-estimates.js';
+import { resolveVehicleExperience } from './vehicle-experience.js';
 import { numeric } from './vehicle-data.js';
 
 export const OWNERSHIP_DEFAULTS = Object.freeze({
@@ -23,9 +25,10 @@ export function ownershipInputs(car, overrides = {}) {
   const price = car.priceCAD?.currency === 'CAD' ? numeric(car.priceCAD.value) : null;
   const purchasePrice = overrides.purchasePrice ?? (price == null ? '' : String(price));
   const parsedPrice = ownershipNumber(purchasePrice, 'purchasePrice');
+  const estimates = resolveOwnershipEstimates(car);
   return { purchasePrice, taxOverride: '', purchaseFees: '500',
     downPayment: parsedPrice == null ? '' : String(Math.round(parsedPrice * 20) / 100),
-    insuranceAnnual: '2218', maintenancePerKm: '0.10', parkingMonthly: '0', otherAnnual: '0', energyOverride: '', ...overrides };
+    insuranceAnnual: String(estimates.insuranceAnnual.central), maintenancePerKm: estimates.maintenancePerKm.central === 0.1 ? '0.10' : String(estimates.maintenancePerKm.central), parkingMonthly: '0', otherAnnual: '0', energyOverride: '', ...overrides };
 }
 
 export function monthlyLoanPayment(principal, apr, months) {
@@ -35,6 +38,28 @@ export function monthlyLoanPayment(principal, apr, months) {
   const r = apr / 1200;
   const payment = principal * r / -Math.expm1(-months * Math.log1p(r));
   return Number.isFinite(payment) ? payment : null;
+}
+
+export function calculateRunningCosts({ inputs, annualKm, annualEnergyCost }) {
+  const value = key => ownershipNumber(inputs[key], key);
+  const energy = inputs.energyOverride === '' ? Number.isFinite(annualEnergyCost) && annualEnergyCost >= 0 ? annualEnergyCost : null : value('energyOverride');
+  const maintenanceRate = value('maintenancePerKm');
+  const maintenance = maintenanceRate != null && Number.isFinite(annualKm) && annualKm >= 1 && annualKm <= 200000 ? maintenanceRate * annualKm : null;
+  const insurance = value('insuranceAnnual'), parking = value('parkingMonthly'), other = value('otherAnnual');
+  const annualRunning = [energy, maintenance, insurance, parking, other].every(n => n != null) ? energy + maintenance + insurance + parking * 12 + other : null;
+  const monthlyRunning = annualRunning == null ? null : annualRunning / 12;
+  return { energy, maintenance, insurance, parking, other, annualRunning, monthlyRunning };
+}
+
+// Shared by the calculator and ranking. Acquisition and finance never affect this projection.
+export function runningScenario(scenario, state = {}) {
+  return { ...scenario, ...Object.fromEntries(Object.keys(state.energyDrafts || {}).map(key => [key, NaN])) };
+}
+export function resolveRunningCosts(car, scenario, overrides = {}) {
+  const inputs = ownershipInputs(car, overrides);
+  const experience = resolveVehicleExperience(car, scenario);
+  return { inputs, experience, scenario, estimates: resolveOwnershipEstimates(car),
+    ...calculateRunningCosts({ inputs, annualKm: scenario.annualKm, annualEnergyCost: experience.energy.annualCost }) };
 }
 
 export function calculateOwnership({ inputs, settings, annualKm, annualEnergyCost }) {
@@ -49,18 +74,14 @@ export function calculateOwnership({ inputs, settings, annualKm, annualEnergyCos
   const apr = ownershipNumber(settings.apr, 'apr'), months = ownershipNumber(settings.termMonths, 'termMonths');
   const payment = principal != null && apr != null && months != null ? monthlyLoanPayment(principal, apr, months) : null;
   const interest = payment == null ? null : Math.max(0, payment * months - principal);
-  const energy = inputs.energyOverride === '' ? Number.isFinite(annualEnergyCost) && annualEnergyCost >= 0 ? annualEnergyCost : null : value('energyOverride');
-  const maintenanceRate = value('maintenancePerKm');
-  const maintenance = maintenanceRate != null && Number.isFinite(annualKm) && annualKm >= 1 && annualKm <= 200000 ? maintenanceRate * annualKm : null;
-  const insurance = value('insuranceAnnual'), parking = value('parkingMonthly'), other = value('otherAnnual');
-  const annualRunning = [energy, maintenance, insurance, parking, other].every(n => n != null) ? energy + maintenance + insurance + parking * 12 + other : null;
-  const monthlyRunning = annualRunning == null ? null : annualRunning / 12;
+  const running = calculateRunningCosts({ inputs, annualKm, annualEnergyCost });
+  const { monthlyRunning } = running;
   const savingsMonths = ownershipNumber(settings.savingsMonths, 'savingsMonths');
   const savingsTarget = acquisition != null && savingsMonths != null ? acquisition / savingsMonths : null;
   const monthlyBudget = acquisition == null || monthlyRunning == null ? null : settings.method === 'cash' ? monthlyRunning : payment == null ? null : monthlyRunning + payment;
   return { price, fees, tax, acquisition, down, principal, payment, interest,
     totalRepayment: interest != null && acquisition != null ? acquisition + interest : null,
-    energy, maintenance, insurance, parking, other, annualRunning, monthlyRunning, monthlyBudget, savingsTarget };
+    ...running, monthlyBudget, savingsTarget };
 }
 
 export function assessOwnership(monthlyBudget, settings) {

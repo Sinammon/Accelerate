@@ -1,3 +1,4 @@
+import { modelAdviceSummary } from './model-advice.js';
 import { rankDecisionMode, DEFAULT_SCENARIO } from './decision-engine.js';
 import { extractVehicleSpecs, specEvidenceLabel } from './vehicle-specs.js';
 import { DIMENSION_LABELS, supportedPowerToWeight } from './capability-scoring.js';
@@ -18,8 +19,8 @@ const money = n => `$${n.toLocaleString('en-CA', { maximumFractionDigits: 0 })} 
 const number = n => n.toLocaleString('en-CA', { maximumFractionDigits: 0 });
 
 // The requested category always owns its result; missing evidence never switches priorities.
-export function decisionSummary(cars, mode, year, scenario) {
-  const requested = rankDecisionMode(cars, mode, year, scenario);
+export function decisionSummary(cars, mode, year, scenario, ownership) {
+  const requested = rankDecisionMode(cars, mode, year, scenario, ownership);
   const kind = !cars.length ? 'empty' : !requested.best.length ? 'guidance' : requested.best[0].reviewRequired ? 'review' : 'supported';
   return { requested, ranking: requested, kind, provisional: requested.provisional, shared: requested.best.length > 1, single: cars.length === 1 };
 }
@@ -91,7 +92,7 @@ export function entrySummary(summary, entry) {
       : factor.key === 'acceleration' ? `${factor.value} s`
       : ['rideQuality', 'cabinQuietness', 'seatComfort', 'seatHeating', 'passengerSpace', 'cargoSpace'].includes(factor.key) ? `${factor.value} / 5`
       : ['capability', 'affordability', 'comfort', 'performance', 'practical'].includes(factor.key) ? `${factor.value.toFixed(1)} / 100`
-      : factor.key === 'fuel' ? `${money(factor.value)}/year` : factor.key === 'seats' || factor.key === 'body' ? factor.value ? 'Yes' : 'No' : `${factor.value} years`;
+      : ['fuel', 'running'].includes(factor.key) ? `${money(factor.value)}/year` : factor.key === 'seats' || factor.key === 'body' ? factor.value ? 'Yes' : 'No' : `${factor.value} years`;
     const evidence = factor.evidence?.find(e => e.url);
     return { text: `${factor.label}: ${value}`, label: factor.evidenceLabel, source: evidence ? { url: evidence.url, publisher: evidence.source } : undefined };
   };
@@ -104,13 +105,16 @@ export function entrySummary(summary, entry) {
   if (!entry.identityMismatch && ['value', 'cost'].includes(requested.mode.id)) {
     const context = ownershipContext(entry.car, requested.mode.id);
     if (requested.mode.id === 'cost') {
-      const energy = entry.experience.energy, scenario = { ...DEFAULT_SCENARIO, ...requested.scenario };
+      const energy = entry.running.experience.energy, scenario = { ...DEFAULT_SCENARIO, ...entry.running.scenario };
       const label = energy.powertrain === 'electric' ? 'charging' : energy.powertrain === 'liquid' ? 'fuel' : 'fuel / charging';
       const cost = Number.isFinite(energy.annualCost) ? `${money(energy.annualCost)}/year` : 'check driving and energy-price assumptions';
-      const prices = [energy.powertrain !== 'electric' && `$${scenario.pricePerLitre.toFixed(2)}/L`, energy.powertrain !== 'liquid' && `$${scenario.pricePerKwh.toFixed(2)}/kWh`, energy.powertrain === 'phev' && `${scenario.electricShare}% electric driving`].filter(Boolean).join(' · ');
+      const prices = [energy.powertrain !== 'electric' && (Number.isFinite(scenario.pricePerLitre) ? `$${scenario.pricePerLitre.toFixed(2)}/L` : 'fuel price incomplete'), energy.powertrain !== 'liquid' && (Number.isFinite(scenario.pricePerKwh) ? `$${scenario.pricePerKwh.toFixed(2)}/kWh` : 'electricity price incomplete'), energy.powertrain === 'phev' && (Number.isFinite(scenario.electricShare) ? `${scenario.electricShare}% electric driving` : 'electric share incomplete')].filter(Boolean).join(' · ');
       const source = energy.evidence?.find(e => e.url);
-      const fuel = { text: `Estimated annual ${label} cost: ${cost}.`, label: `${experienceLabel(energy)} · ${number(scenario.annualKm)} km/year · ${prices} · energy only`, source: source && { url: source.url, publisher: source.source } };
-      reasons = [...(entry.values.price != null ? [{ text: `Purchase price: ${money(entry.values.price)}.`, label: 'Seller-reported asking price' }] : []), fuel, ...context];
+      const fuel = { text: `Estimated annual ${label} cost: ${cost}.`, label: `${experienceLabel(energy)} · ${Number.isFinite(scenario.annualKm) ? number(scenario.annualKm) + ' km/year' : 'annual driving incomplete'} · ${prices} · energy only`, source: source && { url: source.url, publisher: source.source } };
+      const r = entry.running, amount = n => Number.isFinite(n) ? money(n) : 'Incomplete';
+      const running = { text: `Annual running expenses: ${amount(r.annualRunning)}. Insurance ${amount(r.insurance)}, maintenance/tyres/repairs ${amount(r.maintenance)}, parking/tolls ${amount(r.parking == null ? null : r.parking * 12)}, other ${amount(r.other)}; fuel/charging ${amount(r.energy)}.`, label: 'Planning estimates + your calculator inputs · provisional; financing excluded' };
+      if (r.inputs.energyOverride !== '') { fuel.text = `Annual fuel / charging override: ${amount(r.energy)}.`; fuel.label = 'Your calculator input · energy only'; delete fuel.source; }
+      reasons = [...(entry.values.price != null ? [{ text: `Purchase price: ${money(entry.values.price)}.`, label: 'Seller-reported asking price' }] : []), fuel, running, ...context];
     } else if (context.length) reasons = [...reasons.slice(0, 2), ...context];
   }
   if (!entry.identityMismatch && requested.mode.id === 'performance') {
@@ -134,6 +138,8 @@ export function entrySummary(summary, entry) {
           : requested.mode.id === 'value' ? `${summary.provisional ? 'A tentative' : 'Our'} best-value pick: the strongest overall combination of ${ranking.criteria.filter(c => c.active).map(c => c.key === 'capability' ? 'documented strengths' : c.key === 'price' ? 'asking price' : c.key === 'age' ? 'model year' : 'mileage').join(', ')} among these contenders. See what you get for the money below.`
             : requested.mode.id === 'comfort' ? `${summary.provisional ? 'A tentative comfort pick' : 'Our comfort pick'}, based on the available ride, seating and cabin evidence below.`
               : `${summary.provisional ? 'Provisional best fit' : 'Best fit'} for ${requested.mode.title.toLowerCase()} on the supported comparable factors.`;
+  reasons = reasons.filter(r => r.text !== tradeoff);
+  if (!entry.identityMismatch) reasons.push(...modelAdviceSummary(entry.car, [...reasons.map(r => r.text), tradeoff]));
   return { reasons, tradeoff, tradeoffSource: modelDrawback?.sources[0], explanation };
 }
 

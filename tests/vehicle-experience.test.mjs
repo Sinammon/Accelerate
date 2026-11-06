@@ -125,7 +125,7 @@ test('estimates contribute to rankings, space affects only practicality and mixe
   assert.equal(estimated.evidenceCoverage, 0);
   a.enrichment.fuel = { status: 'matched', combined: 6, fuel: 'X' };
   b.enrichment.fuel = { status: 'matched', combined: 10, fuel: 'Z' };
-  assert.equal(rankDecisionMode([a, b], 'cost').criteria.find(c => c.key === 'fuel').active, true);
+  assert.equal(rankDecisionMode([a, b], 'cost').criteria.find(c => c.key === 'running').active, true);
 });
 
 test('estimate validation rejects contradictory scope, implausible values and fabricated evidence per field', () => {

@@ -1,3 +1,4 @@
+import { validatedOwnershipEstimates, validatedModelAdvice, mergeOwnershipEstimates } from './ownership-estimates.js';
 import { validatedExperience, mergeExperience, hasExperience } from './experience.js';
 // The browser and backend share the research contract; no credentials or network here.
 export const MODEL_SPEC_FIELDS = ['displacement', 'engineType', 'induction', 'cylinders', 'horsepower', 'torque', 'curbWeightKg', 'zeroTo100KphSeconds', 'zeroTo60MphSeconds', 'transmission', 'transmissionSpeeds', 'drivetrain', 'fuelType', 'bodyType', 'seats'];
@@ -176,7 +177,7 @@ export function validatedResearch(data, input) {
     assessments[category] = { assessment: proposed.assessment, value: ASSESSMENT_VALUES[proposed.assessment], insightIds: [...new Set(proposed.insightIds)] };
   }
   const dimensionRatings = Object.fromEntries(RATING_DIMENSIONS.filter(key => validDimensionRating(data?.dimensionRatings?.[key], resolvedInput)).map(key => [key, data.dimensionRatings[key]]));
-  return { ...data, fields, insights, assessments, dimensionRatings, experience: validatedExperience(data?.experience, resolvedInput) };
+  return { ...data, fields, insights, assessments, dimensionRatings, ownershipEstimates: validatedOwnershipEstimates(data?.ownershipEstimates, resolvedInput), modelAdvice: validatedModelAdvice(data?.modelAdvice, resolvedInput), experience: validatedExperience(data?.experience, resolvedInput) };
 }
 
 export const findingStrength = finding => (({ exact: 4, typical: 2, estimated: 1 })[finding?.quality] ?? (finding?.kind === 'value' ? 3 : 0)) + (finding?.origin === 'reviewed-reference' ? 0.5 : 0);
@@ -188,9 +189,11 @@ export function mergeResearch(previous = {}, incoming = {}) {
   const experience = mergeExperience(previous.experience, incoming.experience);
   const dimensionRatings = { ...previous.dimensionRatings };
   for (const [key, rating] of Object.entries(incoming.dimensionRatings || {})) if (!dimensionRatings[key] || !rating.stale || dimensionRatings[key].stale) dimensionRatings[key] = rating;
-  const useful = Object.keys(fields).length || incoming.insights?.length || previous.insights?.length || Object.keys(incoming.dimensionRatings || {}).length || Object.keys(previous.dimensionRatings || {}).length || hasExperience(experience);
+  const ownershipEstimates = mergeOwnershipEstimates(previous.ownershipEstimates, incoming.ownershipEstimates);
+  const modelAdvice = incoming.modelAdvice && (!previous.modelAdvice || Date.parse(incoming.modelAdvice.checked) >= Date.parse(previous.modelAdvice.checked)) ? incoming.modelAdvice : previous.modelAdvice;
+  const useful = ownershipEstimates || modelAdvice || Object.keys(fields).length || incoming.insights?.length || previous.insights?.length || Object.keys(incoming.dimensionRatings || {}).length || Object.keys(previous.dimensionRatings || {}).length || hasExperience(experience);
   const failed = !!incoming.status && !['matched', 'partial', 'complete', 'loading'].includes(incoming.status);
-  return { ...previous, ...incoming, fields, experience, dimensionRatings,
+  return { ...previous, ...incoming, fields, experience, dimensionRatings, ownershipEstimates, modelAdvice,
     insights: incoming.insights?.length ? incoming.insights : previous.insights || [],
     assessments: incoming.insights?.length ? incoming.assessments || {} : previous.assessments || {},
     status: useful ? 'partial' : incoming.status || previous.status || 'unavailable',

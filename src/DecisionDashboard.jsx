@@ -60,7 +60,7 @@ function MatchCard({ summary, selectedId, onSelect }) {
       <div className="decision-match-copy"><div className="match-topline"><span className={`recommendation-badge ${!endorsed ? 'neutral' : ''} ${entry.warnings.length ? 'caution' : ''}`}><Icon name={endorsed && summary.kind === 'supported' && !entry.warnings.length ? 'trophy' : 'info'} size={18} />{summary.requested.mode.title.toLowerCase()} &middot; {label}</span></div>
         <h2>{vehicleName(car)}</h2><p className="decision-reason">{explanation}</p>
         <p className="evidence-coverage">{entry.score == null ? 'Available details and next checks.' : summary.provisional ? 'Tentative recommendation · estimates may affect the result.' : 'Based on comparable vehicle details.'} Confirm this car’s equipment and condition.</p>
-        <ul className="decision-reasons">{notes.reasons.map(reason => <li key={reason.text} className={reason.source || reason.context ? 'model-context' : ''}><Icon name={reason.source ? 'book' : reason.context ? 'info' : 'check-circle'} size={21} /><span>{reason.text}<small>{reason.label}{reason.source && <> &middot; <a href={reason.source.url} target="_blank" rel="noopener noreferrer">{reason.source.publisher} <Icon name="arrow" size={14} /></a></>}</small></span></li>)}</ul>
+        <ul className="decision-reasons">{notes.reasons.map(reason => <li key={reason.text} className={reason.source || reason.context ? 'model-context' : ''}><Icon name={reason.source ? 'book' : reason.context ? 'info' : 'check-circle'} size={21} /><span>{reason.topic && <strong className="model-advice-topic">{reason.topic}</strong>}{reason.text}<small>{reason.label}{reason.checked && <> · {new Date(reason.checked).toLocaleDateString('en-CA')}</>}{(reason.sources || (reason.source ? [reason.source] : [])).map((source, index) => <React.Fragment key={source.url || index}> &middot; <a href={source.url} target="_blank" rel="noopener noreferrer">{source.publisher} <Icon name="arrow" size={14} /></a></React.Fragment>)}</small></span></li>)}</ul>
         <div className="decision-tradeoff"><Icon name="balance" size={23} /><b>Trade-off</b><span>{notes.tradeoff}{notes.tradeoffSource && <small><a href={notes.tradeoffSource.url} target="_blank" rel="noopener noreferrer">{notes.tradeoffSource.publisher} <Icon name="arrow" size={14} /></a></small>}</span></div>
         <ListingWarnings entry={entry} />
         {summary.requested.mode.id === 'cost' && <a className="decision-primary ownership-match-action" href="#ownership">Calculate cost of ownership <Icon name="arrow" size={21} /></a>}
@@ -73,14 +73,14 @@ function MatchCard({ summary, selectedId, onSelect }) {
   </>;
 }
 
-export default function DecisionDashboard({ cars, mode = 'value', setMode, retryResearch, scenario: suppliedScenario, setScenario: suppliedSetScenario, view: suppliedView, onViewChange }) {
+export default function DecisionDashboard({ cars, mode = 'value', setMode, retryResearch, scenario: suppliedScenario, setScenario: suppliedSetScenario, view: suppliedView, onViewChange, ownership }) {
   const [localScenario, setLocalScenario] = useState(DEFAULT_SCENARIO);
   const scenario = suppliedScenario || localScenario, setScenario = suppliedSetScenario || setLocalScenario;
   const [localView, setLocalView] = useState({ tab: 'summary', selectedId: null });
   const view = suppliedView || localView, changeView = onViewChange || setLocalView;
   const setTab = tab => changeView(previous => ({ ...previous, tab }));
   const scenarioPanel = useRef(null);
-  const summary = decisionSummary(cars, mode, new Date().getFullYear(), scenario);
+  const summary = decisionSummary(cars, mode, new Date().getFullYear(), scenario, ownership);
   const result = summary.requested;
   const missing = result.criteria.filter(c => c.weight > 0 && !c.active);
   return <section className="page-section decision-page">
@@ -97,7 +97,7 @@ export default function DecisionDashboard({ cars, mode = 'value', setMode, retry
     </div></WorkspacePanel>
     <WorkspacePanel id="recommendation" value="ranking" active={view.tab}>
     {!!cars.length && <>
-      {mode === 'cost' && <OwnershipCosts cars={cars} scenario={scenario} research={result.research} onAdjustFuel={() => {
+      {mode === 'cost' && <OwnershipCosts ownership={ownership} cars={cars} scenario={scenario} research={result.research} onAdjustFuel={() => {
         setTab('assumptions');
         requestAnimationFrame(() => {
         const panel = scenarioPanel.current;
