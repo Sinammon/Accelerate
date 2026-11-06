@@ -9,5 +9,5 @@
 @import './decision.css' layer(components);
 @import './comparison.css' layer(components);
 @import './dashboard.css' layer(components);
-@import './workspace.css' layer(components);
 @import './ownership.css' layer(components);
+@import './compact.css' layer(components);

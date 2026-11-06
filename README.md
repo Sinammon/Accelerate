@@ -4,21 +4,23 @@ Formerly Dilemma and Core. The app is now Accelerate; its GitHub repository and 
 
 A temporary, in-memory eBay.ca used-car comparison for a Grade 12 CS demo. React, Tailwind CSS, Vite, and a minimal Node.js API. Import up to four cars, view real photos, compare available fields and specifications, and read seller descriptions as safe plain text.
 
-## Cinematic dashboard and themes
+## Compact workspace and themes
 
-`/dashboard` is the redesigned entry page; `/` and the existing Import, Compare and Decide hash links remain compatible. The electric-blue/navy design keeps the working listing composer, comparisons, estimates and decision logic. The menu-bar theme switch follows the system preference when unset, remembers an explicit light/dark choice and synchronizes across tabs. Changing themes does not reset the shortlist.
+`/` and `/dashboard` enter the same desktop-first workspace. The header provides **Compare**, **Recommendation**, **Costs**, **Add car** and the theme switch. Existing `#import`, `#compare`, `#decide` and `#ownership` links remain compatible. A 232px sticky shortlist keeps up to four cars in reach (200px at widths up to 1100px; a collapsed disclosure below 768px). Add car opens a short import screen. Help contains the source explanation and fictional walkthrough.
 
-Colors live in `src/data/config/colors.js` and are consumed by `tailwind.config.js`, including the CSS variables used by atmospheric artwork and existing workspace components. Self-hosted Satoshi and Clash Grotesk remain the fonts. See [PRODUCT.md](PRODUCT.md) and [DESIGN.md](DESIGN.md) for the current product and design contracts.
+Compare opens with six rows: asking price, mileage, annual fuel/charging cost, Comfort ride/seats, Practicality passenger/cargo room and horsepower. Specifications and Sources & checks retain the full details, original listing location/mileage, photos, configuration editing, warnings and evidence. Phones compare two selected contenders while retaining all four in the shortlist. Recommendation exposes all six priorities and three tabs: Summary, Ranking & evidence and Assumptions. Two short reasons lead into a full-explanation disclosure; the trade-off and warnings remain visible.
 
-Annual fuel/charging costs and comfort remain populated using references, model estimates or offline baselines. Estimates can affect provisional rankings; passenger/cargo space and daily usability belong to Practicality. The landing-page numbers describe actual app limits and capabilities, not marketing-performance claims or partnerships.
+The theme switch follows the system preference when unset, remembers an explicit light/dark choice and synchronizes across tabs. Switching themes preserves the shortlist. Colors remain in `src/data/config/colors.js`, exported by `tailwind.config.js`; `src/theme.css` supplies foundations and `src/compact.css`, imported last through `src/app.css`, supplies current workspace density. The old `src/workspace.css` is removed. Self-hosted Satoshi and Clash Grotesk and existing credited photographs remain. See [PRODUCT.md](PRODUCT.md), [DESIGN.md](DESIGN.md) and the [workspace brief](.impeccable/surfaces/src-dashboard-jsx.md).
 
-For the requested development port, run `npm run dev -- --port 6006` alongside `npm run server`, then open `http://127.0.0.1:6006/dashboard`. The production rewrite covers only `/dashboard` and `/dashboard/`; API routing is preserved.
+Annual fuel/charging costs and comfort remain populated using references, model estimates or offline baselines. Estimates can affect provisional rankings; passenger/cargo space and daily usability belong to Practicality. This UI change preserves backend, scoring, storage and deployment behavior.
+
+For the requested development port, run `npm run dev -- --port 6006` alongside `npm run server`, then open `http://127.0.0.1:6006/dashboard`. The existing production rewrite covers `/dashboard` and `/dashboard/`; API routing is preserved.
 
 ## Ownership costs and salary guide
 
-At the bottom of Help Me Decide, choose **Calculate cost of ownership** to open `#ownership` with the same shortlist. Cash is the default; separate purchase and running-cost tables cover all cars, with editable estimates and source labels. Finance is optional. Cash salary guidance covers running expenses only; the purchase amount and optional savings target remain separate. Finance guidance adds loan payments while showing the down payment separately.
+Choose **Costs** in the header or **Calculate cost of ownership** in the Affordability explanation to open `#ownership` with the same shortlist. Cash is the default; Finance is optional. Four tabs separate **Summary**, **Purchase**, **Running costs** and **Salary guide**. Summary separates upfront funding and monthly expenses; the purchase and running-cost tables cover all cars, with editable estimates and source labels. Cash salary guidance covers running expenses only; the purchase amount and optional savings target remain separate. Finance guidance adds loan payments while showing the down payment separately.
 
-The Ontario starting insurance figure is FSRA's June 2026 population average, not a vehicle quote. Purchase fees and maintenance/repair reserves are planning allowances. Replace them with personal quotes or estimates. Salary guidance uses an editable estimated take-home percentage and comfortable/stretched limits; it excludes household expenses. Inputs stay in browser memory across navigation and research updates and reset when the shortlist is cleared. No salary is sent to an API or stored in browser storage. Resale and depreciation are not modeled.
+The Ontario starting insurance figure is FSRA's June 2026 population average, not a vehicle quote. Purchase fees and maintenance/repair reserves are planning allowances. Replace them with personal quotes or estimates. Salary guidance uses an editable estimated take-home percentage and comfortable/stretched limits; it excludes household expenses. Valid driving/energy assumptions are shared across Compare, Recommendation and Costs. Private inputs, selected tabs and the selected recommendation contender stay in App memory across navigation and research updates; clearing the shortlist resets private calculator inputs. No salary is sent to an API or stored in browser storage. Refresh clears the shortlist and calculator inputs. Resale and depreciation are not modeled.
 
 ## Project layout
 
@@ -47,11 +49,11 @@ Only normalized model configurations and sanitized spec findings persist in brow
 
 Mileage prefers the dedicated listing Mileage/Odometer fields. If those are missing or malformed, only explicit vehicle mileage statements are accepted from the description; title readings are a final fallback. Phone digits, warranty limits, service intervals, fuel economy, range and unrelated distances are ignored. Units must be supplied explicitly by the field or an applicable mileage statement; they are never guessed from the listing country. Missing units are labeled and excluded from mileage scoring. Contradictory structured readings or units require review. Original imported records remain unchanged, with source evidence available.
 
-Run `npm test` and `npm run build` for offline and rendered-journey validation. `npm run test:model-specs:live` runs independent reference configurations using the private free-tier key, with results printed only to the console. The evaluator includes 30 independent NRCan configurations plus nine reviewed manufacturer horsepower/torque configurations. It reports correctness **among populated numeric fields** separately from field and category coverage. Independently reviewed model observations are printed beside live insights for manual semantic audit; category coverage is not an accuracy percentage. It does not establish accuracy for every amenity or claim. A missing key exits without making requests. No 90% accuracy claim is shown in the product.
+Run `npm test` and `npm run build` for offline regression and DOM-journey validation. `npm run test:model-specs:live` runs independent reference configurations using the private free-tier key, with results printed only to the console. The evaluator includes 30 independent NRCan configurations plus nine reviewed manufacturer horsepower/torque configurations. It reports correctness **among populated numeric fields** separately from field and category coverage. Independently reviewed model observations are printed beside live insights for manual semantic audit; category coverage is not an accuracy percentage. It does not establish accuracy for every amenity or claim. A missing key exits without making requests. No 90% accuracy claim is shown in the product.
 
 ### Category recommendations and retry
 
-Best Value, Affordability, Comfort, Balanced and Performance are the five primary choices; More priorities contains Practicality. Cards show up to three reasons, one trade-off and three relevant facts. Full model research and citations remain in expandable details.
+Best Value, Affordability, Comfort, Practicality, Performance and Balanced are all visible priority choices. Summary shows two compact reasons, a full-explanation/model-context disclosure, one visible trade-off and separate warnings. Detailed facts, full model research and citations remain available in disclosures and Ranking & evidence.
 
 Comfort now scores cited ride quality (35%), cabin quietness (30%), seat comfort (25%) and passenger space (10%), using the same 0-5 cross-class anchors. Front and rear occupants are weighted equally within seating and space. Advertised gadgets, price and brand do not establish comfort. Ratings require applicable professional-review evidence; manufacturer marketing cannot supply a refinement score.
 
@@ -75,7 +77,7 @@ See [docs/DECIDE_REDESIGN.md](docs/DECIDE_REDESIGN.md) for the simplified decisi
 
 Vehicle evidence now includes optional NHTSA vPIC VIN decoding and strict matching against a bundled official NRCan fuel-consumption snapshot. Source badges distinguish seller claims, original VIN records, corroboration and unknown/conflicting values. See [docs/REVIEW.md](docs/REVIEW.md) for the current scoring rules, source limits, Java comparisons, worked example and four-minute demo outline. User comparisons remain temporary and in memory.
 
-The app now follows Import ? Compare ? Decide, with a dedicated comparison page, mileage-unit evidence and five primary decision priorities and one additional mode. Recommendations use transparent scoring, missing-data exclusions and mechanical-warning safeguards. See [docs/DECISION_ENGINE.md](docs/DECISION_ENGINE.md) for the scoring example, three key files, Java comparisons, demonstration steps and review limitations.
+The app follows Add car -> Compare -> Recommendation -> Costs, with a shared shortlist, mileage-unit evidence and all six decision priorities. Recommendations use transparent scoring, missing-data exclusions and mechanical-warning safeguards. See [docs/DECISION_ENGINE.md](docs/DECISION_ENGINE.md) for the scoring example, three key files, Java comparisons, demonstration steps and review limitations.
 
 ## Run locally
 
@@ -205,15 +207,15 @@ The app preserves raw mileage and explicit units, currency, missing fields and s
 
 ## Importer architecture files (see docs/DECISION_ENGINE.md for the three decision-engine files)
 
-1. src/App.jsx: React components, temporary car state, URL form, loading/errors, remove actions and comparison table. Components are functions returning JSX (HTML-like markup). useState is the temporary data React watches.
+1. src/App.jsx: shared route, shortlist, scenario, view and private calculator state. Dashboard.jsx/ImportComposer.jsx provide import; Shortlist.jsx, VehicleComparison.jsx, DecisionDashboard.jsx and OwnershipCalculator.jsx provide the task views. Components are functions returning JSX (HTML-like markup). useState is the temporary data React watches.
 2. backend/handler.mjs: the shared HTTP controller. Validates requests, calls eBay, returns safe errors and no-store JSON, and turns seller HTML into inert text. server.mjs adapts local Node requests to it; api/import.js exposes the same handler on Vercel.
 3. backend/ebay-feasibility.mjs: shared Production authentication, strict eBay.ca URL parsing and vehicle field extraction. Its standalone CLI still works; the backend passes quiet: true to suppress listing diagnostics.
 
-Shared visual tokens and foundations live in src/theme.css, with scoped stylesheets for site chrome, homepage, comparison, decision and evidence. docs/DESIGN.md records the Uizard-inspired dark system, docs/PRODUCT.md records product constraints, and .impeccable/design.json holds machine-readable rules. Vite's /api proxy lives in vite.config.js. All existing Git history is retained. The original app is on codex/dilemma-functional; Vercel preparation is on codex/vercel-deployment. The initial homepage was checkpointed before functional changes.
+Shared visual tokens are exported from src/data/config/colors.js through tailwind.config.js. Foundations live in src/theme.css; src/compact.css, imported last by src/app.css, defines current workspace composition over component styles. Root DESIGN.md and PRODUCT.md are the current design and product contracts; .impeccable/design.json extends the DESIGN frontmatter with component snippets and metadata. Historical docs/DESIGN.md and docs/PRODUCT.md are not the current visual authority. Vite's /api proxy lives in vite.config.js. All existing Git history is retained. The original app is on codex/dilemma-functional; Vercel preparation is on codex/vercel-deployment. The initial homepage was checkpointed before functional changes.
 
 ## Your tiny code change
 
-In src/App.jsx, change the button text 'Import car' to 'Add to shortlist'. Save the file and watch the button update. It's a string literal, just like text inside double quotes in Java; JavaScript also allows single quotes.
+For a small UI practice edit, find the 'Add car' submit label in src/ImportComposer.jsx, change the string locally, and watch the button update. JavaScript string literals work much like Java strings; single quotes are also supported.
 
 ---
 

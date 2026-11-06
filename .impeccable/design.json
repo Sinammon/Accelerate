@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-04T04:07:14.377Z",
+  "generatedAt": "2026-11-05T00:00:00Z",
   "title": "Design System: Accelerate",
   "extensions": {
     "colorMeta": {
@@ -496,262 +496,180 @@
       }
     },
     "typographyMeta": {
-      "display": {
-        "displayName": "Cinematic display",
-        "purpose": "Satoshi dashboard headline; 48/60/72px responsive standard ramp."
+      "import-headline": {
+        "displayName": "Import Headline",
+        "purpose": "Short import task heading only."
       },
-      "headline": {
-        "displayName": "Editorial headline",
-        "purpose": "Satoshi dashboard heading; 36/48px responsive standard ramp."
+      "import-headline-phone": {
+        "displayName": "Import Headline Phone",
+        "purpose": "Import heading below 768px."
       },
-      "metric": {
-        "displayName": "Metric numeral",
-        "purpose": "Satoshi 48/60px numerals in description lists."
+      "workspace-headline": {
+        "displayName": "Workspace Headline",
+        "purpose": "Compact page titles."
       },
-      "title": {
-        "displayName": "Source name",
-        "purpose": "Clash Grotesk source names, 20/24px."
+      "section": {
+        "displayName": "Section",
+        "purpose": "Section and match headings."
+      },
+      "fact": {
+        "displayName": "Fact",
+        "purpose": "Cost totals."
       },
       "body": {
         "displayName": "Body",
-        "purpose": "Satoshi prose and inputs."
+        "purpose": "Reading text."
+      },
+      "interface": {
+        "displayName": "Interface",
+        "purpose": "Tables, tabs, names and concise reasons."
       },
       "evidence": {
         "displayName": "Evidence",
-        "purpose": "Readable metadata, sources and explanations."
-      },
-      "label": {
-        "displayName": "Compact label",
-        "purpose": "Source notes and noninteractive composer chips."
+        "purpose": "Provenance and compact notes."
       },
       "button": {
-        "displayName": "Operational button",
-        "purpose": "Retained shared control typography; dashboard controls use explicit utility variants."
+        "displayName": "Button",
+        "purpose": "Primary action text."
       },
       "wordmark": {
-        "displayName": "Accelerate wordmark",
-        "purpose": "Slanted typographic identity; skewX(-9deg)."
-      },
-      "workspace-headline": {
-        "displayName": "Workspace headline",
-        "purpose": "Retained Clash Grotesk base heading scale."
-      },
-      "workspace-section": {
-        "displayName": "Workspace section",
-        "purpose": "Retained Clash Grotesk section scale."
-      },
-      "workspace-subsection": {
-        "displayName": "Operational subsection",
-        "purpose": "Retained 22px workspace subsection, not a new dashboard scale."
-      },
-      "workspace-fact": {
-        "displayName": "Operational fact",
-        "purpose": "Retained 18px strong decision fact, not a new dashboard scale."
+        "displayName": "Wordmark",
+        "purpose": "Retained slanted identity."
       }
     },
-    "shadows": [
-      {
-        "name": "composer-light",
-        "value": "0 20px 25px -5px rgb(4 18 34 / 0.2), 0 8px 10px -6px rgb(4 18 34 / 0.2)",
-        "purpose": "Floating hero composer in light mode."
-      },
-      {
-        "name": "composer-dark",
-        "value": "0 20px 25px -5px rgb(0 0 0 / 0.2), 0 8px 10px -6px rgb(0 0 0 / 0.2)",
-        "purpose": "Floating hero composer in dark mode."
-      },
-      {
-        "name": "dialog-backdrop",
-        "value": "color-mix(in srgb, var(--color-secondary-950) 78%, transparent)",
-        "purpose": "Image-dialog backdrop; an overlay scrim rather than a box shadow."
-      }
-    ],
+    "shadows": [],
     "motion": [
       {
-        "name": "control-transition",
+        "name": "control-colors",
         "value": "160ms",
-        "purpose": "Base background/border transitions."
-      },
-      {
-        "name": "theme-color-transition",
-        "value": "150ms cubic-bezier(0.4, 0, 0.2, 1)",
-        "purpose": "Standard Tailwind transition-colors."
+        "purpose": "Background and border feedback."
       },
       {
         "name": "route-entry",
         "value": "180ms",
-        "purpose": "Reduced-motion-aware opacity entry."
-      },
-      {
-        "name": "atmosphere-drift",
-        "value": "28s ease-in-out infinite alternate",
-        "purpose": "Bloom translates from (-2%,0) scale(1) to (3%,3%) scale(1.05); disabled for reduced motion."
-      },
-      {
-        "name": "reduced-motion",
-        "value": "0.01ms",
-        "purpose": "Global transition/animation override; no smooth scrolling."
+        "purpose": "Route and comparison-panel fade; minimized under reduced motion."
       }
     ],
     "breakpoints": [
       {
-        "name": "sm",
-        "value": "640px"
-      },
-      {
-        "name": "md",
-        "value": "768px"
-      },
-      {
-        "name": "lg",
-        "value": "1024px"
-      },
-      {
-        "name": "xl",
-        "value": "1280px"
-      },
-      {
-        "name": "2xl",
-        "value": "1536px"
-      },
-      {
-        "name": "legacy-evidence-max",
-        "value": "400px"
-      },
-      {
-        "name": "legacy-mobile-max",
-        "value": "767px"
-      },
-      {
-        "name": "legacy-preview-max",
-        "value": "1000px"
-      },
-      {
-        "name": "legacy-workspace-max",
+        "name": "compact-rail",
         "value": "1100px"
+      },
+      {
+        "name": "phone-layout",
+        "value": "767px"
       }
     ]
   },
   "components": [
     {
-      "name": "Primary button",
+      "name": "Add car",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Semantic workspace action; theme roles control its fill and ink.",
-      "html": "<button type=\"button\" class=\"ds-primary\">Compare cars <svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h15m-6-6 6 6-6 6\"/></svg></button>",
-      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:12px 20px;border:1px solid transparent;border-radius:var(--radius-control,12px);background:var(--action,#0759B8);color:var(--ink,#FFFFFF);font:640 16px/1.38 var(--font-sans,Satoshi,sans-serif);cursor:pointer;transition:background-color 160ms,border-color 160ms}.ds-primary:hover{background:var(--accent,#0759B8)}.ds-primary:active{background:var(--accent,#0759B8)}.ds-primary:disabled{opacity:.6;cursor:not-allowed}.ds-primary:focus-visible,.ds-secondary:focus-visible,.ds-theme:focus-visible,.ds-nav a:focus-visible,.ds-card a:focus-visible{outline:3px solid var(--accent,#0759B8);outline-offset:4px}"
+      "description": "Compact primary action; busy/full labels are explicit in the live form.",
+      "html": "<button class=\"ds-primary\">Add car</button>",
+      "css": ".ds-primary{min-height:44px;padding:12px 20px;border:1px solid transparent;border-radius:8px;background:var(--action);color:var(--ink);font:640 16px/1.38 var(--font-sans);cursor:pointer;transition:background-color 160ms}.ds-primary:hover{background:var(--accent)}.ds-primary:disabled{opacity:.6;cursor:not-allowed}.ds-primary:focus-visible{outline:3px solid var(--accent);outline-offset:4px}"
     },
     {
-      "name": "Editorial secondary button",
+      "name": "Secondary action",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "Rounded outline action used to reveal the working comparison preview.",
-      "html": "<button type=\"button\" class=\"ds-secondary\">Explore the comparison <svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h15m-6-6 6 6-6 6\"/></svg></button>",
-      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:12px 20px;border:1px solid var(--border-subtle,#E3EBF1);border-radius:calc(infinity * 1px);background:transparent;color:var(--text,#041222);font:500 14px/1.38 var(--font-sans,Satoshi,sans-serif);cursor:pointer;transition:background-color 160ms,border-color 160ms}.ds-secondary:hover,.ds-secondary:active{background:var(--surface-raised,#F0F6FA)}.ds-primary:focus-visible,.ds-secondary:focus-visible,.ds-theme:focus-visible,.ds-nav a:focus-visible,.ds-card a:focus-visible{outline:3px solid var(--accent,#0759B8);outline-offset:4px}"
+      "description": "Quiet action with an explicit interactive boundary.",
+      "html": "<button class=\"ds-secondary\">Edit running costs</button>",
+      "css": ".ds-secondary{min-height:44px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);font:640 14px var(--font-sans);cursor:pointer}.ds-secondary:hover{background:var(--surface-hover)}.ds-secondary:focus-visible{outline:3px solid var(--accent);outline-offset:4px}"
     },
     {
-      "name": "Labeled URL input",
+      "name": "Listing field",
       "kind": "input",
       "refersTo": "input",
-      "description": "Base operational input with a real label, explicit help and visible focus.",
-      "html": "<div class=\"ds-field\"><label for=\"ds-url\">eBay.ca vehicle listing URL</label><input id=\"ds-url\" type=\"url\" placeholder=\"Paste a full listing URL\" aria-describedby=\"ds-url-help\"><small id=\"ds-url-help\">Up to four cars in your temporary shortlist.</small></div>",
-      "css": ".ds-field{display:grid;gap:8px;color:var(--text,#041222);font-family:var(--font-sans,Satoshi,sans-serif)}.ds-field label{font-weight:600}.ds-field input{min-width:0;min-height:48px;padding:12px;border:1px solid var(--border,#64798C);border-radius:var(--radius-control,12px);background:var(--background,#F8FBFD);color:var(--text,#041222);font:400 16px/1.55 var(--font-sans,Satoshi,sans-serif)}.ds-field input::placeholder{color:var(--text-secondary,#46596C);opacity:1}.ds-field input:hover{border-color:var(--accent,#0759B8)}.ds-field input:focus-visible{outline:3px solid var(--accent,#0759B8);outline-offset:4px}.ds-field input[aria-invalid=\"true\"]{border-color:var(--error,#0A438B)}.ds-field input:disabled{opacity:.65;cursor:not-allowed}.ds-field small{font-size:14px;color:var(--text-secondary,#46596C)}"
+      "description": "Labeled listing URL field within the compact import form.",
+      "html": "<label class=\"ds-label\" for=\"ds-url\">eBay.ca vehicle listing link</label><input id=\"ds-url\" class=\"ds-input\" type=\"url\" placeholder=\"https://www.ebay.ca/itm/...\">",
+      "css": ".ds-label{display:block;margin-bottom:8px;color:var(--text);font:14px var(--font-sans)}.ds-input{min-height:48px;max-width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--background);color:var(--text);font:16px var(--font-sans)}.ds-input::placeholder{color:var(--text-secondary);opacity:1}.ds-input:hover{border-color:var(--accent)}.ds-input:focus-visible{outline:3px solid var(--accent);outline-offset:4px}"
     },
     {
-      "name": "Floating listing composer",
-      "kind": "custom",
-      "refersTo": "hero-composer",
-      "description": "Visual translation of the real hero import form; the application supplies validation and importing behavior.",
-      "html": "<form class=\"ds-composer\"><label class=\"ds-visually-hidden\" for=\"ds-composer-url\">Your next car starts with a link</label><div class=\"ds-composer-row\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m10 13 4-4m-6 6-1 1a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0m2 2 1-1a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0\"/></svg><input id=\"ds-composer-url\" type=\"url\" required placeholder=\"Paste an eBay.ca car link?\"></div><div class=\"ds-composer-actions\"><span class=\"ds-composer-chip\">eBay.ca</span><span class=\"ds-composer-count\">Up to 4 cars</span><button type=\"submit\" aria-label=\"Import\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h15m-6-6 6 6-6 6\"/></svg></button></div></form>",
-      "css": ".ds-composer{max-width:672px;padding:16px;border-radius:24px;background:var(--color-neutral-white,#FFFFFF);color:var(--color-secondary-950,#041222);box-shadow:0 20px 25px -5px rgb(4 18 34 / .2),0 8px 10px -6px rgb(4 18 34 / .2);font-family:var(--font-sans,Satoshi,sans-serif)}.ds-composer:focus-within{outline:2px solid var(--color-primary-600,#0872E6)}.ds-composer-row{display:flex;align-items:center;gap:12px;padding:0 4px}.ds-composer-row svg{flex-shrink:0;color:var(--color-neutral-500,#64798C)}.ds-composer input{flex:1;width:100%;min-width:0;min-height:48px;padding:8px 0;border:0;background:transparent;color:inherit;font:400 16px/1.55 var(--font-sans,Satoshi,sans-serif)}.ds-composer input::placeholder{color:var(--color-neutral-600,#46596C);opacity:1}.ds-composer input:focus-visible{outline:none}.ds-composer-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}.ds-composer-chip,.ds-composer-count{display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border-radius:calc(infinity * 1px);background:var(--color-neutral-100,#F0F6FA);font-size:12px}.ds-composer-count{color:var(--color-neutral-600,#46596C)}.ds-composer button{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;min-height:44px;margin-left:auto;padding:0;border:0;border-radius:calc(infinity * 1px);background:var(--color-primary-600,#0872E6);color:var(--color-neutral-white,#FFFFFF);cursor:pointer;transition:background-color 160ms}.ds-composer button:hover,.ds-composer button:active{background:var(--color-primary-700,#0759B8)}.ds-composer button:focus-visible{outline:3px solid var(--accent,#0759B8);outline-offset:4px}.ds-composer button:disabled{opacity:.5;cursor:not-allowed}.ds-visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}:host-context(.dark) .ds-composer{background:var(--color-secondary-800,#102C47);color:var(--color-neutral-50,#F8FBFD);box-shadow:0 20px 25px -5px rgb(0 0 0 / .2),0 8px 10px -6px rgb(0 0 0 / .2)}:host-context(.dark) .ds-composer:focus-within{outline-color:var(--color-primary-400,#4BA9FF)}:host-context(.dark) .ds-composer input::placeholder{color:var(--color-neutral-300,#CBD7E0)}:host-context(.dark) .ds-composer-chip,:host-context(.dark) .ds-composer-count{background:var(--color-secondary-700,#1A3C59);color:var(--color-neutral-100,#F0F6FA)}:host-context(.dark) .ds-composer button{background:var(--color-primary-400,#4BA9FF);color:var(--color-secondary-950,#041222)}:host-context(.dark) .ds-composer button:hover{background:var(--color-primary-300,#85C5FF)}@media(max-width:639px){.ds-composer-count{display:none}}"
-    },
-    {
-      "name": "Menu bar",
+      "name": "Selected view tab",
       "kind": "nav",
-      "refersTo": "navigation",
-      "description": "Retained slanted wordmark and three task routes on semantic canvas.",
-      "html": "<nav class=\"ds-nav\" aria-label=\"Main navigation\"><a class=\"ds-wordmark\" href=\"#import\" aria-label=\"Accelerate home\">Accelerate</a><a href=\"#import\" aria-current=\"page\">Import</a><a href=\"#compare\">Compare</a><a href=\"#decide\">Help Me Decide</a></nav>",
-      "css": ".ds-nav{display:flex;flex-wrap:wrap;align-items:center;gap:24px;min-height:80px;background:var(--background,#F8FBFD);color:var(--text,#041222);font:500 14px/1.55 var(--font-sans,Satoshi,sans-serif)}.ds-nav a{display:inline-flex;align-items:center;min-height:44px;color:var(--text-secondary,#46596C);text-decoration:none}.ds-nav a:hover,.ds-nav a[aria-current=\"page\"]{color:var(--text,#041222)}.ds-nav a[aria-current=\"page\"]{text-decoration:underline;text-decoration-color:var(--action,#0759B8);text-underline-offset:10px}.ds-nav .ds-wordmark{padding:0 6px 0 2px;font:650 24px/1.15 var(--font-display,\"Clash Grotesk\",sans-serif);letter-spacing:-.04em;transform:skewX(-9deg);color:var(--text,#041222)}.ds-primary:focus-visible,.ds-secondary:focus-visible,.ds-theme:focus-visible,.ds-nav a:focus-visible,.ds-card a:focus-visible{outline:3px solid var(--accent,#0759B8);outline-offset:4px}"
+      "refersTo": "tab-selected",
+      "description": "Selected-state sample; live tabs implement keyboard selection and labeled panels.",
+      "html": "<button class=\"ds-tab\" role=\"tab\" aria-selected=\"true\">Summary</button>",
+      "css": ".ds-tab{min-height:44px;padding:10px 12px;border:1px solid transparent;border-radius:8px;background:var(--surface-hover);color:var(--accent);font:700 14px var(--font-sans);cursor:pointer}.ds-tab:hover{background:var(--surface-raised);color:var(--text)}.ds-tab:focus-visible{outline:3px solid var(--accent);outline-offset:4px}"
     },
     {
-      "name": "Listing source chip",
+      "name": "Selected priority",
       "kind": "chip",
-      "refersTo": "source-chip",
-      "description": "Quiet noninteractive source marker used inside the composer.",
-      "html": "<span class=\"ds-chip\">eBay.ca</span>",
-      "css": ".ds-chip{display:inline-flex;align-items:center;gap:8px;min-height:32px;padding:0 12px;border-radius:calc(infinity * 1px);background:var(--color-neutral-100,#F0F6FA);color:var(--color-secondary-900,#081D33);font:500 12px/1.333333 var(--font-sans,Satoshi,sans-serif)}:host-context(.dark) .ds-chip{background:var(--color-secondary-700,#1A3C59);color:var(--color-neutral-100,#F0F6FA)}"
+      "refersTo": "priority-selected",
+      "description": "Pressed priority control; all six modes are available in the live workspace.",
+      "html": "<button class=\"ds-priority\" aria-pressed=\"true\">Comfort</button>",
+      "css": ".ds-priority{min-height:44px;padding:8px 12px;border:1px solid var(--accent);border-radius:8px;background:var(--accent);color:var(--ink);font:600 14px var(--font-sans);cursor:pointer}.ds-priority:hover{background:var(--action)}.ds-priority:focus-visible{outline:3px solid var(--accent);outline-offset:4px}"
     },
     {
-      "name": "Vehicle summary container",
+      "name": "Import surface",
       "kind": "card",
-      "refersTo": "surface-card",
-      "description": "Flat workspace container with explicit fictional/evidence context.",
-      "html": "<article class=\"ds-card\"><h3>Vehicle summary</h3><p>Fictional demo ? model-example photography is separately credited.</p><a href=\"#compare\">View comparison</a></article>",
-      "css": ".ds-card{padding:20px;border:1px solid var(--border-subtle,#E3EBF1);border-radius:16px;background:var(--surface,#FFFFFF);color:var(--text,#041222);font-family:var(--font-sans,Satoshi,sans-serif)}.ds-card h3{margin:0 0 8px;font:540 20px/1.25 var(--font-display,\"Clash Grotesk\",sans-serif);letter-spacing:-.02em}.ds-card p{margin:0 0 12px;font-size:14px;line-height:1.7;color:var(--text-secondary,#46596C)}.ds-card a{display:inline-flex;align-items:center;min-height:44px;color:var(--accent,#0759B8);font-size:14px;text-underline-offset:4px}.ds-card a:hover{color:var(--text,#041222)}.ds-primary:focus-visible,.ds-secondary:focus-visible,.ds-theme:focus-visible,.ds-nav a:focus-visible,.ds-card a:focus-visible{outline:3px solid var(--accent,#0759B8);outline-offset:4px}"
+      "refersTo": "import-surface",
+      "description": "Flat compact container for the working form.",
+      "html": "<section class=\"ds-surface\"><strong>Add a listing</strong><p>Compare up to four cars.</p></section>",
+      "css": ".ds-surface{padding:24px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--surface);color:var(--text);font:16px/1.55 var(--font-sans)}.ds-surface p{margin:8px 0 0;color:var(--text-secondary);font-size:14px}"
     },
     {
-      "name": "Theme switch",
-      "kind": "button",
-      "refersTo": "theme-switch",
-      "description": "44px circular mode control with destination label and pressed state.",
-      "html": "<button class=\"ds-theme\" type=\"button\" aria-label=\"Switch to dark mode\" aria-pressed=\"false\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 14a8 8 0 0 1-10-10 8.5 8.5 0 1 0 10 10Z\"/></svg></button>",
-      "css": ".ds-theme{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:1px solid var(--border-subtle,#E3EBF1);border-radius:calc(infinity * 1px);background:transparent;color:var(--text,#041222);cursor:pointer;transition:background-color 150ms,color 150ms}.ds-theme:hover,.ds-theme:active{background:var(--surface-raised,#F0F6FA)}.ds-primary:focus-visible,.ds-secondary:focus-visible,.ds-theme:focus-visible,.ds-nav a:focus-visible,.ds-card a:focus-visible{outline:3px solid var(--accent,#0759B8);outline-offset:4px}"
-    },
-    {
-      "name": "Divider metric grid",
+      "name": "Shortlist rail",
       "kind": "custom",
-      "refersTo": "metric-grid",
-      "description": "Two-column product-fact description list with fine dividers and a token-aware diamond at their intersection.",
-      "html": "<dl class=\"ds-metrics\"><div><span class=\"ds-dot\" aria-hidden=\"true\"></span><dt>Cars in one shortlist</dt><dd>4</dd></div><div><span class=\"ds-dot\" aria-hidden=\"true\"></span><dt>Ways to find your match</dt><dd>5</dd></div><div><span class=\"ds-dot\" aria-hidden=\"true\"></span><dt>Clearer comparison</dt><dd>1</dd></div><div><span class=\"ds-dot\" aria-hidden=\"true\"></span><dt>Accounts required</dt><dd>0</dd></div></dl>",
-      "css": ".ds-metrics{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;color:var(--text,#041222);font-family:var(--font-sans,Satoshi,sans-serif)}.ds-metrics>div{display:flex;flex-direction:column;min-width:0;padding:24px 0;border-color:var(--border-subtle,#E3EBF1);border-style:solid;border-width:0}.ds-metrics>div:nth-child(-n+2){border-bottom-width:1px}.ds-metrics>div:nth-child(odd){border-right-width:1px;padding-right:24px}.ds-metrics>div:nth-child(even){padding-left:24px}.ds-dot{display:block;width:8px;height:8px;margin-bottom:24px;border-radius:calc(infinity * 1px);background:var(--color-primary-600,#0872E6)}.ds-metrics dt{order:2;max-width:208px;margin-top:16px;font-size:14px;line-height:1.625;color:var(--text-secondary,#46596C)}.ds-metrics dd{order:1;margin:0;font-size:48px;font-weight:500;line-height:1;letter-spacing:-.025em}:host-context(.dark) .ds-dot{background:var(--color-primary-400,#4BA9FF)}@media(min-width:640px){.ds-metrics dd{font-size:60px}.ds-metrics>div:nth-child(odd){padding-right:40px}.ds-metrics>div:nth-child(even){padding-left:40px}}.ds-metrics::after{content:\"\";pointer-events:none;position:absolute;left:50%;top:50%;width:8px;height:8px;transform:translate(-50%,-50%) rotate(45deg);background:var(--color-primary-200,#B9DFFF)}:host-context(.dark) .ds-metrics::after{background:var(--color-secondary-400,#5989B2)}"
+      "refersTo": "shortlist",
+      "description": "Compact persistent context; the live rail includes photos, concerns and removal.",
+      "html": "<aside class=\"ds-shortlist\"><h2>Your shortlist <span>0/4</span></h2><p>Add a few cars you're considering.</p><button>Add a car</button></aside>",
+      "css": ".ds-shortlist{width:232px;max-width:100%;padding:16px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--surface);color:var(--text);font:14px/1.5 var(--font-sans)}.ds-shortlist h2{font-size:16px;margin:0 0 16px}.ds-shortlist span,.ds-shortlist p{font-size:14px;color:var(--text-secondary)}.ds-shortlist button{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface-hover);color:var(--accent);font:600 14px var(--font-sans);cursor:pointer}.ds-shortlist button:hover{background:var(--surface-raised)}.ds-shortlist button:focus-visible{outline:3px solid var(--accent);outline-offset:4px}"
+    },
+    {
+      "name": "Evidence disclosure",
+      "kind": "custom",
+      "refersTo": "disclosure",
+      "description": "Long explanation stays available behind a clear summary.",
+      "html": "<details class=\"ds-details\"><summary>Full explanation &amp; model context</summary><p>Model evidence and estimates remain labeled.</p></details>",
+      "css": ".ds-details{border-top:1px solid var(--border-subtle);color:var(--text-secondary);font:14px/1.5 var(--font-sans)}.ds-details summary{min-height:44px;padding:12px 0;cursor:pointer;color:var(--accent)}.ds-details summary:hover{color:var(--text)}.ds-details summary:focus-visible{outline:3px solid var(--accent);outline-offset:4px}"
     }
   ],
   "narrative": {
-    "northStar": "The Blue Horizon",
-    "overview": "Accelerate places a clear car-shopping task inside a cinematic electric-blue and deep-navy world. Soft light fields give the public landing page atmosphere; open editorial spacing and thin dividers keep its facts legible. Light mode carries that atmosphere into a bright lower body, while dark mode continues into navy surfaces with the same content and structure.\n\nThe slanted Accelerate wordmark remains the identity. Self-hosted Satoshi supplies the landing page's geometric headlines, selective sans-serif italics and interface text; Clash Grotesk supplies the wordmark, source names and established workspace headings. Working controls, contained vehicle photography and explicit evidence labels carry the experience into Compare and Decide.",
+    "northStar": "The Clear Shortlist",
+    "overview": "Accelerate is a compact task workspace. Electric blue identifies actions and selection; deep navy anchors text and dark-theme surfaces. White and pale surfaces, fine dividers and restrained spacing keep comparisons and evidence easy to scan.\n\nThe slanted Accelerate wordmark and self-hosted Satoshi/Clash Grotesk pairing retain the identity. Brand expression comes through typography, palette and useful vehicle photographs. The approved compact system replaces the cinematic hero, atmospheric bands, floating composer and long editorial landing page.",
     "keyCharacteristics": [
-      "Electric-blue lighting, deep-navy framing and neutral supporting surfaces.",
-      "Airy Satoshi editorial type with selective italic emphasis and the retained Clash Grotesk wordmark.",
-      "A floating composer, rounded controls, flat workspaces and fine metric dividers.",
-      "Identical light/dark structure, visible uncertainty and credited, contained vehicle photographs."
+      "Compact hierarchy, flat surfaces and explicit selected states.",
+      "Satoshi interface text with the retained Clash Grotesk wordmark.",
+      "Progressive disclosure for explanation without hiding trade-offs or warnings.",
+      "Theme-aware evidence labels and contained, credited vehicle photography."
     ],
     "rules": [
       {
-        "name": "The Two Palettes Rule",
-        "body": "Use Electric Blue and Deep Navy for chromatic expression; supporting colors remain neutral.",
+        "name": "The Semantic Surface Rule",
+        "body": "Pair surface and text roles from the same theme; do not reintroduce fixed navy panels beneath theme-dependent dark text.",
         "section": "colors"
       },
       {
         "name": "The Evidence Rule",
-        "body": "Express status in words as well as color, keeping provenance, warnings and unresolved values readable.",
+        "body": "State warnings, uncertainty and provenance in words as well as color.",
         "section": "colors"
       },
       {
-        "name": "The Contextual Type Rule",
-        "body": "Satoshi leads the cinematic dashboard; Clash Grotesk retains identity, source names and established workspace headings. Preserve that implemented division when adding a surface.",
+        "name": "The Compact Hierarchy Rule",
+        "body": "Use the documented compact roles; reserve the larger import headline for the short entry task.",
         "section": "typography"
       },
       {
         "name": "The Task Depth Rule",
-        "body": "Reserve the conspicuous lift for the floating composer and keep evidence workspaces tonally grouped and flat.",
+        "body": "Use tonal separation and boundaries for working content; reserve overlay depth for an actual dialog or menu.",
         "section": "elevation"
       }
     ],
     "dos": [
-      "**Do** use the exported electric-blue/navy palette and theme-aware semantic roles across new surfaces.",
-      "**Do** keep the slanted Accelerate wordmark and the self-hosted Satoshi / Clash Grotesk fonts.",
-      "**Do** keep the real listing composer, visible keyboard focus, reduced motion and explicit state wording operable.",
-      "**Do** preserve source context, truthful product facts and credited, contained vehicle imagery on theme-aware photo mats.",
-      "**Do** retain the same content structure in both themes and keep mobile comparison overflow local to labeled regions.",
-      "**Do** distinguish source verification from rendered review until desktop, mobile and 200% zoom captures exist."
+      "**Do** use semantic palette roles in both themes.",
+      "**Do** keep the compact type ramp, 8px controls and 12px main surfaces intentional and consistent.",
+      "**Do** retain complete vehicle photographs and existing attribution.",
+      "**Do** keep trade-offs, warnings and estimate labels visible while disclosing longer explanations.",
+      "**Do** preserve keyboard focus, source access and the shared shortlist across task views."
     ],
     "donts": [
-      "**Don't** introduce a third chromatic family or revive the discarded indigo/lilac visual world.",
-      "**Don't** add a separate symbol, logo badge or new raster asset beside the Accelerate wordmark.",
-      "**Don't** represent research sources as partners or invent testimonials, customer counts or performance benchmarks.",
-      "**Don't** hide uncertainty, convert missing data into verified facts or remove visible purchase warnings.",
-      "**Don't** replace the working import with a static form, crop model photographs or add autoplay to the preview.",
-      "**Don't** claim visual fidelity, responsive rendering or 200% zoom approval from source and contrast checks alone."
+      "**Don't** restore cinematic hero bands, atmospheric panels or floating-composer examples as current workspace guidance.",
+      "**Don't** replace evidence wording with color alone or imply individual condition is verified.",
+      "**Don't** treat source checks, test passes or CSS breakpoints as rendered desktop, phone or zoom approval.",
+      "**Don't** add new identity assets, palette families or decorative raster work to this compact system."
     ]
   }
 }

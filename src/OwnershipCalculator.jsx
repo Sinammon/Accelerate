@@ -1,5 +1,6 @@
-import React, { useId } from 'react';
+import React, { useId, useState } from 'react';
 import WorkspaceHeading from './WorkspaceHeading.jsx';
+import WorkspaceTabs, { WorkspacePanel } from './WorkspaceTabs.jsx';
 import Icon from './Icons.jsx';
 import { vehicleName, safeUrl } from './vehicle-data.js';
 import { resolveVehicleExperience, experienceLabel } from './vehicle-experience.js';
@@ -33,7 +34,13 @@ function CostField({ name, label, context, value, onChange, hint, optional = fal
   </div>;
 }
 
-export default function OwnershipCalculator({ cars, scenario, setScenario, state, setState }) {
+export default function OwnershipCalculator({ cars, scenario, setScenario, state, setState, tab: suppliedTab, onTabChange }) {
+  const [localTab, setLocalTab] = useState('summary');
+  const tab = suppliedTab || localTab, setTab = onTabChange || setLocalTab;
+  function openTab(next) {
+    setTab(next);
+    requestAnimationFrame(() => document.getElementById(`costs-tab-${next}`)?.focus());
+  }
   const finance = state.method === 'finance';
   const update = (key, value) => setState(previous => ({ ...previous, [key]: value }));
   const updateCar = (id, key, value) => setState(previous => ({ ...previous, vehicles: { ...previous.vehicles, [id]: { ...previous.vehicles[id], [key]: value } } }));
@@ -59,7 +66,7 @@ export default function OwnershipCalculator({ cars, scenario, setScenario, state
   const value = (record, key) => <strong className="ownership-amount">{money(record.costs[key])}</strong>;
   const table = (id, rows) => <div className="ownership-table-scroll" role="region" aria-labelledby={id} tabIndex={0}>
     <table className="ownership-table" style={{ '--car-count': cars.length }}>
-      <caption className="sr-only">{id === 'purchase-costs' ? 'Purchase costs' : 'Running costs'} in Canadian dollars for all shortlisted cars</caption>
+      <caption className="sr-only">{id === 'cost-summary' ? 'Ownership summary' : id === 'purchase-costs' ? 'Purchase costs' : 'Running costs'} in Canadian dollars for all shortlisted cars</caption>
       <thead><tr><th scope="col">Cost · CAD</th>{cars.map(car => <th scope="col" key={car.legacyItemId}>{vehicleName(car)}{car.demo && <small>Fictional listing</small>}</th>)}</tr></thead>
       <tbody>{rows.map(([label, render, total]) => <tr key={label} className={total ? 'ownership-total' : undefined}><th scope="row">{label}</th>{records.map(record => <td key={record.car.legacyItemId}>{render(record)}</td>)}</tr>)}</tbody>
     </table>
@@ -90,24 +97,45 @@ export default function OwnershipCalculator({ cars, scenario, setScenario, state
   const labels = finance ? { comfortable: 'Comfortable monthly budget', stretched: 'Stretched monthly budget', over: 'Monthly costs over budget' } : { comfortable: 'Comfortable running costs', stretched: 'Stretched running budget', over: 'Running costs over budget' };
 
   return <section className="page-section ownership-page">
-    <WorkspaceHeading title={<>Know the cost of <em className="hero-italic">ownership</em></>} description="Compare what you need to buy each car and what it could cost to run. Adjust the estimates to fit your life.">
-      <a className="back-link" href="#decide">Back to Help Me Decide <Icon name="arrow" size={18} /></a>
+    <WorkspaceHeading title="Cost of ownership" description="See what you need upfront and what you could spend each month.">
+      <a className="back-link" href="#compare">Compare cars <Icon name="arrow" size={18} /></a>
     </WorkspaceHeading>
     {!cars.length ? <div className="empty-state"><h2>Add cars to compare their costs.</h2><p>Import a listing or try the fictional demo to build your shortlist.</p><a className="primary-link" href="#import">Choose your cars <Icon name="arrow" size={18} /></a></div> : <>
       <div className="ownership-toolbar"><fieldset className="ownership-method"><legend>How will you buy?</legend><div>{[['cash', 'Cash'], ['finance', 'Finance']].map(([method, label]) => <button key={method} type="button" aria-pressed={state.method === method} onClick={() => update('method', method)}>{label}</button>)}</div></fieldset><p>Ontario starting scenario · CAD<br /><span>Every assumption is editable.</span></p></div>
       {cars.some(car => car.demo) && <p className="decision-demo-note">Fictional demo listings · These costs are planning estimates, not offers.</p>}
+      <WorkspaceTabs id="costs" label="Cost views" tabs={[["summary", "Summary"], ["purchase", "Purchase"], ["running", "Running costs"], ["salary", "Salary guide"]]} value={tab} onChange={setTab} />
       <details className="ownership-assumptions"><summary>Adjust driving, tax{finance ? ' & financing' : ''} assumptions</summary><div className="ownership-fields">
         {energyField('annualKm', 'Annual driving (km)', '1')}{energyField('pricePerLitre', 'Fuel price (CAD/L)')}{energyField('pricePerKwh', 'Electricity price (CAD/kWh)')}{energyField('electricShare', 'Plug-in hybrid electric driving (%)', '1')}
         {settingField('taxRate', 'Estimated purchase tax (%)')}
         {finance && <>{settingField('apr', 'Annual loan interest (%)')}{settingField('termMonths', 'Loan term (months)', { step: '1' })}</>}
       </div><p>Valid driving and energy-price changes also apply in Compare and Help Me Decide. Prices are scenario assumptions, not live rates. Financing assumes fixed interest, monthly payments and purchase taxes and fees included in the loan.</p></details>
 
+      <WorkspacePanel id="costs" value="summary" active={tab}>
+        <section className="ownership-summary" aria-labelledby="cost-summary"><h2 id="cost-summary">Your costs at a glance</h2>
+          <p>Upfront funding and monthly expenses are separate. These are planning estimates in CAD.</p>
+          {table('cost-summary', [
+            [finance ? 'Down payment · upfront' : 'Cash needed · upfront', r => value(r, finance ? 'down' : 'acquisition'), true],
+            [finance ? 'Running expenses / month' : 'Running expenses / year', r => value(r, finance ? 'monthlyRunning' : 'annualRunning')],
+            ...(finance ? [['Loan payment / month', r => value(r, 'payment')]] : []),
+            [finance ? 'Loan + running / month' : 'Monthly running budget', r => value(r, 'monthlyBudget'), true],
+          ])}
+          <p className="ownership-note">Running expenses include fuel or charging, insurance, a maintenance and repair reserve, parking, and other costs. Cash purchase savings are excluded from the monthly budget.</p>
+          <div className="cost-summary-actions"><button type="button" onClick={() => openTab('purchase')}>Edit purchase estimates</button><button type="button" className="text-button" onClick={() => openTab('running')}>Edit running costs</button><button type="button" className="text-button" onClick={() => openTab('salary')}>Check your salary</button></div>
+          {records.some(r => r.costs.monthlyBudget == null) && <p role="status" className="ownership-error">Incomplete totals need attention. Check Purchase, Running costs, and the shared assumptions above. Missing amounts never count as zero.</p>}
+          <p className="ownership-note">Ontario starting scenario. Insurance uses a June 2026 population average, not a personal quote. <a href={FSRA} target="_blank" rel="noopener noreferrer">FSRA source</a>. All assumptions are editable.</p>
+        </section>
+      </WorkspacePanel>
+      <WorkspacePanel id="costs" value="purchase" active={tab}>
       <section className="ownership-section" aria-labelledby="purchase-costs"><h2 id="purchase-costs">Purchase costs</h2><p>Start with the seller’s price, then adjust your acquisition estimates. Ontario private-sale tax may use wholesale value instead of purchase price; use a tax override when needed. <a href={ONTARIO} target="_blank" rel="noopener noreferrer">Ontario tax guidance</a>.</p>
         {table('purchase-costs', purchaseRows)}
         {!finance && <details className="ownership-assumptions ownership-savings"><summary>Save toward this purchase</summary><p>This is a future purchase savings goal, not an expense after buying with cash. It is excluded from running totals and the salary assessment.</p>{settingField('savingsMonths', 'Savings period (months)', { step: '1' })}<dl>{records.map(r => <div key={r.car.legacyItemId}><dt>{vehicleName(r.car)}</dt><dd>{money(r.costs.savingsTarget)}<small>per month toward {money(r.costs.acquisition)} upfront</small></dd></div>)}</dl></details>}
       </section>
+      </WorkspacePanel>
+      <WorkspacePanel id="costs" value="running" active={tab}>
       <section className="ownership-section" aria-labelledby="running-costs"><h2 id="running-costs">Running costs</h2><p>These are editable estimates, not guaranteed bills. Insurance depends on the driver and coverage; maintenance and repairs depend on condition and use. Totals include your repair reserve.</p>{table('running-costs', runningRows)}<p className="ownership-note">“Incomplete” means a required amount or driving assumption needs attention. Missing costs never count as zero. Resale value and depreciation are not modeled.</p></section>
 
+      </WorkspacePanel>
+      <WorkspacePanel id="costs" value="salary" active={tab}>
       <section className="ownership-section ownership-salary" aria-labelledby="salary-heading"><h2 id="salary-heading">How does it fit your salary?</h2><p>{finance ? 'Compare loan payments plus running expenses with your estimated take-home pay. Your down payment needs separate savings.' : 'Check whether your income covers running expenses. Buying with cash still requires the full purchase amount in separate savings.'} This income-based guide excludes housing, debt and other household commitments.</p>
         <div className="ownership-fields ownership-income">{settingField('salary', 'Your gross yearly salary (CAD)', { optional: blank(state.salary), placeholder: 'Enter yearly salary', hint: 'Optional. Stays in memory in this browser; not saved or sent.' })}{settingField('takeHomePercent', 'Estimated take-home pay (%)', { hint: '70% is a starting assumption, not a tax calculation.' })}</div>
         <details className="ownership-assumptions"><summary>Adjust the salary guide</summary><div className="ownership-fields">{settingField('comfortablePercent', 'Comfortable limit (% of take-home)')}{settingField('stretchedPercent', 'Stretched limit (% of take-home)', { error: rulesError })}</div><p>Comfortable: up to {state.comfortablePercent}% of take-home pay. Stretched: above {state.comfortablePercent}% through {state.stretchedPercent}%. Over budget: above {state.stretchedPercent}%. These are editable budgeting rules, not a lending assessment.</p></details>
@@ -118,6 +146,7 @@ export default function OwnershipCalculator({ cars, scenario, setScenario, state
           {!finance && <p className="ownership-note">This result covers running costs. It does not establish whether your purchase savings are sufficient.</p>}
         </li>)}</ul>
       </section>
+      </WorkspacePanel>
     </>}
   </section>;
 }

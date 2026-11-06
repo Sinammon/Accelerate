@@ -2,29 +2,36 @@
 version: 1
 slug: "src-dashboard-jsx"
 primary_target: "src/Dashboard.jsx"
-related_targets: ["src/App.jsx","src/ImportComposer.jsx","src/dashboard.css","src/data/config/colors.js"]
+related_targets: ["src/App.jsx", "src/ImportComposer.jsx", "src/Shortlist.jsx", "src/WorkspaceTabs.jsx", "src/VehicleComparison.jsx", "src/DecisionDashboard.jsx", "src/OwnershipCalculator.jsx", "src/compact.css", "src/app.css", "src/data/config/colors.js"]
 ---
 
-# Accelerate cinematic dashboard
+# Accelerate compact workspace
 
-Route: /dashboard (root remains a compatible entry).
-Mode: Persuade on the landing page; Operate in Compare and Decide.
-Primary target: src/Dashboard.jsx. Related: src/App.jsx, src/ImportComposer.jsx, src/dashboard.css, src/data/config/colors.js.
+Routes: / and /dashboard remain entry points; #import, #compare, #decide and #ownership remain compatible.
+Mode: Operate throughout the task workspace.
+Primary target: src/Dashboard.jsx. Shared shell and state: src/App.jsx; current layout/density authority: src/compact.css, imported last through src/app.css. src/workspace.css was removed.
 
 ## Direction contract
 
-THESIS: Give Canadian car shoppers the supplied cinematic blue composition with their actual listing-import action at its center. Preserve Import, Compare and Decide, and the fuel/comfort estimates.
+THESIS: Let shoppers operate the car comparison from a compact desktop-first workspace, with the shortlist and next task in reach. Preserve the full evidence and calculation depth behind clear tabs and disclosures.
 
-OWN-WORLD: Two chromatic palettes only: electric blue and deep navy, with white and neutral supporting surfaces. Airy geometric type, selective sans-serif italics, a floating white/navy composer and thin metric dividers. The existing Accelerate wordmark remains the identity.
+OWN-WORLD: Retain the slanted Accelerate wordmark, self-hosted Satoshi and Clash Grotesk, the electric-blue/navy semantic palettes and white/pale light-theme surfaces. Use flat boundaries, compact Satoshi interface type, intentional 8px controls and 12px main surfaces. The compact type ramp is 12/14/16/18/22/24px; import uses 36px and 28px on phones. Replace the former cinematic landing composition and legacy fixed navy panels rather than carrying them into the workspace.
 
-STORY: Paste an eBay.ca listing, compare up to four cars, then choose among five visible priorities. Source names identify research inputs; facts about the app replace the reference's unrelated marketing statistics. The existing interactive preview is available in a disclosure.
+STORY: Add a real eBay.ca listing or try the fictional demo; compare essentials; choose one of six priorities; examine acquisition/running expenses and salary assumptions. The same temporary shortlist, shared scenario, view selections and private calculator edits continue across the task views. Help holds the walkthrough and source explanation.
 
-FIRST VIEWPORT: Full-width navy and soft blue light, compact overlaid navigation, a centered two-line heading, concise shopping description and working composer. The hero dissolves into a quiet source strip and two-column editorial/metric section. A blue horizon ends the page. Mobile stacks content, keeps a two-column metric grid and preserves 44-unit touch targets. Both themes retain identical structure.
+FIRST VIEWPORT: A compact header with Compare, Recommendation, Costs, Add car and theme controls. A sticky 232px shortlist sits beside the main task, becoming 200px up to 1100px and a collapsed disclosure below 768px. The import task is a short introduction plus labeled form. Compare defaults to six rows: price, mileage, annual energy, Comfort ride/seats, Practicality passenger/cargo room and horsepower. Specifications and Sources & checks preserve full details, original location/mileage, photos and provenance. Recommendation has Summary, Ranking & evidence and Assumptions tabs with all six modes, compact reasons, full explanation disclosure, visible trade-off and separate warnings. Costs has Summary, Purchase, Running costs and Salary guide tabs. These are implemented source rules; actual 1366x768 fit is unverified.
 
-FORM: User-pinned screenshot and supplied JSON specification, implemented code-first under the existing project preference. No concept tournament or random visual direction. Seed: none (brief-pinned).
+FORM: User-approved compact Operate replacement, implemented code-first within the retained identity, fonts and palette. Seed: none (brief-pinned). No new raster work; existing photo credits remain preserved.
 
-FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+FINISH: The implementation ends with an independent finish review, bounded verdict, current DESIGN.md and sidecar, and preserved provenance for every existing shipping raster.
 
-## Constraints and verification
+## Constraints
 
-Keep listing validation, four-car limit, all decision logic, warnings, estimates, source disclosures, cancellation and shortlist continuity. Reuse self-hosted fonts and existing credited model photographs. No account, partnership or creative-production claims. Theme persistence contains only the theme preference. Browser host currently unavailable; rendered UI, compiled CSS, contrast and regression checks are available. Do not claim screenshot fidelity or device/zoom rendering approval without captures.
+Preserve the four-car limit, validation, removal/replacement, async cancellation, all six ranking modes, energy/comfort estimates, warnings, citations, configuration edits and source access. Compare preserves two selected contenders on phones with all cars in the shortlist. Costs retains cash/finance calculations and all-car tables. App memory retains selected tabs, contender and private calculator inputs across navigation/research updates; clearing the shortlist resets private inputs. Keep root, /dashboard and existing hash routes. No backend, scoring, persistent-storage or deployment changes.
+
+## Verification evidence - 5 November 2026
+
+- Final automated verification: npm test passed 198/198; npm run build passed with 496 modules. Existing Motion use-client and >500kB chunk advisories remain. git diff --check passed before documentation edits; documentation whitespace/JSON is checked separately.
+- The detector ran once. Its 8px-radius and 36px/28px-import-heading advisories are intentional approved compact choices, recorded in DESIGN frontmatter, prose and sidecar.
+- Independent finish verdict: ship for two resolved SOURCE findings only. Removed low-contrast legacy navy panels and focused the destination cost tab after programmatic switches. The reviewer also accepted the source correction preserving original listing location/mileage in Sources & checks. This is not whole-surface visual approval.
+- Browser and native access hosts were unavailable. No screenshots exist. Actual desktop/1366x768 fit, phone rendering, contrast across the whole rendered surface and 200% zoom remain unverified. Source inspection and JSDOM journeys cannot certify these checks.

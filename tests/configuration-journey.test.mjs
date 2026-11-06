@@ -65,11 +65,11 @@ test('configuration editor saves market and mileage, rejects incomplete correcti
     assert.equal(oldSignal.aborted, true, 'saving aborts enrichment for the superseded vehicle');
     assert.equal(document.querySelector('#reference-market-111111111111').value, 'US');
     assert.ok([...document.querySelector('#configuration-111111111111').options].slice(1).every(option => option.textContent.startsWith('US reference')));
-    assert.match(document.querySelector('.car-card').textContent, /50000 mi · User-entered/);
+    assert.match(document.querySelector('.mileage-evidence').textContent, /50,000 mi · User-entered/);
     assert.match(document.querySelector('.mileage-evidence').textContent, /Original imported mileage evidence.*154865/s);
     await React.act(async () => { releaseOld(); await new Promise(resolve => setTimeout(resolve, 40)); });
     assert.equal(document.querySelector('#reference-market-111111111111').value, 'US');
-    assert.match(document.querySelector('.car-card').textContent, /50000 mi · User-entered/);
+    assert.match(document.querySelector('.mileage-evidence').textContent, /50,000 mi · User-entered/);
     await change('#configuration-111111111111', 'epa:1');
     await change('#edit-111111111111-horsepower', '192');
     assert.equal(document.querySelector('#configuration-111111111111').value, 'epa:1', 'compatible corrections keep selection');
@@ -84,7 +84,7 @@ test('configuration editor saves market and mileage, rejects incomplete correcti
     });
     assert.equal(document.querySelector('#reference-market-111111111111').value, '');
     assert.equal(document.querySelector('#mileage-111111111111').value, '154865');
-    assert.match(document.querySelector('.car-card').textContent, /154865 km \(assumed\)/);
+    assert.match(document.querySelector('.seller-context').textContent, /Kilometres are assumed.*154865/s);
     assert.equal(document.querySelector('.mileage-evidence'), null);
     assert.equal(imports, 1);
   } finally {

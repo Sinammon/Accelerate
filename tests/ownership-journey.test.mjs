@@ -53,15 +53,15 @@ test('calculator compares four cars, validates edits, preserves sources and sepa
     }
     await React.act(async () => root.render(React.createElement(Harness)));
     const field = name => `[data-field="${name}"]`;
-    assert.equal(document.querySelectorAll('table').length, 2);
+    assert.equal(document.querySelectorAll('table').length, 3);
     for (const table of document.querySelectorAll('table')) assert.equal(table.querySelectorAll('thead th').length, 5);
     assert.equal(document.querySelector('.ownership-method button[aria-pressed="true"]').textContent, 'Cash');
     assert.equal(document.querySelectorAll('.ownership-results > li').length, 4);
     assert.match(document.querySelector('.ownership-results').textContent, /Gross salary for comfortable running costs.*\$49,981\/year/s);
-    assert.match(document.querySelector('.ownership-table').textContent, /\$23,100/);
+    assert.match(document.querySelector('#costs-panel-purchase .ownership-table').textContent, /\$23,100/);
     assert.match(document.body.textContent, /Ontario average—not a quote for this vehicle.*June 2026.*FSRA/s);
     assert.ok(document.querySelector('a[href="https://example.test/energy"]'));
-    const energyAmounts = () => [...document.querySelectorAll('table')[1].querySelectorAll('tbody tr:first-child .ownership-amount')].map(el => el.textContent);
+    const energyAmounts = () => [...document.querySelector('#costs-panel-running table').querySelectorAll('tbody tr:first-child .ownership-amount')].map(el => el.textContent);
     assert.deepEqual(energyAmounts(), ['$1,530', '$1,530', '$450', '$1,245']);
     await change(field('pricePerKwh'), '0.20');
     assert.deepEqual(energyAmounts(), ['$1,530', '$1,530', '$600', '$1,320']);
@@ -101,7 +101,7 @@ test('calculator compares four cars, validates edits, preserves sources and sepa
     assert.equal(currentState.vehicles['car-0'].taxOverride, '100');
     await React.act(async () => document.querySelectorAll('.ownership-method button')[1].click());
     assert.equal(document.querySelector('.ownership-savings'), null);
-    assert.match(document.querySelector('.ownership-table').textContent, /Monthly loan payment.*Total loan interest.*Total purchase repayment/s);
+    assert.match(document.querySelector('#costs-panel-purchase .ownership-table').textContent, /Monthly loan payment.*Total loan interest.*Total purchase repayment/s);
     await change(field('downPayment'), '999999');
     assert.match(document.querySelector(field('downPayment')).nextElementSibling.textContent, /cannot exceed/);
     assert.match(document.querySelector('.ownership-result-status').textContent, /Complete/);
@@ -166,8 +166,9 @@ test('ownership journey preserves private inputs, cleans removed cars, resets on
     });
     assert.equal(window.location.hash, '#ownership');
     assert.equal(document.activeElement, document.querySelector('h1'));
-    assert.equal(document.querySelector('.workflow [aria-current="step"]').getAttribute('href'), '#decide');
-    assert.equal(document.querySelectorAll('table').length, 2);
+    assert.equal(document.querySelector('#primary-navigation [aria-current="page"]').getAttribute('href'), '#ownership');
+    assert.equal(document.querySelector('.workflow'), null);
+    assert.equal(document.querySelectorAll('table').length, 3);
     await change('[data-field="salary"]', '120000');
     await change('[data-field="insuranceAnnual"]', '999');
     await go('decide');
@@ -192,7 +193,7 @@ test('ownership journey preserves private inputs, cleans removed cars, resets on
       document.querySelector('.comparison-options').open = true;
       document.querySelector('[data-action="clear-comparison"]').click();
     });
-    await React.act(async () => document.querySelector('.nav-demo').click());
+    await React.act(async () => document.querySelector('.demo-entry button').click());
     await go('ownership');
     assert.equal(document.querySelector('[data-field="salary"]').value, '');
     assert.equal(document.querySelector('[data-field="insuranceAnnual"]').value, '2218', 're-imported removed IDs do not regain old overrides');

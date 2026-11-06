@@ -1,6 +1,6 @@
 ---
 name: Accelerate
-description: Cinematic electric-blue atmosphere around a clear, evidence-led car-shopping workspace.
+description: A compact, evidence-led car-shopping workspace in electric blue and deep navy.
 colors:
   primary-50: "#EFF7FF"
   primary-100: "#DCEFFF"
@@ -38,225 +38,153 @@ colors:
   neutral-950: "#07111B"
   neutral-black: "#000000"
 typography:
-  display:
+  import-headline:
     fontFamily: "Satoshi, sans-serif"
-    fontSize: "4.5rem"
-    fontWeight: 500
-    lineHeight: 1
-    letterSpacing: "-0.025em"
-  headline:
+    fontSize: "36px"
+    fontWeight: 650
+  import-headline-phone:
     fontFamily: "Satoshi, sans-serif"
-    fontSize: "3rem"
-    fontWeight: 500
+    fontSize: "28px"
+    fontWeight: 650
+  workspace-headline:
+    fontFamily: "Satoshi, sans-serif"
+    fontSize: "24px"
+    fontWeight: 700
     lineHeight: 1.25
-    letterSpacing: "-0.025em"
-  metric:
+  section:
     fontFamily: "Satoshi, sans-serif"
-    fontSize: "3.75rem"
-    fontWeight: 500
-    lineHeight: 1
-    letterSpacing: "-0.025em"
-  title:
-    fontFamily: "Clash Grotesk, sans-serif"
-    fontSize: "1.5rem"
-    fontWeight: 600
-    lineHeight: 1.333333
-    letterSpacing: "-0.025em"
+    fontSize: "22px"
+  fact:
+    fontFamily: "Satoshi, sans-serif"
+    fontSize: "18px"
+    fontWeight: 650
   body:
     fontFamily: "Satoshi, sans-serif"
-    fontSize: "1rem"
+    fontSize: "16px"
     fontWeight: 400
     lineHeight: 1.55
+  interface:
+    fontFamily: "Satoshi, sans-serif"
+    fontSize: "14px"
   evidence:
     fontFamily: "Satoshi, sans-serif"
-    fontSize: "0.875rem"
-    fontWeight: 400
-    lineHeight: 1.7
-  label:
-    fontFamily: "Satoshi, sans-serif"
-    fontSize: "0.75rem"
-    fontWeight: 400
-    lineHeight: 1.333333
+    fontSize: "12px"
   button:
     fontFamily: "Satoshi, sans-serif"
-    fontSize: "1rem"
+    fontSize: "16px"
     fontWeight: 640
     lineHeight: 1.38
   wordmark:
     fontFamily: "Clash Grotesk, sans-serif"
-    fontSize: "1.5rem"
+    fontSize: "24px"
     fontWeight: 650
     lineHeight: 1.15
     letterSpacing: "-0.04em"
-  workspace-headline:
-    fontFamily: "Clash Grotesk, sans-serif"
-    fontSize: "clamp(32px, 3vw, 40px)"
-    fontWeight: 540
-    lineHeight: 1.18
-    letterSpacing: "-0.02em"
-  workspace-section:
-    fontFamily: "Clash Grotesk, sans-serif"
-    fontSize: "clamp(24px, 2.5vw, 32px)"
-    fontWeight: 540
-    lineHeight: 1.18
-    letterSpacing: "-0.02em"
-  workspace-subsection:
-    fontFamily: "Clash Grotesk, sans-serif"
-    fontSize: "22px"
-    fontWeight: 540
-    lineHeight: 1.18
-    letterSpacing: "-0.02em"
-  workspace-fact:
-    fontFamily: "Satoshi, sans-serif"
-    fontSize: "18px"
-    fontWeight: 700
 rounded:
   photo: "4px"
-  badge: "6px"
-  xl: "12px"
-  2xl: "16px"
-  3xl: "24px"
-  full: "calc(infinity * 1px)"
+  control: "8px"
+  surface: "12px"
+  inherited-card: "16px"
 spacing:
-  "1": "4px"
-  "2": "8px"
-  "3": "12px"
-  "4": "16px"
-  "5": "20px"
-  "6": "24px"
-  "7": "28px"
-  "8": "32px"
-  "10": "40px"
-  "11": "44px"
-  "12": "48px"
-  "16": "64px"
-  "20": "80px"
-  "24": "96px"
-  "28": "112px"
-  "32": "128px"
-  "36": "144px"
+  xs: "4px"
+  sm: "8px"
+  md: "12px"
+  lg: "16px"
+  xl: "20px"
+  section: "24px"
 components:
   button-primary:
     backgroundColor: "{colors.primary-700}"
     textColor: "{colors.neutral-white}"
     typography: "{typography.button}"
-    rounded: "{rounded.xl}"
+    rounded: "{rounded.control}"
     padding: "12px 20px"
   button-primary-dark:
     backgroundColor: "{colors.primary-400}"
     textColor: "{colors.secondary-950}"
-  button-primary-dark-hover:
-    backgroundColor: "{colors.primary-300}"
-    textColor: "{colors.secondary-950}"
   button-secondary:
     backgroundColor: "transparent"
     textColor: "{colors.secondary-950}"
-    rounded: "{rounded.full}"
-    padding: "12px 20px"
+    rounded: "{rounded.control}"
+    padding: "8px 12px"
   input:
     backgroundColor: "{colors.neutral-50}"
     textColor: "{colors.secondary-950}"
-    typography: "{typography.body}"
-    rounded: "{rounded.xl}"
+    rounded: "{rounded.control}"
     padding: "12px"
-  hero-composer:
+  import-surface:
     backgroundColor: "{colors.neutral-white}"
     textColor: "{colors.secondary-950}"
-    rounded: "{rounded.3xl}"
+    rounded: "{rounded.surface}"
+    padding: "24px"
+  shortlist:
+    backgroundColor: "{colors.neutral-white}"
+    textColor: "{colors.secondary-950}"
+    rounded: "{rounded.surface}"
     padding: "16px"
-  hero-composer-dark:
-    backgroundColor: "{colors.secondary-800}"
-    textColor: "{colors.neutral-50}"
-  import-submit:
-    backgroundColor: "{colors.primary-600}"
-    textColor: "{colors.neutral-white}"
-    rounded: "{rounded.full}"
-    padding: "0"
-    height: "44px"
-    width: "44px"
-  import-submit-hover:
-    backgroundColor: "{colors.primary-700}"
-  source-chip:
-    backgroundColor: "{colors.neutral-100}"
-    textColor: "{colors.secondary-900}"
-    rounded: "{rounded.full}"
-    padding: "0 12px"
-    height: "32px"
-  surface-card:
-    backgroundColor: "{colors.neutral-white}"
-    textColor: "{colors.secondary-950}"
-    rounded: "{rounded.2xl}"
-    padding: "20px"
+    width: "232px"
+  tab-selected:
+    backgroundColor: "{colors.primary-50}"
+    textColor: "{colors.primary-700}"
+    typography: "{typography.interface}"
+    rounded: "{rounded.control}"
+    padding: "10px 12px"
   priority-selected:
     backgroundColor: "{colors.primary-700}"
     textColor: "{colors.neutral-white}"
-    rounded: "{rounded.xl}"
-    padding: "20px"
+    rounded: "{rounded.control}"
+    padding: "8px 12px"
+  recommendation:
+    backgroundColor: "{colors.neutral-white}"
+    textColor: "{colors.secondary-950}"
+    rounded: "{rounded.surface}"
   disclosure:
     backgroundColor: "transparent"
     textColor: "{colors.neutral-600}"
-    padding: "16px 0"
-  navigation:
-    backgroundColor: "transparent"
-    textColor: "{colors.secondary-950}"
-  theme-switch:
-    backgroundColor: "transparent"
-    textColor: "{colors.secondary-950}"
-    rounded: "{rounded.full}"
-    padding: "0"
-    height: "44px"
-    width: "44px"
-  metric-grid:
-    backgroundColor: "transparent"
-    textColor: "{colors.secondary-950}"
+    typography: "{typography.interface}"
+    padding: "12px 0"
 ---
 
 # Design System: Accelerate
 
 ## Overview
 
-**Creative North Star: "The Blue Horizon"**
+**Creative North Star: "The Clear Shortlist"**
 
-Accelerate places a clear car-shopping task inside a cinematic electric-blue and deep-navy world. Soft light fields give the public landing page atmosphere; open editorial spacing and thin dividers keep its facts legible. Light mode carries that atmosphere into a bright lower body, while dark mode continues into navy surfaces with the same content and structure.
+Accelerate is a compact task workspace. Electric blue identifies actions and selection; deep navy anchors text and dark-theme surfaces. White and pale surfaces, fine dividers and restrained spacing keep comparisons and evidence easy to scan.
 
-The slanted Accelerate wordmark remains the identity. Self-hosted Satoshi supplies the geometric page headlines, selective sans-serif italics and interface text; Clash Grotesk supplies the wordmark, source names and workspace section headings. Working controls, contained vehicle photography and explicit evidence labels carry the experience into Compare and Decide.
+The slanted Accelerate wordmark and self-hosted Satoshi/Clash Grotesk pairing retain the identity. Brand expression comes through typography, palette and useful vehicle photographs. The approved compact system replaces the cinematic hero, atmospheric bands, floating composer and long editorial landing page.
 
 **Key Characteristics:**
 
-- Electric-blue lighting, deep-navy framing and neutral supporting surfaces.
-- Airy Satoshi editorial type with selective italic emphasis and the retained Clash Grotesk wordmark.
-- A floating composer, rounded controls, flat workspaces and fine metric dividers.
-- Identical light/dark structure, visible uncertainty and credited, contained vehicle photographs.
+- Compact hierarchy, flat surfaces and explicit selected states.
+- Satoshi interface text with the retained Clash Grotesk wordmark.
+- Progressive disclosure for explanation without hiding trade-offs or warnings.
+- Theme-aware evidence labels and contained, credited vehicle photography.
 
-This is a source-derived record of the replacement world, superseding the former Aerotime/indigo documentation. Palette and semantic-role authority is `src/data/config/colors.js`, exported through `tailwind.config.js`; base rules live in `src/theme.css`, with this surface in `src/Dashboard.jsx`, `src/ImportComposer.jsx` and `src/dashboard.css`. The [surface brief](.impeccable/surfaces/src-dashboard-jsx.md) owns composition and mode; [PRODUCT.md](PRODUCT.md) owns product facts.
+Source authority: `src/data/config/colors.js` and `tailwind.config.js` define palettes and semantic theme roles. `src/theme.css` supplies foundations; `src/app.css` imports `src/compact.css` last in the component layer to define current density and composition. `src/workspace.css` has been removed. The [dashboard brief](.impeccable/surfaces/src-dashboard-jsx.md) owns the Operate flow; [PRODUCT.md](PRODUCT.md) owns product and data truth.
 
-Verification boundary: the production build, theme workflow, compiled-token checks and both-mode contrast checks passed. The finish review returned **ship for its resolved source findings only**. The browser host was unavailable: no desktop, mobile or 200%-zoom screenshots exist, and neither visual fidelity nor responsive rendering has been approved. Existing Motion `use client` and bundle-chunk advisories remain. Documentation and snippets below do not imply a rendered review.
-
-Retained drift, not system guidance: the separate legacy photo-credits HTML still hardcodes the former indigo palette. Its photographs, credits and licenses remain preserved; this documentation pass does not expand that page's scope or promote its old colors into the new system.
+Verification, 5 November 2026: `npm test` passed 198/198 and `npm run build` passed (496 modules). Existing Motion `use client` and >500 kB chunk advisories remain. The independent finish verdict is **ship for two resolved source findings only**: removed legacy low-contrast navy panels, and focused the destination tab after programmatic cost-tab switches. The reviewer also accepted preservation of original location/mileage in Sources & checks. The detector ran once; its 8px-corner and 36px/28px-heading advisories describe the intentional approved compact system recorded here. Browser/native access was unavailable. There are no screenshots, no verified 1366x768 fit, phone or 200%-zoom rendering, and no whole-surface visual approval. Automated tests and source review do not establish those checks.
 
 ## Colors
 
-There are exactly two chromatic families: Electric Blue (`primary-*`) and Deep Navy (`secondary-*`). Cool neutrals support reading, boundaries and photography. The frontmatter captures the exported palettes; semantic CSS variables select from these palettes by theme.
+Exactly two chromatic families remain: Electric Blue (`primary-*`) and Deep Navy (`secondary-*`), supported by cool neutrals. Frontmatter records the exported palette; the source semantic roles choose the correct member for each theme.
 
 ### Primary
 
-- **Electric Blue:** bright middle tones create atmospheric light and the hero's circular import action. Darker tones carry readable actions and links in light mode; lighter tones carry actions and focus in dark mode.
-- **Pale Blue Light:** the lightest primary tones support gradients, hover fields and selected tabs. They are supporting fields, not small-text substitutes.
+- **Electric Blue:** readable actions, active navigation, focus and selected priorities. Pale blue supports light-theme selection fields.
 
 ### Secondary
 
-- **Deep Navy:** the deepest tones frame the hero, horizon and dark canvas; middle tones separate dark panels and boundaries. The deepest tone also supplies light-mode reading text and dark-mode action ink.
-- **Quiet Navy:** mid-light secondary tones give source names a quieter voice without introducing another hue family.
+- **Deep Navy:** light-theme reading text and dark-theme canvas/surfaces. It supplies structure rather than large decorative panels around pale text.
 
 ### Neutral
 
-- **White and Cool Paper:** bright lower body, light-mode form and workspace surfaces.
-- **Reading Slate:** secondary prose, placeholders and evidence, with lighter neutral counterparts in dark mode.
-- **Neutral Dividers and Photo Mats:** content structure and letterboxing for contained vehicle photographs. Neutral black is a shadow ingredient.
+- **White and Cool Paper:** light-theme working surfaces and canvas.
+- **Reading Slate:** supporting text, labels and evidence.
+- **Neutral Dividers and Photo Mats:** table boundaries and complete vehicle silhouettes.
 
-These are the implemented theme-alias mappings; values are frontmatter token names, not a second palette.
-
-| CSS role | Light | Dark |
+| CSS role | Light token | Dark token |
 | --- | --- | --- |
 | `--background` | `neutral-50` | `secondary-950` |
 | `--surface` | `neutral-white` | `secondary-900` |
@@ -268,153 +196,89 @@ These are the implemented theme-alias mappings; values are frontmatter token nam
 | `--warning` / `--warning-surface` | `secondary-700` / `neutral-100` | `neutral-200` / `secondary-800` |
 | `--error` / `--error-surface` | `primary-800` / `primary-50` | `primary-200` / `secondary-800` |
 | `--success` / `--success-surface` | `primary-700` / `primary-50` | `primary-300` / `secondary-800` |
-| `--hero-field` / `--preview-field` | `primary-50` / `neutral-100` | `secondary-900` / `secondary-900` |
-| `--support-blue` / `--support-purple` | `primary-300` / `primary-700` | `primary-400` / `primary-300` |
-| `--muted` / `--photo-mat` | `neutral-500` / `neutral-100` | `neutral-400` / `secondary-800` |
+| `--photo-mat` | `neutral-100` | `secondary-800` |
 
-The legacy `--support-purple` name is a compatibility alias to blue, not authorization for a purple accent. Status roles stay inside the two-family palette and use explicit wording to communicate meaning.
+Legacy `--hero-field`, `--preview-field` and `--support-purple` aliases remain source compatibility names, not permission to restore the old hero or introduce purple. The separate photo-credits HTML retains historical indigo styling outside this change; its existing photographs, credits and licenses remain preserved.
 
-**The Two Palettes Rule.** Use Electric Blue and Deep Navy for chromatic expression; supporting colors remain neutral.
+**The Semantic Surface Rule.** Pair surface and text roles from the same theme; do not reintroduce fixed navy panels beneath theme-dependent dark text.
 
-**The Evidence Rule.** Express status in words as well as color, keeping provenance, warnings and unresolved values readable.
+**The Evidence Rule.** State warnings, uncertainty and provenance in words as well as color.
 
 ## Typography
 
-**Display and Body Font:** self-hosted Satoshi, sans-serif fallback. **Identity and Workspace Font:** self-hosted Clash Grotesk, sans-serif fallback. Retain `/fonts/fonts.css`, the font files and licenses. Tailwind exports `--font-sans` and `--font-display`; `--font-body` aliases the former.
-
-Page headline type is geometric and open, with normal-weight italic emphasis. The bundled variable fonts contain normal faces; `.hero-italic` deliberately enables style synthesis locally. Workspace section and evidence headings retain Clash Grotesk.
+Self-hosted Satoshi is the working interface family. Clash Grotesk supplies the slanted wordmark and retained supporting contexts. Preserve `/fonts/fonts.css`, bundled font files and licenses. `--font-sans` and `--font-display` remain the source aliases; `--font-body` uses Satoshi.
 
 ### Hierarchy
 
-- **Display:** Satoshi medium (500), line height 1, tight tracking. The dashboard uses the standard Tailwind ramp (48px base, 60px at `sm`, 72px at `lg`); the emphasized line uses weight 400.
-- **Headline:** Satoshi medium (500), leading 1.25, 36px base and 48px at `sm`, with selective blue italic emphasis.
-- **Metric:** Satoshi medium (500), 48px base and 60px at `sm`, leading 1. Numbers and definitions remain real description-list content.
-- **Title:** source names use Clash Grotesk semibold (600), 20px base and 24px at `sm`. The wordmark uses weight 650 and its own line height.
-- **Body:** Satoshi regular (400), 16px. Base leading is 1.55; hero introduction and metric descriptions use 1.625. Hero copy caps at 32rem; longer workspace explanations retain observed 70–75ch limits.
-- **Evidence and Label:** 14px evidence/helper copy, 12px compact source notes and composer chips. Evidence can use leading up to 1.7.
+The compact ramp is 12/14/16/18/22/24px. Evidence and notes use the smallest role; tables, tabs, names and concise reasons use the interface role. Body copy uses regular weight and the base line height. Cost totals use the fact role; section/match titles use the section role; page titles use the workspace headline role. Import alone uses the larger headline and its phone variant. These are intentional approved roles, replacing the obsolete display/hero/metric ramp.
 
-The new dashboard uses standard Tailwind type, spacing and radius ramps. It does not migrate every operational stylesheet: retained 18px mobile vehicle names and decision facts, 22px workspace subsections/mobile prices, 26px preview branding and 28px prices/preview headings remain contextual sizes. These are existing roles, not a new global landing scale. Compact Compare headings remain 32px desktop and 24px on phones.
+The wordmark retains `skewX(-9deg)`, tight tracking and an accessible home link. It reduces to 22px below 768px. Workspace page headings use Satoshi bold; a legacy heading stylesheet must not override that division. Supporting prose keeps observed 65-75ch reading limits where relevant. Use tabular numerals for prices, quantities and cost totals.
 
-The live-text wordmark uses `skewX(-9deg)` and remains the complete identity. Its current header size is 20px base and 24px at `sm`; footer and preview contexts retain their own sizes. Its home link is named “Accelerate home.”
-
-**The Contextual Type Rule.** Satoshi leads the cinematic dashboard; Clash Grotesk retains identity, source names and established workspace headings. Preserve that implemented division when adding a surface.
+**The Compact Hierarchy Rule.** Use the documented compact roles; reserve the larger import headline for the short entry task.
 
 ## Layout
 
-The application is full width, with content capped at 80rem and gutters of 20px base / 32px from `sm`. The header has an 80px minimum height; its measured height is exported to sticky workspace controls. It overlays the landing hero and is sticky on the workspace canvas.
+The application is desktop-first. The shared header has a 64px minimum height, a wordmark, Compare/Recommendation/Costs navigation, theme control and Add car. Its measured height anchors the sticky shortlist. The workspace has a 1600px cap, 24px outer padding and column gap, with a 232px shortlist beside a flexible main area. At widths up to 1100px, the rail is 200px and gutters/gap become 16px. Below 768px, the rail is a collapsed disclosure above the content and navigation moves behind a labeled menu.
 
-The dashboard uses a 64rem hero content cap, 42rem composer, 72rem source strip and shared 80rem editorial section. Hero top padding is 128px base / 144px at `lg`, with 96px below. Other spacing uses the frontmatter's 4px-based steps. The editorial area becomes two equal columns at `lg`; its metrics retain two columns at every width with fine divider lines. The lower horizon height steps from 224px to 288px at `sm` and 320px at `lg`.
+The entry task has a 760px cap, 56px top margin (24px on phones), one introduction and a bordered import surface. Help contains source explanation and the fictional walkthrough. Page titles use a 16px bottom gap; tabs and short summaries precede detail. Compare retains two selected contenders on phones and the full shortlist. Costs retains all contenders in locally scrolling tables with sticky row labels; desktop minimum width is 144px plus 180px per car (128px label on phones). Preserve safe-area space for the existing mobile decision bar.
 
-New work uses standard Tailwind breakpoints: `sm` 640px, `md` 768px, `lg` 1024px, `xl` 1280px and `2xl` 1536px. Header navigation hides below `lg`, with a labeled menu and an expanded row; inherited narrow-screen rules stack links below 768px. The header demo action appears at `xl`. Existing workspace rules also use 767px, 1000px and 1100px thresholds; evidence tightens at 400px.
-
-Compare shows all contenders on larger screens and two selected contenders on phones while retaining the four-car shortlist. Keep summaries and table on the same pair, overflow inside labeled data regions, long values wrapping, and space reserved for the mobile decision bar and safe area. Theme changes preserve content structure and the shortlist.
-
-Responsive CSS and 44px primary-control targets are implemented source rules. Desktop, mobile and 200% zoom rendering still require browser captures; this document does not certify those acceptance checks.
+The spacing scale is compact and primarily 4px-based. Source-specific 10px rail gaps and larger empty-state/expanded-detail spacing remain contextual, not a replacement global rhythm. Responsive rules are implementation facts, not verified screen-fit claims.
 
 ## Elevation & Depth
 
-The dashboard uses layered radial/linear gradients from exported blue/navy variables. A blurred hero bloom (64px) stays behind content. This is CSS decorative media, with no new raster. Workspaces remain flat, grouped by solid tonal surfaces and fine boundaries.
+Current workspaces are flat. Solid semantic surfaces, one-pixel boundaries, selected fields and restrained hierarchy establish grouping. The removed hero bloom, floating-composer shadow and horizon are no longer design-system examples. Image dialogs retain a modal backdrop (`color-mix(in srgb, var(--text) 72%, transparent)`) rather than decorative lift.
 
-### Shadow Vocabulary
+Controls transition background/border over 160ms. Route entry and comparison-panel fades use 180ms. Deliberate navigation may scroll smoothly; reduced motion disables smooth scrolling and minimizes transitions while preserving focus and state feedback. No decorative motion is required to complete a task.
 
-- **Floating composer:** extra-large shadow (`0 20px 25px -5px rgb(4 18 34 / 0.2), 0 8px 10px -6px rgb(4 18 34 / 0.2)`) lifts the light form above the atmosphere. Dark mode uses the same geometry with neutral black at 20% opacity.
-- **Dialog backdrop:** a 78% deep-navy mix separates the image dialog from its workspace.
-
-**The Task Depth Rule.** Reserve the conspicuous lift for the floating composer and keep evidence workspaces tonally grouped and flat.
-
-The bloom drifts over 28 seconds with `ease-in-out`, alternating a small translation and scale change. Base controls transition background/border over 160ms; theme utilities use Tailwind's standard 150ms color transition. Route entry fades over 180ms. Preview steps are manual, and deliberate in-page navigation scrolls smoothly. Reduced motion disables the bloom and smooth scrolling and minimizes transitions while preserving state feedback.
+**The Task Depth Rule.** Use tonal separation and boundaries for working content; reserve overlay depth for an actual dialog or menu.
 
 ## Shapes
 
-The floating composer uses broad corners (24px); shared cards/panels use 16px, operational controls use 12px, and the dashboard's submit, theme switch, chips and editorial action use fully rounded ends. Retained photo corners (4px) and evidence badges (6px) serve dense content.
-
-Hero and horizon bands stay rectangular. Metrics use a two-by-two divider structure rather than four boxed cards; a small decorative diamond (8px, rotated 45 degrees) sits at the divider intersection in a theme-aware palette color. Vehicle images remain contained on a token-aware photo mat; preserve complete silhouettes and existing credits instead of cropping them into decoration.
+The intentional compact system uses 8px corners for navigation, tabs, priority selectors and compact import controls, and 12px corners for the shortlist, import surface and recommendation container. Vehicle thumbnails retain 4px corners. Inherited base fields, evidence containers and dialogs may retain 12px/16px source radii; do not apply a broad global reset to these retained contexts. Vehicle photographs use contain sizing and semantic mats, preserving the whole car and its credits.
 
 ## Components
 
 ### Buttons
 
-Base primary buttons use semantic action/ink, 12px × 20px padding, 12px corners and a 44px minimum height. Light-mode hover retains the readable dark blue; dark mode shifts to the lighter accent. The editorial secondary action uses a fine neutral border, transparent ground, full rounding, 14px medium text and tonal hover. The hero header action uses white/navy; workspace actions use semantic roles.
-
-Focus is a visible 3px accent outline with 4px offset unless a composite supplies its own treatment. Disabled/busy states keep wording and implemented opacity/cursor feedback. Primary actions remain at least 44px.
+Primary actions use semantic action/ink and the base button typography, with a minimum 44px target. Compact actions use the control corner role. Secondary controls use transparent or raised surfaces with readable text and tonal hover. Disabled and busy controls retain explicit wording and cursor/opacity feedback. Focus uses a visible 3px accent outline with 4px offset unless a composite provides its own treatment.
 
 ### Inputs / Fields
 
-Base fields use canvas color, interactive boundary, 12px padding, 12px corners and a 48px minimum height. Placeholders use secondary text at full opacity. Invalid fields combine error boundaries with visible messages. Editable details keep labels, units, original-value context and provenance.
+The listing input has a visible label, 48px minimum height, compact corners, canvas fill and interactive boundary. It sits beside an Add car button, stacking on phones. Preserve validation, full-shortlist/busy states, alert errors and live status. Cost and configuration fields retain labels, units, estimate/source hints and invalid-state messages. Missing costs read Incomplete rather than zero.
 
-### Floating listing composer
+### Navigation and tabs
 
-The hero composer is the working import form. A white/navy container holds a link icon, transparent URL field, eBay.ca chip, shortlist limit, optional fictional-demo action and 44px circular arrow submit. This distinct submit uses Electric Blue 600/white in light mode and Electric Blue 400/navy in dark mode. Retain hover, spinner, disabled/full-shortlist state, validation, errors and live status. A 2px blue focus-within ring identifies the composite; the field keeps its accessible label and description.
+Selected top navigation uses `aria-current`, accent text and a semantic hover field. Comparison tabs are Overview, Specifications and Sources & checks. Recommendation tabs are Summary, Ranking & evidence and Assumptions; Costs tabs are Summary, Purchase, Running costs and Salary guide. Tab controls have a 44px minimum height, selected accent/field treatment and visible focus. Arrow keys, Home and End move selection and focus; panels have stable labels. Cost summary shortcuts focus the destination tab. Tab choices and selected recommendation contender survive route navigation in App memory.
 
-### Navigation and theme
+### Shortlist
 
-The menu bar carries the wordmark, Import / Compare / Help Me Decide, shortlist count and import action. Hero navigation uses light ink; workspace navigation uses semantic roles. Preserve `aria-current`, the labeled mobile menu, Escape-to-close and keyboard focus.
+The compact rail keeps thumbnail, name, price, concern count, research status and removal available beside the task. Names and concerns open that car's Sources & checks. Add is disabled at four cars or during import. The phone disclosure exposes the same cars and controls. Refresh clears the temporary shortlist and calculator inputs.
 
-The 44px circular theme control names its destination and exposes the dark state with `aria-pressed`. Theme defaults to the system preference, persists its allowlisted preference and synchronizes across tabs. Both modes retain the navy hero; lower body and workspace surfaces change between bright neutrals and navy.
+### Comparison table
 
-### Chips and evidence
+Overview has six rows: asking price, mileage, annual fuel/charging cost, Comfort (ride/seats), Practicality (passenger/cargo room) and horsepower. Dense values use interface text with smaller explicit evidence labels. Specifications retains all supported details; Sources & checks retains photos, source selection, original listing location/mileage, configuration editing, warnings, seller specifics and safe plain-text description. Keep local overflow within a labeled keyboard-focusable data region.
 
-Composer chips use neutral/navy tonal fills, full rounding and 12px text; the noninteractive eBay.ca chip is 32px tall. Workspace evidence badges retain their compact form and explicit source/state wording. Warnings, estimates and seller claims remain distinguishable in words; blue color alone carries no verification claim.
+### Recommendation
 
-### Cards / Containers
+All six priorities are visible. The Summary card holds the vehicle photograph, match status, short explanation, two compact reasons and a full-explanation/model-context disclosure. The trade-off and purchase warnings remain separate and visible. Detailed facts and experience sources use another disclosure; Ranking & evidence retains comparison and citations; Assumptions retains scenario inputs and scoring explanation. Affordability links to Costs beside its explanation. Browsing contenders and switching tabs preserve the shopper's context without changing the ranking engine.
 
-Vehicle cards, summaries and decision matches use flat semantic surfaces, fine boundaries and 16px corners. Compact comparison cards retain their dense spacing; decision copy uses 24px base / 40px at `sm`. Selected priorities use readable dark blue/white in light mode and bright blue/navy in dark mode. Keep contained photographs and serious warnings visible.
+### Costs
 
-### Compare and Decide color treatment
-
-`WorkspaceHeading` gives both working pages a compact navy field with soft electric-blue corner lighting, Satoshi page titles and pale-blue italic emphasis. This is the dashboard atmosphere scaled to a task heading, with the existing comparison management and back action intact. On small screens actions wrap; the options menu aligns right and stays within the page gutters.
-
-Blue identifies active workflow steps, selected comparison tabs and the selected decision priority. A check icon and `aria-pressed` also identify the priority. Comparison tables use pale-blue column headings, a quieter label column and an emphasized annual-cost or asking-price row. Vehicle prices and detail actions share the same blue ramp. All source and estimate labels stay visible.
-
-The recommendation pairs a contained vehicle photograph with a navy explanation area in both themes. Light-blue text, source links and explicit purchase warnings remain readable on that field. Key facts use a calm blue strip; annual costs and expandable assumptions continue on the theme's reading surface below. The full comfort block appears only when Comfort is selected. Dark mode maps those lower surfaces to navy without changing structure. The styling is in `src/workspace.css`, imported after the dashboard styles; no new color families, imagery, motion or scoring behavior are introduced.
-
-Verification for this extension: the existing 181-test suite, production build, shared-token checks and static UI detector pass. Source-level contrast checks cover the new navy panels and selected states. Browser and native preview hosts were unavailable, so rendered desktop, mobile and zoom checks remain unverified.
-
-### Ownership calculator
-
-`#ownership` continues Help Me Decide with the shared compact `WorkspaceHeading`, a back link and the same electric-blue/navy semantic roles, Satoshi body text and Clash Grotesk section headings. Cash is selected initially; Cash/Finance buttons expose their state with `aria-pressed`. Separate purchase and running-cost tables retain every shortlisted car. The optional purchase-savings disclosure stays separate from running totals and salary assessments.
-
-Per-car fields retain labels, CAD units, editable estimates and attribution. Insurance starts at $2,218/year, labeled as FSRA's June 2026 Ontario average rather than a vehicle quote; purchase tax links to Ontario guidance. Generic fees and maintenance reserves remain planning estimates. Automatic energy details expose their evidence, while valid shared driving edits also update Compare and Decide. Required missing or invalid amounts show incomplete results. The salary guide starts with an editable 70% take-home assumption and 15%/20% limits: cash assesses running expenses and shows separate acquisition funding; finance adds loan payments and shows the separate down payment. Inputs and drafts remain in React memory across navigation and research updates; clearing the shortlist resets the calculator.
-
-Tables use flat semantic surfaces, fine boundaries, 12px corners and highlighted totals. Each labeled, keyboard-focusable region scrolls horizontally; its cost-label column stays fixed at 180px, reducing to 136px at the 767px breakpoint. Vehicle columns remain at least 220px, or 200px on phones. Headers and highlighted amounts use the existing 18px contextual type; phone headers use 16px. Fields retain 48px minimum height. Salary results stack on phones. These are implemented responsive rules, pending rendered verification.
-
-Evidence recorded on 4 November 2026: seven ownership regression tests passed; the final full suite passed 188/188 and the production build passed (492 modules). The static detector ran once; its two 20px type advisories were corrected to the documented 18px role. Independent finish review confirmed the Decide action's missing flex layout resolved and returned **Ship for reviewed source findings**. Existing Motion directive and bundle-size advisories remain. Browser/native hosts were unavailable: no desktop, phone or 200%-zoom screenshots exist, and ownership contrast and whole-surface visual approval remain unverified. This extension adds no tokens, identity or rasters; the existing frontmatter and design sidecar remain authoritative.
-
-### Sources, metrics and working preview
-
-Source names have explanatory notes. eBay.ca, NRCan, US EPA, NHTSA and Gemini are listing/reference/research inputs, not partnerships or endorsements. Metrics describe actual product facts, not invented performance claims.
-
-The native preview disclosure retains manual Import → Compare → Decide controls, explicit fictional labels, existing credited model photographs and a real-import exit. Overview remains the default workspace tab, with Specifications and Sources & checks available through accessible tabs. Preserve tab keyboard behavior and shortlist continuity.
+Cash/Finance controls stay above the four cost tabs. Summary separates upfront funding from monthly running expenses, then links to editable Purchase, Running costs and Salary guide. Expanded assumptions share valid driving/energy changes with Compare and Recommendation. All-car tables preserve source/estimate wording, fixed row labels and editable amounts. Cash purchase savings remain separate from expenses; Finance includes loan payments with a separately funded down payment. Private salary and overrides live only in App memory across navigation and research updates, resetting when the shortlist is cleared.
 
 ## Do's and Don'ts
 
 ### Do:
 
-- **Do** use the exported electric-blue/navy palette and theme-aware semantic roles across new surfaces.
-- **Do** keep the slanted Accelerate wordmark and the self-hosted Satoshi / Clash Grotesk fonts.
-- **Do** keep the real listing composer, visible keyboard focus, reduced motion and explicit state wording operable.
-- **Do** preserve source context, truthful product facts and credited, contained vehicle imagery on theme-aware photo mats.
-- **Do** retain the same content structure in both themes and keep mobile comparison overflow local to labeled regions.
-- **Do** distinguish source verification from rendered review until desktop, mobile and 200% zoom captures exist.
+- **Do** use semantic palette roles in both themes.
+- **Do** keep the compact type ramp, 8px controls and 12px main surfaces intentional and consistent.
+- **Do** retain complete vehicle photographs and existing attribution.
+- **Do** keep trade-offs, warnings and estimate labels visible while disclosing longer explanations.
+- **Do** preserve keyboard focus, source access and the shared shortlist across task views.
 
 ### Don't:
 
-- **Don't** introduce a third chromatic family or revive the discarded indigo/lilac visual world.
-- **Don't** add a separate symbol, logo badge or new raster asset beside the Accelerate wordmark.
-- **Don't** represent research sources as partners or invent testimonials, customer counts or performance benchmarks.
-- **Don't** hide uncertainty, convert missing data into verified facts or remove visible purchase warnings.
-- **Don't** replace the working import with a static form, crop model photographs or add autoplay to the preview.
-- **Don't** claim visual fidelity, responsive rendering or 200% zoom approval from source and contrast checks alone.
-
-
-### Configuration and decision guidance: 5 November 2026
-
-The existing Operate workspace remains authoritative. Confirm Configuration adds a Reference market selector above the reference variants, followed by labeled odometer and km/miles fields. The dataset preference stays separate from Original market. Mileage uses the existing responsive field grid, explicit User-entered attribution, reset behavior and preserved source evidence. No new tokens, font roles or imagery are introduced.
-
-Affordability's explanation beside the contained photograph now includes annual fuel/charging cost with scenario and estimate attribution. Calculate cost of ownership follows the trade-off/warnings in that same navy panel; its pale-blue fill and navy text remain readable in both themes. The generic bottom-of-page calculator promotion is removed. Annual energy details remain below; the full comfort block appears only for Comfort. Reliability and seller-history observations are inline explanation context, with citations or an unverified seller label and information icon; they have no separate priority or score. Performance explains compatible hp/tonne advantages and separates them from measured acceleration.
-
-Rendered verification uses local headless Chrome against static renders of the real components and compiled app CSS: 1440px desktop in both themes, 390px constrained layouts for the match and editor (the headless host enforces a 500px minimum viewport), and a 720 CSS-pixel/2x-density layout as a 200%-zoom approximation. Captures confirm readable fuel assumptions and calculator action, responsive wrapping, retained photo silhouettes and visible editor focus treatment. Screenshots are local ignored review artifacts, not shipping assets. These checks do not certify native mobile rendering, live browser keyboard interaction or actual browser zoom: connected browser/native access hosts were unavailable. Functional keyboard/navigation, theme changes, mileage/market edits, reset, calculator state retention and superseded-request cancellation are covered by JSDOM regressions.
-
-The mechanical detector ran over the changed UI files. Its sole advisory is the pre-existing 28px fluid endpoint in the decision heading; this change adds no new off-ramp type sizes. Existing Motion directive and bundle-size build advisories remain. Live reliability-source discovery was not exercised; provider contracts, applicability validation and missing-evidence behavior use deterministic fixtures, and unsupported claims remain omitted.
-
-Final automated verification for this extension: 197/197 tests passed; the production build passed with 494 modules. Finish review found no remaining issues in the changed behavior or reviewed static layouts. Native-browser interaction and the approximation limits above remain explicit.
+- **Don't** restore cinematic hero bands, atmospheric panels or floating-composer examples as current workspace guidance.
+- **Don't** replace evidence wording with color alone or imply individual condition is verified.
+- **Don't** treat source checks, test passes or CSS breakpoints as rendered desktop, phone or zoom approval.
+- **Don't** add new identity assets, palette families or decorative raster work to this compact system.

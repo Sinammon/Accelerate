@@ -41,12 +41,13 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(menuButton.getAttribute('aria-expanded'), 'false');
     assert.equal(document.activeElement, menuButton, 'Escape returns focus to the disclosure trigger');
     await act(async () => menuButton.click());
-    await act(async () => document.querySelector('#primary-navigation a').click());
+    await act(async () => { document.querySelector('#primary-navigation a').click(); await new Promise(resolve => setTimeout(resolve, 20)); });
+    await act(async () => { document.querySelector('.nav-button').click(); await new Promise(resolve => setTimeout(resolve, 20)); });
     assert.equal(menuButton.getAttribute('aria-expanded'), 'false', 'selecting navigation closes the mobile menu');
     assert.match(document.querySelector('h1').textContent, /Find the right car/);
     assert.equal(document.querySelector('.mode-grid'), null);
     assert.equal(document.querySelectorAll('.preview-vehicle').length, 4);
-    assert.equal(document.querySelectorAll('.car-card').length, 0);
+    assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 0);
     const clickPreview = async selector => act(async () => {
       document.querySelector(selector).click();
       await new Promise(resolve => setTimeout(resolve, 50));
@@ -59,11 +60,19 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(document.querySelector('.preview-match h3').textContent, '2017 Mazda3');
     await clickPreview('.preview-advance');
     assert.equal(document.activeElement.id, 'listing-url');
-    assert.equal(document.querySelectorAll('.car-card').length, 0, 'sample data never enters the real shortlist');
+    assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 0, 'sample data never enters the real shortlist');
     const tab = async id => act(async () => document.getElementById(`compare-tab-${id}`).click());
+    const showSource = async (index = 0) => {
+      await tab('sources');
+      await act(async () => {
+        const select = document.querySelector('#evidence-vehicle');
+        select.value = select.options[index].value;
+        select.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+      });
+    };
     const clearComparison = async () => act(async () => { document.querySelector('.comparison-options').open = true; document.querySelector('[data-action="clear-comparison"]').click(); });
     const change = async (selector, value) => {
-      if (selector === '#listing-url' && document.querySelector('#comparison-import[hidden]')) await act(async () => document.querySelector('.add-car').click());
+      if (selector === '#listing-url' && !document.querySelector('#listing-url')) await act(async () => { document.querySelector('.nav-button').click(); await new Promise(resolve => setTimeout(resolve, 20)); });
       const input = document.querySelector(selector);
       await act(async () => {
         Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(input, String(value));
@@ -78,14 +87,14 @@ test('three-page journey preserves imports, supports all modes, removes and repl
       });
     };
     const submit = async () => {
-      const beforeCount = document.querySelectorAll('.car-card').length;
+      const beforeCount = document.querySelectorAll('[data-shortlist-id]').length;
       await act(async () => {
         document.querySelector('form').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
         await new Promise(resolve => setTimeout(resolve, 10));
       });
-      if (document.querySelectorAll('.car-card').length > beforeCount) {
+      if (document.querySelectorAll('[data-shortlist-id]').length > beforeCount) {
         assert.equal(document.querySelector('#compare-tab-overview').getAttribute('aria-selected'), 'true', 'imports start with the essentials');
-        assert.equal(document.querySelector('#comparison-import').hidden, true, 'successful import collapses the form');
+        assert.equal(document.querySelector('#comparison-import'), null, 'successful import leaves the focused comparison');
       }
       if (document.querySelector('#compare-tab-specifications')) await tab('specifications');
     };
@@ -103,29 +112,32 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.notEqual(window.location.hash, '#compare');
     await add('111111111111', 10000, 2016, 'Odometer: 100000 kms. Heated seats.', null, null);
     assert.equal(window.location.hash, '#compare');
-    assert.equal(document.querySelector('h1').textContent, 'Compare Your Vehicles');
+    assert.equal(document.querySelector('h1').textContent, 'Compare cars');
     assert.equal(document.querySelector('.vehicle-name').textContent, '2016 Example 1');
-    assert.match(document.querySelector('.car-meta').textContent, /100000 km/);
-    assert.doesNotMatch(document.querySelector('.car-meta').textContent, /Unit unknown|conflict/);
-    assert.equal(document.querySelector('.vehicle-image img').getAttribute('src'), 'https://images.example.test/front.jpg');
-    await act(async () => document.querySelector('.photo-next').click());
-    assert.equal(document.querySelector('.vehicle-image img').getAttribute('src'), 'https://images.example.test/rear.jpg');
-    await act(async () => document.querySelector('.photo-next').click());
-    assert.equal(document.querySelector('.vehicle-image img').getAttribute('src'), 'https://images.example.test/front.jpg');
+    assert.match(document.querySelector('tbody').textContent, /100000 km/);
+    assert.doesNotMatch(document.querySelector('tbody').textContent, /Unit unknown|conflict/);
+    await tab('sources');
+    assert.equal(document.querySelector('.source-photo .vehicle-image img').getAttribute('src'), 'https://images.example.test/front.jpg');
+    await act(async () => document.querySelector('.source-photo .photo-next').click());
+    assert.equal(document.querySelector('.source-photo .vehicle-image img').getAttribute('src'), 'https://images.example.test/rear.jpg');
+    await act(async () => document.querySelector('.source-photo .photo-next').click());
+    assert.equal(document.querySelector('.source-photo .vehicle-image img').getAttribute('src'), 'https://images.example.test/front.jpg');
+    await tab('specifications');
     assert.equal(document.querySelectorAll('table:first-of-type tbody tr').length >= 2, true);
-    assert.equal(document.querySelectorAll('.table-scroll')[0].querySelectorAll('tbody tr').length, 2, 'fully unknown specification rows are omitted');
+    assert.equal(document.querySelectorAll('.table-scroll')[0].querySelectorAll('tbody tr').length, 9, 'fully unknown specification rows are omitted');
     assert.match(document.querySelector('.shared-gaps').textContent, /Transmission/);
     await tab('sources');
     assert.equal(document.querySelectorAll('.feature-evidence > div').length, 1, 'only explicit amenity claims appear');
     await tab('specifications');
     assert.equal(document.querySelector('.mode-grid'), null);
     await tab('overview');
-    assert.match(document.querySelector('table').textContent, /Annual fuel \/ charging cost.*CAD\/year.*Ride quality.*Seat cushioning.*Seat heating.*Cabin quietness.*Practicality/s);
+    assert.match(document.querySelector('table').textContent, /Annual fuel \/ charging cost.*CAD\/year.*Comfort.*Ride.*Seats.*Practicality/s);
     await change('.scenario-panel input', '10000');
-    const validCost = document.querySelector('.experience-cost strong').textContent;
+    const costText = () => document.querySelector('tbody tr:nth-child(3)').textContent;
+    const validCost = costText();
     await change('.scenario-panel input', '');
     assert.equal(document.querySelector('.scenario-panel input').getAttribute('aria-invalid'), 'true');
-    assert.equal(document.querySelector('.experience-cost strong').textContent, validCost);
+    assert.equal(costText(), validCost);
     await go('decide');
     assert.equal(document.querySelector('.scenario-panel input').value, '10000', 'last valid assumptions persist across routes');
     assert.match(document.querySelector('.vehicle-experience').textContent, /CAD\/year/);
@@ -134,7 +146,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     await go('compare');
     await tab('specifications');
     await add('222222222222', 20000, 2021, 'No heated seats.', null);
-    assert.equal(document.querySelectorAll('.car-card').length, 2);
+    assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 2);
     assert.match(document.querySelector('tbody').textContent, /km \(assumed\)/);
     assert.doesNotMatch(document.querySelectorAll('.car-card')[1].textContent, /Check mileage/);
     let calls = 0;
@@ -144,20 +156,20 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(calls, 0);
     assert.match(document.querySelector('#import-error').textContent, /already/);
     await act(async () => {
-      document.querySelector('.desktop-decide button').click();
+      document.querySelector('#primary-navigation a[href="#decide"]').click();
       await new Promise(resolve => setTimeout(resolve, 10));
     });
-    assert.equal(document.querySelector('h1').textContent, "Let's Find Your Best Match");
+    assert.equal(document.querySelector('h1').textContent, 'Your recommendation');
     assert.equal(window.location.hash, '#decide');
     await act(async () => document.querySelector('.skip-link').click());
     assert.equal(window.location.hash, '#decide', 'skip navigation preserves the current stage');
     assert.equal(document.activeElement.id, 'main-content');
     assert.equal(document.querySelectorAll('input[type="range"]').length, 0);
-    assert.equal(document.querySelectorAll('.mode-grid .mode-card').length, 5);
-    assert.deepEqual([...document.querySelectorAll('.mode-grid .mode-card strong')].map(el => el.textContent), ['Best Value', 'Affordability', 'Comfort', 'Practicality', 'Performance']);
+    assert.equal(document.querySelectorAll('.mode-grid .mode-card').length, 6);
+    assert.deepEqual([...document.querySelectorAll('.mode-grid .mode-card strong')].map(el => el.textContent), ['Best Value', 'Affordability', 'Comfort', 'Practicality', 'Performance', 'Balanced']);
     assert.equal(document.querySelector('.more-mode-options'), null);
-    assert.doesNotMatch(document.querySelector('.decision-page').textContent, /Balanced|More priorities/);
-    assert.equal(document.querySelectorAll('.mode-card').length, 5);
+    assert.ok(document.querySelector('[data-mode="balanced"]'));
+    assert.equal(document.querySelectorAll('.mode-card').length, 6);
     assert.ok(document.querySelector('.best-match'), 'unresearched listings receive provisional estimates');
     await act(async () => document.querySelector('.mode-card[data-mode="practical"]').click());
     assert.ok(document.querySelector('.best-match'));
@@ -169,7 +181,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.match(document.querySelector('.vehicle-experience').textContent, /Ride quality.*Seat cushioning.*Seat heating.*Cabin quietness/s);
     await go('compare');
     await add('333333333333', 100, 2025, 'Engine problems. Coolant leak. Not running.');
-    assert.match(document.querySelector('.car-card:last-child .warning-details').textContent, /Engine concern.*Coolant leak/s, 'condition warnings remain visible while evidence sections are collapsed');
+    assert.match(document.querySelector('thead th:last-child .warning-details').textContent, /Engine concern.*Coolant leak/s, 'condition warnings remain visible while evidence sections are collapsed');
     await go('decide');
     await act(async () => document.querySelector('.mode-card[data-mode="cost"]').click());
     assert.equal(document.querySelector('.best-match h2').textContent, '2025 Example 3');
@@ -179,7 +191,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(document.querySelector('.decision-match-copy .ownership-match-action').getAttribute('href'), '#ownership');
     assert.match(document.querySelector('.ownership-costs').textContent, /Insurance.*Personal quote needed/s);
     assert.match(document.querySelector('.ownership-scope').textContent, /not estimated or included in the ranking/);
-    await act(async () => document.querySelector('.ownership-scenario button').click());
+    await act(async () => { document.querySelector('.ownership-scenario button').click(); await new Promise(resolve => setTimeout(resolve, 20)); });
     assert.equal(document.querySelector('.scenario-panel').open, true);
     assert.equal(document.activeElement, document.querySelector('.scenario-panel input'));
     await change('.scenario-panel input', '10000');
@@ -193,21 +205,21 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(document.querySelector('.mode-card[data-mode="practical"]').getAttribute('aria-pressed'), 'true');
     await go('compare');
     await add('444444444444', 25000, 2023);
-    assert.equal(document.querySelectorAll('.car-card').length, 4);
-    assert.equal(document.querySelector('.url-form button').disabled, true);
+    assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 4);
+    assert.equal(document.querySelector('.nav-button').disabled, true);
     assert.equal(document.querySelector('table thead').querySelectorAll('th').length, 5);
     await act(async () => document.querySelector('.remove-button').click());
-    assert.equal(document.querySelectorAll('.car-card').length, 3);
-    assert.equal(document.querySelector('.url-form button').disabled, false);
+    assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 3);
+    assert.equal(document.querySelector('.nav-button').disabled, false);
     await add('555555555555', 15000, 2020);
-    assert.equal(document.querySelectorAll('.car-card').length, 4);
+    assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 4);
     assert.equal(document.querySelector('.vehicle-name').textContent, '2021 Example 2');
     await go('decide');
     assert.equal(document.querySelectorAll('.ranking-row').length, 4);
     assert.equal(document.querySelector('.mode-card[data-mode="practical"]').getAttribute('aria-pressed'), 'true');
     await go('compare');
     await clearComparison();
-    assert.equal(document.querySelectorAll('.car-card').length, 0);
+    assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 0);
     await go('decide');
     assert.match(document.querySelector('.result-banner').textContent, /shortlist comes first/);
     // Refresh clears the shortlist; only sanitized model specifications may persist.
@@ -237,7 +249,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
       finishVin(Response.json({ vin: { status: 'decoded', fields: { year: '2003', make: 'Example', model: 'Original' } } }));
       await new Promise(resolve => setTimeout(resolve, 40));
     });
-    assert.equal(document.querySelectorAll('.car-card').length, 1);
+    assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 1);
     assert.equal(document.querySelector('.vehicle-name').textContent, '2020 Example Replacement');
     // Research is nonblocking, fills Compare, and updates the selected decision mode.
     await clearComparison();
@@ -261,7 +273,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     };
     await change('#listing-url', 'https://www.ebay.ca/itm/177777777777');
     await submit();
-    assert.equal(document.querySelectorAll('.car-card').length, 1);
+    assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 1);
     await tab('sources');
     assert.match(document.querySelector('.source-status').textContent, /Looking up model/);
     await change('#listing-url', 'https://www.ebay.ca/itm/277777777777');
@@ -287,14 +299,16 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(document.querySelectorAll('.decision-key-facts > div').length <= 3, true);
     // Retry research without reimporting; a failed retry preserves known specifications.
     await go('compare');
-    assert.match(document.querySelector('.car-card .research-control').textContent, /Research ready: 2 specifications/);
-    assert.equal(document.querySelector('.car-card [data-action="model-research"]').textContent, 'Refresh research');
+    await showSource();
+    assert.match(document.querySelector('.vehicle-summary .research-control').textContent, /Research ready: 2 specifications/);
+    assert.equal(document.querySelector('.vehicle-summary [data-action="model-research"]').textContent, 'Refresh research');
+    await tab('overview');
     await act(async () => document.querySelector('.car-card .view-details').click());
     assert.equal(document.querySelector('#compare-tab-sources').getAttribute('aria-selected'), 'true', 'View details opens the correct evidence without another API request');
     assert.equal(document.activeElement, document.querySelector('.vehicle-summary'));
     assert.equal(document.querySelector('.vehicle-summary .model-research').open, true, 'View results opens dimension research even without broad notes');
-    await act(async () => document.querySelector('.car-card [data-action="model-research"]').click());
-    assert.equal(document.querySelector('.car-card [data-action="model-research"]').textContent, 'Restart research');
+    await act(async () => document.querySelector('.vehicle-summary [data-action="model-research"]').click());
+    assert.equal(document.querySelector('.vehicle-summary [data-action="model-research"]').textContent, 'Restart research');
     await tab('specifications');
     assert.match(document.querySelector('table').textContent, /158/);
     await act(async () => {
@@ -302,21 +316,23 @@ test('three-page journey preserves imports, supports all modes, removes and repl
       await new Promise(resolve => setTimeout(resolve, 15));
     });
     assert.match(document.querySelector('table').textContent, /158/);
-    assert.match(document.querySelector('.car-card').textContent, /Previous research is still available/);
+    await showSource();
+    assert.match(document.querySelector('.vehicle-summary').textContent, /Previous research is still available/);
     await tab('sources');
     assert.equal(document.querySelector('.source-status-grid .capability-details strong').textContent, '4 / 5', 'quota failure preserves previous dimension results');
-    assert.equal(document.querySelectorAll('.car-card').length, 2);
+    assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 2);
     assert.ok(window.localStorage.getItem('dilemma:model-specs:v1'));
     await act(async () => document.querySelector('[data-action="clear-saved-specs"]').click());
     assert.equal(window.localStorage.getItem('dilemma:model-specs:v1'), null);
-    assert.equal(document.querySelectorAll('.car-card').length, 2, 'clearing saved specs preserves the temporary shortlist');
+    assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 2, 'clearing saved specs preserves the temporary shortlist');
     // A full shortlist must still search and retry its fourth car independently.
     for (const id of ['377777777777', '477777777777']) {
       await change('#listing-url', `https://www.ebay.ca/itm/${id}`);
       await submit();
     }
-    assert.equal(document.querySelectorAll('.car-card').length, 4);
-    const fourthCard = () => document.querySelectorAll('.car-card')[3];
+    assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 4);
+    await showSource(3);
+    const fourthCard = () => document.querySelector('.sources-workspace');
     const fourthAction = () => fourthCard().querySelector('[data-action="model-research"]');
     assert.match(fourthCard().textContent, /Seating capacity: listing 4; VIN record 5/);
     assert.equal(researchPending.length, 5, 'each import starts research, including the fourth');
@@ -355,7 +371,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
       researchPending.at(-1).resolve(Response.json({ modelSpecs: { status: 'matched', fields: { horsepower: researchField(158) } } }));
       await new Promise(resolve => setTimeout(resolve, 15));
     });
-    assert.equal(document.querySelectorAll('.car-card').length, 0);
+    assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 0);
     // Demo is explicit, uses only public bundled reference files, and supports sparse data.
     const demoRequests = [];
     globalThis.fetch = async url => {
@@ -367,7 +383,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
       document.querySelector('.demo-entry button').click();
       await new Promise(resolve => setTimeout(resolve, 100));
     });
-    assert.equal(document.querySelectorAll('.car-card').length, 3);
+    assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 3);
     await tab('sources');
     assert.equal(demoRequests.length, 3);
     assert.match(document.querySelector('.demo-notice').textContent, /fictional/i);
@@ -376,10 +392,10 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     await tab('specifications');
     // Fuel references load from disk asynchronously. Wait for their table row;
     // the sources panel is absent while Overview is selected and cannot signal readiness.
-    for (let attempt = 0; attempt < 100 && document.querySelector('.table-scroll tbody').rows.length < 13; attempt++) {
+    for (let attempt = 0; attempt < 100 && document.querySelector('.table-scroll tbody').rows.length < 20; attempt++) {
       await act(async () => new Promise(resolve => setTimeout(resolve, 20)));
     }
-    assert.equal(document.querySelector('.table-scroll').querySelectorAll('tbody tr').length, 13);
+    assert.equal(document.querySelector('.table-scroll').querySelectorAll('tbody tr').length, 20);
     assert.match(document.querySelector('.table-scroll').textContent, /Power \(hp\).*158.*132.*155/s);
     await tab('sources');
     assert.match(document.querySelector('.source-status-grid').textContent, /Factory reference/);
@@ -450,7 +466,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.ok(document.querySelector('.capability-details a[href="https://www.caranddriver.com/mercedes-maybach/s580-s680-2025"]'));
     assert.ok(document.querySelector('.mode-grid [data-mode="performance"]'));
     await act(async () => document.querySelector('[data-mode="value"]').click());
-    assert.match(document.querySelector('.mode-explanation').textContent, /See what you get for the asking price/);
+    assert.match(document.querySelector('.mode-explanation').textContent, /What each car offers for the asking price/);
     await act(async () => document.querySelector('[data-mode="practical"]').click());
     assert.match(document.querySelector('.mode-explanation').textContent, /Seating needs, passenger space/);
 
@@ -487,7 +503,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(document.querySelector('.car-card.pair-0').dataset.carId, ids[3], 'selecting the other car swaps the two choices');
     assert.equal(document.querySelector('.car-card.pair-1').dataset.carId, ids[2]);
     assert.equal(document.querySelectorAll('.car-card.pair-visible').length, 2);
-    assert.equal(document.querySelector('table thead .pair-0').textContent, document.querySelector('.car-card.pair-0 .vehicle-name').textContent, 'table and cards use the same first contender');
+    assert.equal(document.querySelector('table thead .pair-0 .vehicle-name').textContent, document.querySelector('.car-card.pair-0 .vehicle-name').textContent, 'table and cards use the same first contender');
     await act(async () => document.querySelector('.car-card.pair-0 .view-details').click());
     assert.equal(document.querySelector('#evidence-vehicle').value, ids[3]);
     assert.equal(document.activeElement.dataset.researchCar, ids[3], 'View details focuses the selected vehicle evidence');
@@ -496,18 +512,22 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     await go('compare');
     assert.equal(document.querySelector('#evidence-vehicle').value, ids[3], 'evidence selection survives stage navigation');
     assert.equal(document.querySelector('#compare-tab-sources').getAttribute('aria-selected'), 'true');
+    await tab('overview');
     assert.equal(document.querySelector('.car-card.pair-1').dataset.carId, ids[2]);
-    await act(async () => document.querySelector('.car-card.pair-0 .remove-button').click());
+    await act(async () => document.querySelector('[data-shortlist-id="' + ids[3] + '"] .remove-button').click());
     assert.equal(document.querySelectorAll('.car-card.pair-visible').length, 2);
     assert.equal(document.querySelector('.car-card.pair-0').dataset.carId, ids[2], 'remaining selected car stays selected');
     assert.equal(document.querySelector('.car-card.pair-1').dataset.carId, ids[0], 'removed selection falls back to the earliest distinct car');
+    await tab('sources');
     assert.equal(document.querySelector('#evidence-vehicle').value, ids[0]);
-    await act(async () => document.querySelector('.add-car').click());
+    await act(async () => { document.querySelector('.nav-button').click(); await new Promise(resolve => setTimeout(resolve, 20)); });
     assert.equal(document.activeElement.id, 'listing-url');
     await change('#listing-url', 'https://example.com/not-ebay');
     await submit();
     assert.match(document.querySelector('#import-error').textContent, /eBay.ca/);
-    assert.equal(document.querySelector('#comparison-import').hidden, false, 'errors leave the form open for correction');
+    assert.ok(document.querySelector('#listing-url'), 'errors leave the form open for correction');
+    await go('compare');
+    await tab('sources');
     await clearComparison();
     assert.equal(document.querySelector('#comparison-import').hidden, false, 'empty shortlist teaches importing');
     assert.equal(document.querySelector('[role="tablist"]'), null);
@@ -530,7 +550,8 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     await submit();
     assert.equal(detailRequests.length, 1, 'ambiguous engines allow model-level experience without selecting a base engine');
     assert.equal(detailRequests[0].domain, 'experience');
-    await act(async () => document.querySelector('.car-card .research-control button').click());
+    await showSource();
+    await act(async () => document.querySelector('.vehicle-summary .research-control button').click());
     assert.equal(document.querySelector('.vehicle-details-editor').open, true);
     await act(async () => {
       const select = document.querySelector('#configuration-999999999999');
@@ -596,7 +617,7 @@ test('Compare and Decide omit false powertrain warnings while retaining genuine 
       make('synthetic-accord', '2019', 'Honda', 'Accord', 'Automatic transmission.', { transmission: 'CVT' }),
       make('synthetic-maserati', '2016', 'Maserati', 'Gran Turismo', 'Electric parking brake. Manual folding mirrors. Automatic climate control.', {}),
     ];
-    const render = (Component, cars) => new JSDOM(renderToStaticMarkup(React.createElement(Component, { cars, mode: 'cost' })));
+    const render = (Component, cars) => new JSDOM(renderToStaticMarkup(React.createElement(Component, { cars, mode: 'cost', ...(Component === Comparison ? { view: { tab: 'specifications', pair: [], sourceId: null } } : {}) })));
     for (const Component of [Comparison, Dashboard]) {
       const valid = render(Component, cars);
       assert.doesNotMatch(valid.window.document.body.textContent, /VIN\/listing mismatch|Conflicting seller values|Review before choosing/);

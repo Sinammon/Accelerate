@@ -1,0 +1,152 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { JSDOM } from 'jsdom';
+import { createServer } from 'vite';
+
+test('compact workspace preserves tab choices and private edits across the complete shopping journey', async () => {
+  const dom = new JSDOM('<div id="root"></div>', { url: 'http://localhost/dashboard', pretendToBeVisual: true });
+  const names = ['window', 'document', 'HTMLElement', 'Element', 'SVGElement', 'getComputedStyle', 'requestAnimationFrame', 'cancelAnimationFrame', 'IS_REACT_ACT_ENVIRONMENT', 'fetch'];
+  const saved = new Map(names.map(name => [name, Object.getOwnPropertyDescriptor(globalThis, name)]));
+  for (const name of ['window', 'document', 'HTMLElement', 'Element', 'SVGElement']) globalThis[name] = dom.window[name];
+  globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
+  globalThis.requestAnimationFrame = dom.window.requestAnimationFrame.bind(dom.window);
+  globalThis.cancelAnimationFrame = dom.window.cancelAnimationFrame.bind(dom.window);
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+  dom.window.matchMedia = () => ({ matches: true, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
+  dom.window.scrollTo = () => {};
+  dom.window.Element.prototype.scrollIntoView = () => {};
+  const requests = [];
+  let releaseImport;
+  globalThis.fetch = async (url, options = {}) => {
+    requests.push({ url, body: options.body });
+    if (url === '/api/import') {
+      const id = JSON.parse(options.body).url.match(/(\d+)$/)[1];
+      return new Promise(resolve => { releaseImport = () => resolve(Response.json({ vehicle: {
+        legacyItemId: id, year: '2018', make: 'Example', model: id.slice(0, 1),
+        priceCAD: { value: '20000', currency: 'CAD' }, location: { city: 'Toronto', country: 'CA' }, images: [], itemSpecifics: [],
+        ...(id.startsWith('4') ? { description: 'Engine problems. Not running.' } : {}),
+      } })); });
+    }
+    return Response.json({}, { status: 503 });
+  };
+  const React = await import('react'), { createRoot } = await import('react-dom/client');
+  const vite = await createServer({ server: { middlewareMode: true, hmr: false, ws: false }, appType: 'custom' });
+  const root = createRoot(document.getElementById('root'));
+  const click = selector => React.act(async () => { document.querySelector(selector).click(); await new Promise(resolve => setTimeout(resolve, 20)); });
+  const go = page => click(`#primary-navigation a[href="#${page}"]`);
+  const change = (selector, value) => React.act(async () => {
+    const input = document.querySelector(selector);
+    assert.ok(input, selector);
+    Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(input, value);
+    input.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+  });
+  const submit = () => React.act(async () => { document.querySelector('form').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true })); });
+  const add = async id => {
+    if (!document.querySelector('#listing-url')) await click('.nav-button');
+    await change('#listing-url', `https://www.ebay.ca/itm/${id}`);
+    await submit();
+    assert.equal(document.querySelector('form').getAttribute('aria-busy'), 'true');
+    assert.equal(document.querySelector('.nav-button').disabled, true);
+    await React.act(async () => { releaseImport(); await new Promise(resolve => setTimeout(resolve, 25)); });
+  };
+  try {
+    const { default: App } = await vite.ssrLoadModule('/src/App.jsx');
+    await React.act(async () => root.render(React.createElement(App)));
+    assert.deepEqual([...document.querySelectorAll('#primary-navigation a')].map(a => a.textContent), ['Compare', 'Recommendation', 'Costs']);
+    assert.equal(document.querySelector('.workflow'), null);
+    assert.equal(document.querySelector('.dashboard-hero'), null);
+    assert.equal(document.querySelector('.workspace-help').open, false);
+    assert.equal(document.querySelector('.shortlist-toggle').getAttribute('aria-expanded'), 'false');
+    await click('.shortlist-toggle');
+    assert.equal(document.querySelector('.shortlist-toggle').getAttribute('aria-expanded'), 'true');
+    await change('#listing-url', 'https://example.test/invalid');
+    await submit();
+    assert.match(document.querySelector('#import-error').textContent, /eBay.ca/);
+    assert.equal(requests.length, 0);
+
+    await add('111111111111');
+    assert.equal(window.location.hash, '#compare');
+    assert.equal(document.querySelector('.comparison-table tbody').rows.length, 6);
+    assert.match(document.querySelector('.comparison-table').textContent, /General baseline/);
+    for (const id of ['222222222222', '333333333333', '444444444444']) await add(id);
+    assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 4);
+    assert.equal(document.querySelector('.nav-button').disabled, true);
+    assert.equal(document.querySelector('.shortlist-add').disabled, true);
+    assert.match(document.querySelector('.card-warnings summary').textContent, /Engine concern/);
+    assert.match(document.querySelector('.shortlist-warning').textContent, /concerns? to review/);
+
+    await click('#compare-tab-specifications');
+    await go('decide');
+    assert.equal(document.querySelectorAll('.mode-card').length, 6);
+    await click('[data-mode="comfort"]');
+    await click('.decision-arrow.next');
+    const contender = document.querySelector('.decision-match h2').textContent;
+    await click('#recommendation-tab-ranking');
+    assert.equal(document.querySelector('#recommendation-panel-summary').hidden, true);
+    assert.equal(document.querySelector('#recommendation-panel-ranking').hidden, false);
+    const ranking = document.querySelector('#recommendation-tab-ranking');
+    await React.act(async () => ranking.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'End', bubbles: true })));
+    assert.equal(document.activeElement.id, 'recommendation-tab-assumptions');
+
+    await go('ownership');
+    assert.equal(document.querySelector('#costs-panel-summary').hidden, false);
+    assert.equal(document.querySelector('#costs-panel-purchase').hidden, true);
+    assert.match(document.querySelector('#costs-panel-summary').textContent, /Cash needed.*Monthly running budget/s);
+    for (const [index, destination] of ['purchase', 'running', 'salary'].entries()) {
+      await click('#costs-tab-summary');
+      await click(`.cost-summary-actions button:nth-child(${index + 1})`);
+      assert.equal(document.activeElement.id, `costs-tab-${destination}`);
+      assert.equal(document.querySelector(`#costs-panel-${destination}`).hidden, false);
+    }
+    await click('#costs-tab-summary');
+    await click('.cost-summary-actions button:nth-child(2)');
+    assert.equal(document.activeElement.id, 'costs-tab-running');
+    await change('[data-field="insuranceAnnual"]', '3000');
+    await click('#costs-tab-purchase');
+    await change('[data-field="purchasePrice"]', '25000');
+    await click('#costs-tab-salary');
+    await change('[data-field="salary"]', '120000');
+    await go('decide');
+    assert.equal(document.querySelector('#recommendation-tab-assumptions').getAttribute('aria-selected'), 'true');
+    await click('#recommendation-tab-summary');
+    assert.equal(document.querySelector('.decision-match h2').textContent, contender);
+    await go('compare');
+    assert.equal(document.querySelector('#compare-tab-specifications').getAttribute('aria-selected'), 'true');
+    await go('ownership');
+    assert.equal(document.querySelector('#costs-tab-salary').getAttribute('aria-selected'), 'true');
+    assert.equal(document.querySelector('[data-field="salary"]').value, '120000');
+    assert.equal(document.querySelector('[data-field="insuranceAnnual"]').value, '3000');
+    assert.equal(document.querySelector('[data-field="purchasePrice"]').value, '25000');
+    assert.doesNotMatch(JSON.stringify(requests), /salary|insuranceAnnual|purchasePrice|120000/);
+
+    await click('.shortlist-remove');
+    assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 3);
+    assert.equal(document.querySelector('[data-field="insuranceAnnual"]').value, '2218');
+    assert.equal(document.querySelector('[data-field="salary"]').value, '120000');
+    assert.equal(document.activeElement.classList.contains('shortlist-remove'), true);
+    await click('.shortlist-car-name');
+    assert.equal(window.location.hash, '#compare');
+    assert.equal(document.querySelector('#compare-tab-sources').getAttribute('aria-selected'), 'true');
+    assert.match(document.querySelector('.source-listing-context').textContent, /Listing location: Toronto, CA.*Mileage:/);
+    for (const tab of document.querySelectorAll('[role="tab"]')) {
+      assert.ok(document.getElementById(tab.getAttribute('aria-controls')));
+      assert.equal(tab.tabIndex, tab.getAttribute('aria-selected') === 'true' ? 0 : -1);
+    }
+    await go('ownership');
+    await click('.shortlist-remove');
+    await click('.shortlist-remove');
+    await click('.shortlist-remove');
+    assert.match(document.querySelector('.empty-state').textContent, /Add cars/);
+    await add('555555555555');
+    await go('ownership');
+    assert.equal(document.querySelector('#costs-tab-summary').getAttribute('aria-selected'), 'true');
+    assert.equal(document.querySelector('[data-field="salary"]').value, '');
+    assert.equal(document.querySelector('[data-field="insuranceAnnual"]').value, '2218');
+    assert.doesNotMatch(document.body.textContent, /NaN|Infinity/);
+  } finally {
+    await React.act(async () => root.unmount());
+    await vite.close();
+    dom.window.close();
+    for (const [name, descriptor] of saved) { if (descriptor) Object.defineProperty(globalThis, name, descriptor); else delete globalThis[name]; }
+  }
+});

@@ -11,6 +11,7 @@ import ThemeSwitch from './ThemeSwitch.tsx';
 import { ThemeProvider } from './ThemeProvider.jsx';
 import Icon from './Icons.jsx';
 import Brand from './Brand.jsx';
+import Shortlist from './Shortlist.jsx';
 import { enrichVehicle } from './enrichment.js';
 import { mergeResearch } from '../shared/model-specs.js';
 import { modelSpecCache } from './spec-cache.js';
@@ -30,6 +31,8 @@ function Application() {
   const [comparisonView, setComparisonView] = useState(emptyComparisonView);
   const [page, setPage] = useState(route);
   const [mode, setMode] = useState('value');
+  const [decisionView, setDecisionView] = useState({ tab: 'summary', selectedId: null });
+  const [ownershipTab, setOwnershipTab] = useState('summary');
   const [scenario, setScenario] = useState(DEFAULT_SCENARIO);
   const [ownership, setOwnership] = useState(createOwnershipState);
   const [url, setUrl] = useState('');
@@ -73,9 +76,30 @@ function Application() {
       document.getElementById('listing-url')?.scrollIntoView({ behavior: reduced ? 'instant' : 'smooth', block: 'center' });
     });
   }
-  function showSteps() {
-    navigate('import');
-    requestAnimationFrame(() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: reduced ? 'instant' : 'smooth', block: 'center' }));
+  function removeCar(id) {
+    for (const controller of enrichmentTasks.current) if (controller.vehicleId === id) controller.abort();
+    const remaining = cars.filter(car => car.legacyItemId !== id);
+    setCars(remaining);
+    setComparisonView(previous => reconcileComparisonView(previous, remaining));
+    setDecisionView(previous => previous.selectedId === id ? { ...previous, selectedId: null } : previous);
+    setNotice('Car removed. You can add a replacement.');
+    if (!remaining.length) {
+      setOwnership(createOwnershipState());
+      setOwnershipTab('summary');
+      setDecisionView({ tab: 'summary', selectedId: null });
+    }
+    requestAnimationFrame(() => (document.querySelector('.shortlist-remove') || document.querySelector('.shortlist-add'))?.focus());
+  }
+  function clearCars() {
+    for (const controller of enrichmentTasks.current) controller.abort();
+    setCars([]); setOwnership(createOwnershipState()); setOwnershipTab('summary');
+    setDecisionView({ tab: 'summary', selectedId: null }); setComparisonView(emptyComparisonView());
+    setNotice('Comparison cleared.');
+    requestAnimationFrame(() => document.getElementById('listing-url')?.focus());
+  }
+  function showSources(car) {
+    setComparisonView(previous => ({ ...previous, tab: 'sources', sourceId: car.legacyItemId }));
+    navigate('compare');
   }
   function enrichImported(imported) {
     const controller = new AbortController();
@@ -157,20 +181,22 @@ function Application() {
   }
   const importForm = <ImportComposer cars={cars} page={page} url={url} setUrl={setUrl} loading={loading} error={error} notice={notice} onSubmit={handleSubmit} onDemo={loadDemo} />;
   const enter = { initial: { opacity: reduced ? 1 : 0 }, animate: { opacity: 1 }, transition: { duration: reduced ? 0 : 0.18 } };
-  return <LazyMotion features={domAnimation} strict><MotionConfig reducedMotion="user"><div className={`site-shell app-shell ${page === 'import' ? 'landing-shell' : ['decide', 'ownership'].includes(page) ? 'decision-shell' : ''}`}>
+  return <LazyMotion features={domAnimation} strict><MotionConfig reducedMotion="user"><div className="site-shell app-shell compact-workspace">
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); document.getElementById('main-content')?.focus(); }}>Skip to content</a>
     <header className="site-header" onKeyDown={event => { if (event.key === 'Escape' && menuOpen) { setMenuOpen(false); menuToggle.current?.focus(); } }}>
       <Brand />
-      <nav id="primary-navigation" className={menuOpen ? 'is-open' : ''} aria-label="Main navigation">{[['import', 'Import'], ['compare', 'Compare'], ['decide', 'Help Me Decide']].map(([id, label]) => <a className="nav-link" key={id} href={`#${id}`} aria-current={page === id ? 'page' : page === 'ownership' && id === 'decide' ? 'location' : undefined} onClick={() => setMenuOpen(false)}>{label}{id === 'compare' && <span className="nav-count" aria-label={`${cars.length} cars in shortlist`}>{cars.length}</span>}</a>)}</nav>
-      <div className="header-actions"><ThemeSwitch overHero={page === 'import'} /><button className="nav-demo" type="button" onClick={cars.length ? () => navigate('compare') : loadDemo} disabled={loading}>{cars.length ? 'Your shortlist' : 'Try the demo'}</button><button className="nav-button size-11 p-0 sm:h-auto sm:w-auto sm:px-4" type="button" aria-label="Import a car" onClick={() => { setMenuOpen(false); startImport(); }}><span className="hidden sm:inline">Import a car</span><Icon name="arrow" size={15} /></button><button className="nav-menu-toggle" type="button" ref={menuToggle} aria-expanded={menuOpen} aria-controls="primary-navigation" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} onClick={() => setMenuOpen(open => !open)}><Icon name={menuOpen ? 'close' : 'menu'} size={20} /></button></div>
+      <nav id="primary-navigation" className={menuOpen ? 'is-open' : ''} aria-label="Main navigation">{[['compare', 'Compare'], ['decide', 'Recommendation'], ['ownership', 'Costs']].map(([id, label]) => <a className="nav-link" key={id} href={`#${id}`} aria-current={page === id ? 'page' : undefined} onClick={() => setMenuOpen(false)}>{label}</a>)}</nav>
+      <div className="header-actions"><ThemeSwitch /><button className="nav-button" type="button" disabled={cars.length >= 4 || loading} onClick={() => { setMenuOpen(false); startImport(); }}>Add car <Icon name="link" size={16} /></button><button className="nav-menu-toggle" type="button" ref={menuToggle} aria-expanded={menuOpen} aria-controls="primary-navigation" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} onClick={() => setMenuOpen(open => !open)}><Icon name={menuOpen ? 'close' : 'menu'} size={20} /></button></div>
     </header>
-    {page !== 'import' && <nav className="workflow" aria-label="Your progress">{[['import', '1', 'Import'], ['compare', '2', 'Compare'], ['decide', '3', 'Decide']].map(([id, n, label]) => <a href={`#${id}`} key={id} aria-current={page === id || page === 'ownership' && id === 'decide' ? 'step' : undefined}><span>{n}</span>{label}</a>)}</nav>}
+    <div className="workspace-layout">
+    <Shortlist cars={cars} onAdd={startImport} onRemove={removeCar} onDetails={showSources} loading={loading} />
     <main id="main-content" tabIndex={-1}><m.div key={page} className="page-transition" {...enter}>
-      {page === 'import' && <Dashboard importForm={importForm} onStart={startImport} onShowCosts={() => { if (cars.length) { setMode('cost'); navigate('decide'); } else showSteps(); }} />}
-      {page === 'compare' && <VehicleComparison scenario={scenario} setScenario={setScenario} onSaveDetails={saveVehicleDetails} cars={cars} view={comparisonView} onViewChange={setComparisonView} notice={notice} retryResearch={retryResearch} clearSavedSpecs={() => { modelSpecCache.clear(); setNotice('Saved model specifications cleared. Your current comparison is unchanged.'); }} importForm={importForm} navigate={navigate} removeCar={id => { for (const controller of enrichmentTasks.current) if (controller.vehicleId === id) controller.abort(); const remaining = cars.filter(car => car.legacyItemId !== id); setCars(remaining); setComparisonView(previous => reconcileComparisonView(previous, remaining)); setNotice('Car removed. You can import a replacement.'); }} clearCars={() => { for (const controller of enrichmentTasks.current) controller.abort(); setCars([]); setOwnership(createOwnershipState()); setComparisonView(emptyComparisonView()); setNotice('Comparison cleared.'); }} />}
-      {page === 'decide' && <DecisionDashboard scenario={scenario} setScenario={setScenario} cars={cars} retryResearch={retryResearch} mode={mode} setMode={setMode} />}
-      {page === 'ownership' && <OwnershipCalculator cars={cars} scenario={scenario} setScenario={setScenario} state={ownership} setState={setOwnership} />}
-    </m.div></main><footer><Brand className="footer-brand" small /><span>A clearer road to your next car.</span><span className="prototype-label">Temporary shortlist · Refresh clears your shortlist</span></footer>
+      {page === 'import' && <Dashboard importForm={importForm} onStart={startImport} />}
+      {page === 'compare' && <VehicleComparison scenario={scenario} setScenario={setScenario} onSaveDetails={saveVehicleDetails} cars={cars} view={comparisonView} onViewChange={setComparisonView} notice={notice} retryResearch={retryResearch} clearSavedSpecs={() => { modelSpecCache.clear(); setNotice('Saved model specifications cleared. Your current comparison is unchanged.'); }} importForm={importForm} navigate={navigate} removeCar={removeCar} clearCars={clearCars} />}
+      {page === 'decide' && <DecisionDashboard scenario={scenario} setScenario={setScenario} cars={cars} retryResearch={retryResearch} mode={mode} setMode={next => { setMode(next); setDecisionView(previous => ({ ...previous, selectedId: null })); }} view={decisionView} onViewChange={setDecisionView} />}
+      {page === 'ownership' && <OwnershipCalculator cars={cars} scenario={scenario} setScenario={setScenario} state={ownership} setState={setOwnership} tab={ownershipTab} onTabChange={setOwnershipTab} />}
+    </m.div></main>
+    </div>
   </div></MotionConfig></LazyMotion>;
 }
 
