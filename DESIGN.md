@@ -42,24 +42,35 @@ typography:
     fontFamily: "Satoshi, sans-serif"
     fontSize: "72px"
     fontWeight: 500
-    lineHeight: 1
+    lineHeight: 1.08
   import-headline-phone:
+    fontFamily: "Satoshi, sans-serif"
+    fontSize: "40px"
+    fontWeight: 500
+    lineHeight: 1.08
+  editorial:
+    fontFamily: "Satoshi, sans-serif"
+    fontSize: "36px"
+    fontWeight: 500
+    lineHeight: 1.25
+  editorial-wide:
     fontFamily: "Satoshi, sans-serif"
     fontSize: "48px"
     fontWeight: 500
-    lineHeight: 1
+    lineHeight: 1.25
   workspace-headline:
     fontFamily: "Satoshi, sans-serif"
     fontSize: "24px"
-    fontWeight: 700
+    fontWeight: 600
     lineHeight: 1.25
   section:
     fontFamily: "Satoshi, sans-serif"
     fontSize: "22px"
+    fontWeight: 500
   fact:
     fontFamily: "Satoshi, sans-serif"
     fontSize: "18px"
-    fontWeight: 650
+    fontWeight: 600
   body:
     fontFamily: "Satoshi, sans-serif"
     fontSize: "16px"
@@ -74,7 +85,7 @@ typography:
   button:
     fontFamily: "Satoshi, sans-serif"
     fontSize: "16px"
-    fontWeight: 640
+    fontWeight: 500
     lineHeight: 1.38
   wordmark:
     fontFamily: "Clash Grotesk, sans-serif"
@@ -87,7 +98,7 @@ rounded:
   control: "8px"
   surface: "12px"
   inherited-card: "16px"
-  composer: "24px"
+  composer: "16px"
   full: "calc(infinity * 1px)"
 spacing:
   xs: "4px"
@@ -120,18 +131,12 @@ components:
     backgroundColor: "{colors.neutral-white}"
     textColor: "{colors.secondary-950}"
     rounded: "{rounded.composer}"
-    padding: "16px"
+    padding: "20px"
   car-management:
     backgroundColor: "{colors.neutral-white}"
     textColor: "{colors.secondary-950}"
     rounded: "{rounded.surface}"
     padding: "16px"
-  source-chip:
-    backgroundColor: "{colors.neutral-100}"
-    textColor: "{colors.secondary-900}"
-    rounded: "{rounded.full}"
-    padding: "0 12px"
-    height: "32px"
   metric-grid:
     backgroundColor: "transparent"
     textColor: "{colors.secondary-950}"
@@ -222,9 +227,9 @@ Self-hosted Satoshi is the working interface family. Clash Grotesk supplies the 
 
 ### Hierarchy
 
-The compact ramp is 12/14/16/18/22/24px. Evidence and notes use the smallest role; tables, tabs, names and concise reasons use the interface role. Body copy uses regular weight and the base line height. Cost totals use the fact role; section/match titles use the section role; page titles use the workspace headline role. The restored home uses Satoshi 48px/60px/72px display headings, 36px/48px editorial headings and 48px/60px metrics. These home roles stay separate from the compact working type ramp.
+The compact ramp is 12/14/16/18/22/24px. Evidence and notes use the smallest role; tables, tabs, names and concise reasons use the interface role. Body copy uses regular weight and the base line height. Cost totals use the fact role; section/match titles use the section role; page titles use the workspace headline role. The home headline scales from 40px to 72px, with 36px/48px editorial headings and product-fact figures. These home roles stay separate from the compact working type ramp. Interface weights are 400/500/600; short labels keep normal tracking and headings use size rather than italic emphasis.
 
-The wordmark retains `skewX(-9deg)`, tight tracking and an accessible home link. It reduces to 22px below 768px. Workspace page headings use Satoshi bold; a legacy heading stylesheet must not override that division. Supporting prose keeps observed 65-75ch reading limits where relevant. Use tabular numerals for prices, quantities and cost totals.
+The wordmark retains `skewX(-9deg)`, tight tracking and an accessible home link. It reduces to 22px below 768px. Workspace page headings use Satoshi 24px/600. Supporting prose keeps 65-75ch reading limits where relevant. Use tabular numerals for prices, quantities and cost totals, with cost amounts and numeric cost inputs aligned right. Interface icons use the existing authored set at 18px with a 1.5 stroke.
 
 **The Compact Hierarchy Rule.** Use the documented compact roles; reserve larger display and metric type for the restored home dashboard.
 
@@ -242,13 +247,13 @@ These responsive source rules do not establish verified desktop, phone or zoom r
 
 Current workspaces are flat. Solid semantic surfaces, one-pixel boundaries, selected fields and restrained hierarchy establish grouping. The restored home retains its blue bloom, floating-composer soft shadow and horizon. These atmospheric treatments stay off the working screens. Image dialogs retain a modal backdrop (`color-mix(in srgb, var(--text) 72%, transparent)`) rather than decorative lift.
 
-Controls transition background/border over 160ms. Route entry and comparison-panel fades use 180ms. Deliberate navigation may scroll smoothly; reduced motion disables smooth scrolling and minimizes transitions while preserving focus and state feedback. No decorative motion is required to complete a task.
+Controls transition color/background/border over 160ms with `cubic-bezier(0.22, 1, 0.36, 1)`. Route entry and comparison-panel fades use 180ms. The fictional walkthrough uses the same curve with a short 12px slide; individual car cards do not animate on arrival. Deliberate navigation may scroll smoothly; reduced motion disables smooth scrolling and minimizes transitions while preserving focus and state feedback. The blue bloom and horizon remain static. Loading spinners indicate active work only.
 
 **The Task Depth Rule.** Use tonal separation and boundaries for working content; reserve overlay depth for an actual dialog or menu.
 
 ## Shapes
 
-The intentional compact system uses 8px corners for navigation, tabs, priority selectors and compact import controls, and 12px corners for the Cars menu and recommendation container. The home composer uses 24px corners and rounded chips. Vehicle thumbnails retain 4px corners. Inherited base fields, evidence containers and dialogs may retain 12px/16px source radii; do not apply a broad global reset to these retained contexts. Vehicle photographs use contain sizing and semantic mats, preserving the whole car and its credits.
+The compact system uses 8px controls and 12px surfaces, scoped to the workspace. The home composer uses 16px corners, 20px padding (16px below 480px) and 8px fields/buttons. Circular elements are reserved for meaningful indicators and the loading spinner. Vehicle photographs use contain sizing and semantic mats, preserving the whole car and its credits.
 
 ## Components
 
@@ -270,7 +275,7 @@ The working-screen header has a Cars count disclosure with every contender, remo
 
 ### Home dashboard
 
-Dashboard.jsx and HeroImportComposer.jsx restore the previous hero, floating URL composer, research-source strip, editorial metrics, fictional walkthrough and blue horizon. Import remains functional with validation, full-list status, loading feedback, demo access and the shared shortlist. The larger display typography and atmosphere are specific to this route.
+Dashboard.jsx and HeroImportComposer.jsx retain the blue hero, floating URL composer, research-source strip, editorial product facts, fictional walkthrough and horizon. The headline is “Compare your eBay.ca shortlist”. The composer has a visible listing-field label and a text-based Add car button, one capacity/account helper line and a secondary fictional-demo action. The fuel/comfort action sits in the existing editorial section. Import validation, full-list status, loading feedback and the shared shortlist remain functional. The announcement pill, italic emphasis and ornamental dots/diamond are removed. The larger display typography and static atmosphere are specific to this route.
 
 ### Comparison table
 
@@ -298,6 +303,18 @@ Each car's comparison header has Details and Remove actions alongside its photog
 
 Help me decide shows its complete reasons and model context once, fully visible in the main card with source labels and links. The separate repeated Full explanation & model context disclosure is removed. Trade-offs, purchase warnings and the separate detailed vehicle/estimate evidence remain available.
 
+
+## Unslop refinement — 6 November 2026
+
+Direction: practical, measured and candid, like an automotive buyer's comparison sheet. Existing vehicle photographs, aligned CAD figures and explicit source labels carry the detail. The user approved keeping the blue hero and horizon as an exception to Unslop's guidance against atmospheric gradients; they are static and remain isolated to the homepage. The retained slanted wordmark is a brand treatment, not italic interface emphasis.
+
+The pass follows spacing, color, icons, copy, type, layout, details, visuals and motion. Controls retain at least 44px targets, the real product facts and walkthrough stay in their original section order, and no new imagery, dependencies, API, scoring, calculation, storage or deployment behavior is introduced. Normal cost figures use reading text; selected controls, actions and important totals carry the accent. Provenance is quiet text while conflict labels, trade-offs and warnings retain their wording and visibility.
+
+Method credit: [Unslop by Damir Sokolovsky (@heydamir)](https://github.com/heydamir/unslop/blob/main/skills/unslop/SKILL.md), licensed CC BY 4.0. The project applies its guidance without vendoring the skill or adding a story video.
+
+Verification is limited to source review, automated contrast/DOM journeys, regression tests, the build and the mechanical detector. The browser access host and native pipe are unavailable; no desktop/phone screenshots, whole-surface contrast, 200% zoom or rendered-layout approval is claimed. Current command results are reported with the implementation.
+
+The final full suite passed 212/212 tests, and the production build passed with 501 modules. Existing Motion `use client` and >500kB chunk advisories remain. The detector ran once and returned 14 inherited type-ramp advisories; their literal sizes were reconciled with the documented shared scale, including the home editorial roles. These results do not replace rendered verification.
 
 ## Do's and Don'ts
 

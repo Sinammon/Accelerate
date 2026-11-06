@@ -44,6 +44,8 @@ Bundled fictional demo, four credited model photographs, reviewed model-research
 
 ## Product Principles
 
+UI refinement, 6 November 2026: keep the navy/electric-blue homepage atmosphere and horizon static. The homepage says “Compare your eBay.ca shortlist” and offers a visibly labeled listing field, a text Add car action, one capacity/account helper and the secondary fictional demo. The fuel/comfort action remains in the editorial section. The whole app retains its compact layout and identity, with 24px/600 working headings, a consistent 18px icon set, quieter provenance and aligned cost figures. Existing content, section order, features and evidence safeguards remain authoritative.
+
 - Prioritize the shopper's import and comparison task.
 - Explain recommendations using supported facts and visible trade-offs.
 - Keep uncertainty and source provenance legible.

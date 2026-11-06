@@ -5,7 +5,7 @@
 .shortlist-count { color: var(--text-secondary); font-size: 14px; margin: 12px 0 0; }
 .comparison-import { padding: 24px; margin-bottom: 32px; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--surface); }
 .comparison-import .input-row { background: var(--background); }
-.empty-state { padding: 64px 24px; border: 1px dashed var(--border); border-radius: var(--radius-panel); text-align: center; }
+.empty-state { padding: 48px 24px; border: 1px solid var(--border-subtle); border-radius: 12px; text-align: center; background: var(--surface); }
 .empty-state p { color: var(--text-secondary); }
 .car-grid { display: grid; grid-template-columns: repeat(var(--columns), minmax(0, 1fr)); gap: 20px; align-items: stretch; }
 .car-card { min-width: 0; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--surface); overflow: hidden; }
@@ -19,7 +19,7 @@
 .remove-button { min-width: 44px; padding: 8px; color: var(--text-secondary); background: transparent; border-color: var(--border); }
 .remove-button:hover { color: var(--error); background: var(--error-surface); }
 .vehicle-name { font-size: 24px; margin: 16px 0; }
-.car-price { color: var(--accent); font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; margin: 0 0 12px; }
+.car-price { color: var(--text); font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; margin: 0 0 12px; }
 .car-meta { color: var(--text-secondary); font-size: 14px; margin: 8px 0; overflow-wrap: anywhere; }
 .source-link { display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; margin-top: 8px; }
 .demo-notice, .decision-demo-note, .decision-status { padding: 16px 20px; border: 1px solid var(--border); border-radius: var(--radius-control); color: var(--text-secondary); font-size: 14px; margin: 24px 0; }
@@ -65,9 +65,9 @@
 .ownership-range { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: .75rem 0; font-variant-numeric: tabular-nums; }
 .ownership-range > div { min-width: 5rem; }
 .ownership-range dt { color: var(--text-secondary); }
-.ownership-range dd { margin: 0; font-weight: 650; }
-.ownership-reset { margin-block: .35rem; }
-.model-advice-topic { display: block; margin-bottom: .2rem; font-size: .875rem; }
+.ownership-range dd { margin: 0; font-weight: 600; }
+.ownership-reset { margin-block: .5rem; }
+.model-advice-topic { display: block; margin-bottom: .25rem; font-size: .875rem; }
 .model-advice ul { padding-left: 1.25rem; }
 .model-advice li { margin-block: .75rem; max-width: 70ch; overflow-wrap: anywhere; }
 .model-advice li p { margin-block: .25rem; }

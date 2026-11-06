@@ -12,4 +12,3 @@ export const researchSources = [
   { label: 'NHTSA', note: 'VINs and recalls', url: 'https://www.nhtsa.gov/' },
   { label: 'Gemini', note: 'Model research and estimates', url: 'https://ai.google.dev/' },
 ];
-export const lightPoints = ['left-1/4 top-28', 'left-16 top-72', 'right-1/4 top-36', 'right-16 top-80', 'left-1/3 top-16', 'right-1/3 top-64', 'left-8 top-40', 'right-8 top-24'];

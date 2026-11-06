@@ -1,4 +1,4 @@
-/* Gradients are decorative media; every color is a shared palette token. */
+/* User-approved blue atmosphere stays on the home route, without looping motion. */
 .hero-atmosphere {
   background:
     radial-gradient(ellipse 58% 50% at 3% 50%, var(--color-primary-600), transparent 74%),
@@ -15,7 +15,6 @@
 }
 .atmospheric-bloom {
   background: radial-gradient(ellipse at 50% 10%, var(--color-primary-500), transparent 60%);
-  animation: atmosphere-drift 28s ease-in-out infinite alternate;
 }
 .horizon-atmosphere {
   background:
@@ -30,18 +29,34 @@
     radial-gradient(ellipse 48% 24% at 75% 67%, var(--color-primary-700), transparent 78%),
     linear-gradient(to bottom, var(--background) 8%, var(--color-primary-950) 45%, var(--color-secondary-950) 85%);
 }
-.hero-italic { font-synthesis: style; }
+.dashboard-hero .hero-headline { max-width: 18ch; font-size: clamp(40px, 5.4vw, 72px); line-height: 1.08; letter-spacing: -.03em; }
+.app-shell .hero-composer { padding: 20px; border-radius: 16px; background: var(--surface); color: var(--text); box-shadow: 0 8px 24px rgb(0 0 0 / .08); }
+.app-shell .hero-composer > label { margin-bottom: 8px; font-size: 14px; font-weight: 500; }
+.app-shell .hero-composer .input-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.app-shell .hero-composer input { width: 100%; min-height: 48px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--background); color: var(--text); }
+.app-shell .hero-composer input:focus-visible { outline-offset: 3px; }
+.app-shell .hero-composer input[aria-invalid='true'] { border-color: var(--error); }
+.app-shell .hero-composer .input-row button { min-height: 48px; padding: 12px 20px; border-radius: 8px; font-size: 14px; }
+.hero-composer-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 16px; margin-top: 12px; }
+.app-shell .hero-composer .input-note { display: block; margin: 0; font-size: 12px; color: var(--text-secondary); }
+.app-shell .hero-composer .demo-entry { margin: 0; }
+.app-shell .hero-composer .demo-entry button { min-height: 44px; padding: 8px 0; border: 0; border-radius: 0; background: transparent; color: var(--text-secondary); font-size: 14px; font-weight: 400; }
+.app-shell .hero-composer .demo-entry button:hover { color: var(--text); }
+.app-shell .hero-composer .error-message, .app-shell .hero-composer .form-message { margin-top: 12px; font-size: 14px; }
+.editorial-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+.editorial-actions .text-button { min-height: 48px; border-radius: 8px; font-size: 14px; font-weight: 500; }
+.editorial-actions .inline-button { color: var(--text-secondary); font-size: 14px; }
 .app-shell { @apply mx-auto min-h-screen w-full max-w-none bg-canvas p-0 text-content transition-colors; }
 .app-shell .site-header { @apply sticky top-0 z-30 mx-auto grid min-h-20 w-full max-w-7xl grid-cols-2 gap-x-2 border-divider bg-canvas px-5 sm:gap-x-4 sm:px-8 lg:grid-cols-3; }
 .app-shell .site-header .brand { @apply text-xl text-content sm:text-2xl; }
 .app-shell .site-header nav { @apply col-span-2 row-start-2 hidden items-center justify-center gap-6 py-4 lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:flex lg:py-0; }
 .app-shell .site-header nav.is-open { @apply flex; }
 .app-shell .header-actions { @apply col-start-2 row-start-1 flex items-center justify-end gap-1 sm:gap-2 lg:col-start-3 lg:gap-3; }
-.app-shell .nav-menu-toggle { @apply inline-flex size-11 min-h-11 rounded-full border border-divider bg-transparent p-0 text-content lg:hidden; }
+.app-shell .nav-menu-toggle { @apply inline-flex size-11 min-h-11 rounded-lg border border-divider bg-transparent p-0 text-content lg:hidden; }
 .app-shell .nav-link { @apply whitespace-nowrap text-sm font-medium text-subdued no-underline hover:text-content; }
 .app-shell .nav-link[aria-current='page'] { @apply text-content; }
 .app-shell .nav-count { @apply size-6 min-w-6 rounded-full bg-panel-raised text-xs; }
-.app-shell .nav-button { @apply min-h-11 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium; }
+.app-shell .nav-button { @apply min-h-11 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium; }
 .app-shell .nav-demo { @apply hidden min-h-11 border-0 bg-transparent px-3 py-2 text-sm font-normal text-subdued xl:inline-flex; }
 .app-shell.landing-shell .site-header { @apply absolute inset-x-0 top-0 border-0 bg-transparent; }
 .app-shell.landing-shell .site-header .brand,
@@ -72,10 +87,14 @@
 .app-shell .dashboard-preview .preview-intro h2 { @apply text-2xl; }
 .app-shell .dashboard-preview .preview-intro p { @apply m-0 max-w-none text-subdued; }
 .app-shell .hero-intro { @apply max-w-lg text-base; }
+.app-shell .dashboard-hero .hero-intro { color: var(--color-neutral-200); }
 .app-shell footer { @apply mx-auto max-w-7xl border-divider px-5 py-8 text-sm sm:px-8; }
 .app-shell.landing-shell footer { @apply w-full max-w-none border-0 bg-secondary-950 text-neutral-300; }
 .app-shell.landing-shell footer .footer-brand { @apply text-neutral-50; }
 .app-shell .decision-photo-dialog::backdrop { background: color-mix(in srgb, var(--color-secondary-950) 78%, transparent); }
-.app-shell .hero-composer .input-note svg { @apply text-primary-800 dark:text-primary-200; }
-@keyframes atmosphere-drift { from { transform: translate3d(-2%, 0, 0) scale(1); } to { transform: translate3d(3%, 3%, 0) scale(1.05); } }
-@media (prefers-reduced-motion: reduce) { .atmospheric-bloom { animation: none; } }
+@media (max-width: 479px) {
+  .app-shell .hero-composer { padding: 16px; }
+  .app-shell .hero-composer .input-row { grid-template-columns: minmax(0, 1fr); }
+  .app-shell .hero-composer .input-row button { width: 100%; }
+  .hero-composer-footer { align-items: flex-start; flex-direction: column; gap: 4px; }
+}

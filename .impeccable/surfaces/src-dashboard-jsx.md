@@ -47,3 +47,11 @@ Compare has an Add car button beside its heading; the shared header Add car acti
 Each car's comparison header has Details and Remove actions alongside its photograph; Sources & checks also provides Remove this car for the selected contender. Removal uses the existing cancellation/state cleanup and reconciles phone pairs. Focus moves to a remaining selected car's Remove action or, after the final removal, the import field. No home, sidebar, API, scoring or storage changes are introduced.
 
 Help me decide shows its complete reasons and model context once, fully visible in the main card with source labels and links. The separate repeated Full explanation & model context disclosure is removed. Trade-offs, purchase warnings and the separate detailed vehicle/estimate evidence remain available.
+
+## Approved Unslop refinement — 6 November 2026
+
+The user selected the whole app while explicitly preserving the blue homepage atmosphere. Retain the home hero, horizon, section order, fonts, palette, slanted wordmark, photos and compact workspace. Keep the atmosphere static; remove the announcement pill, italic emphasis, ornamental dots/diamond and repeated composer chips. The home headline is “Compare your eBay.ca shortlist”. Import has a visible URL label, text Add car action, one capacity/account helper and a secondary fictional-demo button. Retain the fuel/comfort action in the existing editorial section.
+
+Character: practical, measured and candid. Existing vehicle photos and the manual fictional walkthrough carry the product detail; aligned CAD figures and explicit provenance are the signature. Use 4px spacing, 24px/600 working headings, 400/500/600 interface weights, 18px/1.5 icons, 8px controls, 12px workspace surfaces and a 16px home composer. Normal cost values use text color, while actions, selections and important totals use the accent. Preserve every state, data safeguard, tab, warning and calculation.
+
+Source/DOM verification does not establish rendered fit. Browser/native access is unavailable; desktop, phone and 200% zoom approval remain outstanding. Method: [Unslop by Damir Sokolovsky (@heydamir)](https://github.com/heydamir/unslop/blob/main/skills/unslop/SKILL.md), CC BY 4.0. This refinement supersedes earlier conflicting visual values in this brief.

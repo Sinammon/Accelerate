@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-05T00:00:00Z",
+  "generatedAt": "2026-11-06T00:00:00Z",
   "title": "Design System: Accelerate",
   "extensions": {
     "colorMeta": {
@@ -535,6 +535,14 @@
       "wordmark": {
         "displayName": "Wordmark",
         "purpose": "Retained slanted identity."
+      },
+      "editorial": {
+        "displayName": "Editorial",
+        "purpose": "Home editorial headings and product facts at the narrow size."
+      },
+      "editorial-wide": {
+        "displayName": "Editorial Wide",
+        "purpose": "Home editorial headings and product facts at the wide size."
       }
     },
     "shadows": [],
@@ -568,7 +576,7 @@
       "refersTo": "button-primary",
       "description": "Compact primary action; busy/full labels are explicit in the live form.",
       "html": "<button class=\"ds-primary\">Add car</button>",
-      "css": ".ds-primary{min-height:44px;padding:12px 20px;border:1px solid transparent;border-radius:8px;background:var(--action);color:var(--ink);font:640 16px/1.38 var(--font-sans);cursor:pointer;transition:background-color 160ms}.ds-primary:hover{background:var(--accent)}.ds-primary:disabled{opacity:.6;cursor:not-allowed}.ds-primary:focus-visible{outline:3px solid var(--accent);outline-offset:4px}"
+      "css": ".ds-primary{min-height:44px;padding:12px 20px;border:1px solid transparent;border-radius:8px;background:var(--action);color:var(--ink);font:500 16px/1.38 var(--font-sans);cursor:pointer;transition:background-color 160ms}.ds-primary:hover{background:var(--accent)}.ds-primary:disabled{opacity:.6;cursor:not-allowed}.ds-primary:focus-visible{outline:3px solid var(--accent);outline-offset:4px}"
     },
     {
       "name": "Secondary action",
@@ -576,7 +584,7 @@
       "refersTo": "button-secondary",
       "description": "Quiet action with an explicit interactive boundary.",
       "html": "<button class=\"ds-secondary\">Edit running costs</button>",
-      "css": ".ds-secondary{min-height:44px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);font:640 14px var(--font-sans);cursor:pointer}.ds-secondary:hover{background:var(--surface-hover)}.ds-secondary:focus-visible{outline:3px solid var(--accent);outline-offset:4px}"
+      "css": ".ds-secondary{min-height:44px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);font:500 14px var(--font-sans);cursor:pointer}.ds-secondary:hover{background:var(--surface-hover)}.ds-secondary:focus-visible{outline:3px solid var(--accent);outline-offset:4px}"
     },
     {
       "name": "Listing field",
@@ -611,28 +619,20 @@
       "css": ".ds-details{border-top:1px solid var(--border-subtle);color:var(--text-secondary);font:14px/1.5 var(--font-sans)}.ds-details summary{min-height:44px;padding:12px 0;cursor:pointer;color:var(--accent)}.ds-details summary:hover{color:var(--text)}.ds-details summary:focus-visible{outline:3px solid var(--accent);outline-offset:4px}"
     },
     {
-      "name": "Floating listing composer",
+      "name": "Labeled listing composer",
       "kind": "custom",
       "refersTo": "hero-composer",
-      "description": "Visual translation of the real hero import form; the application supplies validation and importing behavior.",
-      "html": "<form class=\"ds-composer\"><label class=\"ds-visually-hidden\" for=\"ds-composer-url\">Your next car starts with a link</label><div class=\"ds-composer-row\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m10 13 4-4m-6 6-1 1a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0m2 2 1-1a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0\"/></svg><input id=\"ds-composer-url\" type=\"url\" required placeholder=\"Paste an eBay.ca car link?\"></div><div class=\"ds-composer-actions\"><span class=\"ds-composer-chip\">eBay.ca</span><span class=\"ds-composer-count\">Up to 4 cars</span><button type=\"submit\" aria-label=\"Import\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h15m-6-6 6 6-6 6\"/></svg></button></div></form>",
-      "css": ".ds-composer{max-width:672px;padding:16px;border-radius:24px;background:var(--color-neutral-white,#FFFFFF);color:var(--color-secondary-950,#041222);box-shadow:0 20px 25px -5px rgb(4 18 34 / .2),0 8px 10px -6px rgb(4 18 34 / .2);font-family:var(--font-sans,Satoshi,sans-serif)}.ds-composer:focus-within{outline:2px solid var(--color-primary-600,#0872E6)}.ds-composer-row{display:flex;align-items:center;gap:12px;padding:0 4px}.ds-composer-row svg{flex-shrink:0;color:var(--color-neutral-500,#64798C)}.ds-composer input{flex:1;width:100%;min-width:0;min-height:48px;padding:8px 0;border:0;background:transparent;color:inherit;font:400 16px/1.55 var(--font-sans,Satoshi,sans-serif)}.ds-composer input::placeholder{color:var(--color-neutral-600,#46596C);opacity:1}.ds-composer input:focus-visible{outline:none}.ds-composer-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}.ds-composer-chip,.ds-composer-count{display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border-radius:calc(infinity * 1px);background:var(--color-neutral-100,#F0F6FA);font-size:12px}.ds-composer-count{color:var(--color-neutral-600,#46596C)}.ds-composer button{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;min-height:44px;margin-left:auto;padding:0;border:0;border-radius:calc(infinity * 1px);background:var(--color-primary-600,#0872E6);color:var(--color-neutral-white,#FFFFFF);cursor:pointer;transition:background-color 160ms}.ds-composer button:hover,.ds-composer button:active{background:var(--color-primary-700,#0759B8)}.ds-composer button:focus-visible{outline:3px solid var(--accent,#0759B8);outline-offset:4px}.ds-composer button:disabled{opacity:.5;cursor:not-allowed}.ds-visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}:host-context(.dark) .ds-composer{background:var(--color-secondary-800,#102C47);color:var(--color-neutral-50,#F8FBFD);box-shadow:0 20px 25px -5px rgb(0 0 0 / .2),0 8px 10px -6px rgb(0 0 0 / .2)}:host-context(.dark) .ds-composer:focus-within{outline-color:var(--color-primary-400,#4BA9FF)}:host-context(.dark) .ds-composer input::placeholder{color:var(--color-neutral-300,#CBD7E0)}:host-context(.dark) .ds-composer-chip,:host-context(.dark) .ds-composer-count{background:var(--color-secondary-700,#1A3C59);color:var(--color-neutral-100,#F0F6FA)}:host-context(.dark) .ds-composer button{background:var(--color-primary-400,#4BA9FF);color:var(--color-secondary-950,#041222)}:host-context(.dark) .ds-composer button:hover{background:var(--color-primary-300,#85C5FF)}@media(max-width:639px){.ds-composer-count{display:none}}"
-    },
-    {
-      "name": "Listing source chip",
-      "kind": "chip",
-      "refersTo": "source-chip",
-      "description": "Quiet noninteractive source marker used inside the composer.",
-      "html": "<span class=\"ds-chip\">eBay.ca</span>",
-      "css": ".ds-chip{display:inline-flex;align-items:center;gap:8px;min-height:32px;padding:0 12px;border-radius:calc(infinity * 1px);background:var(--color-neutral-100,#F0F6FA);color:var(--color-secondary-900,#081D33);font:500 12px/1.333333 var(--font-sans,Satoshi,sans-serif)}:host-context(.dark) .ds-chip{background:var(--color-secondary-700,#1A3C59);color:var(--color-neutral-100,#F0F6FA)}"
+      "description": "Visible URL label, text-based Add car action, one helper line and a secondary fictional-demo action. Live importing and validation remain in the app.",
+      "html": "<form class=\"ds-composer\"><label for=\"ds-composer-url\">eBay.ca vehicle listing link</label><div class=\"ds-composer-row\"><input id=\"ds-composer-url\" type=\"url\" required placeholder=\"https://www.ebay.ca/itm/…\"><button type=\"submit\">Add car</button></div><div class=\"ds-composer-footer\"><p>0/4 cars added · No account needed</p><button type=\"button\">Try fictional demo</button></div></form>",
+      "css": ".ds-composer{max-width:672px;padding:20px;border-radius:16px;background:var(--surface,#FFFFFF);color:var(--text,#041222);box-shadow:0 8px 24px rgb(0 0 0 / .08);font-family:var(--font-sans,Satoshi,sans-serif)}.ds-composer label{display:block;margin-bottom:8px;font-size:14px;font-weight:500}.ds-composer-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px}.ds-composer input{width:100%;min-width:0;min-height:48px;box-sizing:border-box;padding:12px;border:1px solid var(--border,#64798C);border-radius:8px;background:var(--background,#F8FBFD);color:inherit;font:400 16px/1.55 var(--font-sans,Satoshi,sans-serif)}.ds-composer input::placeholder{color:var(--text-secondary,#46596C);opacity:1}.ds-composer button{min-height:48px;padding:12px 20px;border:0;border-radius:8px;background:var(--action,#0759B8);color:var(--ink,#FFFFFF);font:500 14px/1.38 var(--font-sans,Satoshi,sans-serif);cursor:pointer;transition:background-color 160ms cubic-bezier(.22,1,.36,1)}.ds-composer button:hover{background:var(--accent,#0759B8)}.ds-composer :focus-visible{outline:3px solid var(--accent,#0759B8);outline-offset:4px}.ds-composer button:disabled{opacity:.6;cursor:not-allowed}.ds-composer-footer{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 16px;margin-top:12px}.ds-composer-footer p{margin:0;color:var(--text-secondary,#46596C);font-size:12px}.ds-composer-footer button{min-height:44px;padding:8px 0;border-radius:0;background:transparent;color:var(--text-secondary,#46596C);font-weight:400;text-decoration:underline}.ds-composer-footer button:hover{color:var(--text,#041222);background:transparent}@media(max-width:479px){.ds-composer{padding:16px}.ds-composer-row{grid-template-columns:minmax(0,1fr)}.ds-composer-footer{flex-direction:column;align-items:flex-start}}"
     },
     {
       "name": "Divider metric grid",
       "kind": "custom",
       "refersTo": "metric-grid",
-      "description": "Two-column product-fact description list with fine dividers and a token-aware diamond at their intersection.",
-      "html": "<dl class=\"ds-metrics\"><div><span class=\"ds-dot\" aria-hidden=\"true\"></span><dt>Cars in one shortlist</dt><dd>4</dd></div><div><span class=\"ds-dot\" aria-hidden=\"true\"></span><dt>Ways to find your match</dt><dd>6</dd></div><div><span class=\"ds-dot\" aria-hidden=\"true\"></span><dt>Clearer comparison</dt><dd>1</dd></div><div><span class=\"ds-dot\" aria-hidden=\"true\"></span><dt>Accounts required</dt><dd>0</dd></div></dl>",
-      "css": ".ds-metrics{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;color:var(--text,#041222);font-family:var(--font-sans,Satoshi,sans-serif)}.ds-metrics>div{display:flex;flex-direction:column;min-width:0;padding:24px 0;border-color:var(--border-subtle,#E3EBF1);border-style:solid;border-width:0}.ds-metrics>div:nth-child(-n+2){border-bottom-width:1px}.ds-metrics>div:nth-child(odd){border-right-width:1px;padding-right:24px}.ds-metrics>div:nth-child(even){padding-left:24px}.ds-dot{display:block;width:8px;height:8px;margin-bottom:24px;border-radius:calc(infinity * 1px);background:var(--color-primary-600,#0872E6)}.ds-metrics dt{order:2;max-width:208px;margin-top:16px;font-size:14px;line-height:1.625;color:var(--text-secondary,#46596C)}.ds-metrics dd{order:1;margin:0;font-size:48px;font-weight:500;line-height:1;letter-spacing:-.025em}:host-context(.dark) .ds-dot{background:var(--color-primary-400,#4BA9FF)}@media(min-width:640px){.ds-metrics dd{font-size:60px}.ds-metrics>div:nth-child(odd){padding-right:40px}.ds-metrics>div:nth-child(even){padding-left:40px}}.ds-metrics::after{content:\"\";pointer-events:none;position:absolute;left:50%;top:50%;width:8px;height:8px;transform:translate(-50%,-50%) rotate(45deg);background:var(--color-primary-200,#B9DFFF)}:host-context(.dark) .ds-metrics::after{background:var(--color-secondary-400,#5989B2)}"
+      "description": "Four existing product facts with fine dividers, tabular figures and no ornamental dots or diamond.",
+      "html": "<dl class=\"ds-metrics\"><div><dt>Cars in one shortlist</dt><dd>4</dd></div><div><dt>Ways to find your match</dt><dd>6</dd></div><div><dt>Clearer comparison</dt><dd>1</dd></div><div><dt>Accounts required</dt><dd>0</dd></div></dl>",
+      "css": ".ds-metrics{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;color:var(--text,#041222);font-family:var(--font-sans,Satoshi,sans-serif)}.ds-metrics>div{display:flex;flex-direction:column;min-width:0;padding:24px 0;border-color:var(--border-subtle,#E3EBF1);border-style:solid;border-width:0}.ds-metrics>div:nth-child(-n+2){border-bottom-width:1px}.ds-metrics>div:nth-child(odd){border-right-width:1px;padding-right:24px}.ds-metrics>div:nth-child(even){padding-left:24px}.ds-metrics dt{order:2;max-width:208px;margin-top:12px;font-size:14px;line-height:1.625;color:var(--text-secondary,#46596C)}.ds-metrics dd{order:1;margin:0;font-size:36px;font-weight:500;line-height:1;font-variant-numeric:tabular-nums}@media(min-width:640px){.ds-metrics dd{font-size:48px}.ds-metrics>div:nth-child(odd){padding-right:32px}.ds-metrics>div:nth-child(even){padding-left:32px}}"
     },
     {
       "name": "Cars menu",
@@ -640,12 +640,12 @@
       "refersTo": "car-management",
       "description": "Header disclosure for temporary comparison management; replaces the left sidebar.",
       "html": "<details class=\"ds-cars\"><summary>Cars (2/4)</summary><div>Vehicle names, source actions and remove controls.</div></details>",
-      "css": ".ds-cars{position:relative;color:var(--text)}.ds-cars summary{min-height:44px;padding:10px 8px}.ds-cars>div{padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:12px}"
+      "css": ".ds-cars{position:relative;color:var(--text)}.ds-cars summary{min-height:44px;padding:12px 8px}.ds-cars>div{padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:12px}"
     }
   ],
   "narrative": {
     "northStar": "A familiar welcome, a clear comparison",
-    "overview": "The restored navy/electric-blue home dashboard welcomes shoppers with its floating import composer, source strip, editorial section and horizon. Working screens remain compact and use the full content width, with no left sidebar. Compare displays contained vehicle photos above the six-row overview. A header Cars menu keeps removal and selected-car source access available. Compare supports inline import from its heading or the header action, plus per-car removal beside each photo. Recommendations present complete reasons and model context once in the main card, with no repeated explanation disclosure.",
+    "overview": "The restored navy/electric-blue home dashboard welcomes shoppers with its floating import composer, source strip, editorial section and horizon. Working screens remain compact and use the full content width, with no left sidebar. Compare displays contained vehicle photos above the six-row overview. A header Cars menu keeps removal and selected-car source access available. Compare supports inline import from its heading or the header action, plus per-car removal beside each photo. Recommendations present complete reasons and model context once in the main card, with no repeated explanation disclosure. The 6 November Unslop refinement retains the blue atmosphere as an explicit user preference, makes it static, and simplifies the composer, type, icon system and evidence chrome. Practical, measured and candid is the direction; existing car photos and aligned CAD figures carry the detail.",
     "keyCharacteristics": [
       "Compact hierarchy, flat surfaces and explicit selected states.",
       "Satoshi interface text with the retained Clash Grotesk wordmark.",
@@ -677,6 +677,11 @@
         "name": "Direct comparison actions",
         "body": "Keep adding and removing cars on Compare; show the recommendation explanation once and fully, with citations and visible trade-offs and warnings.",
         "section": "components"
+      },
+      {
+        "name": "Approved atmosphere exception",
+        "body": "Keep the static blue hero and horizon on the home route. Refinement follows Unslop by Damir Sokolovsky (@heydamir), CC BY 4.0: https://github.com/heydamir/unslop/blob/main/skills/unslop/SKILL.md",
+        "section": "elevation"
       }
     ],
     "dos": [

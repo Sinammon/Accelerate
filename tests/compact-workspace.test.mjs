@@ -48,6 +48,7 @@ test('compact workspace preserves tab choices and private edits across the compl
     await change('#listing-url', `https://www.ebay.ca/itm/${id}`);
     await submit();
     assert.equal(document.querySelector('form').getAttribute('aria-busy'), 'true');
+    assert.match(document.querySelector('form button[type="submit"]').textContent, /Adding car/);
     assert.equal(document.querySelector('.nav-button').disabled, true);
     if (inline) {
       assert.equal(window.location.hash, '#compare');
@@ -116,6 +117,13 @@ test('compact workspace preserves tab choices and private edits across the compl
     assert.equal(document.querySelector('.nav-button').disabled, true);
     assert.equal(document.querySelector('.compare-add').disabled, true);
     assert.match(document.querySelector('#comparison-full-note').textContent, /Remove a car/);
+    await click('.brand');
+    assert.equal(window.location.hash, '#import');
+    assert.equal(document.querySelector('.hero-composer button[type="submit"]').textContent, 'Shortlist full');
+    assert.equal(document.querySelector('.hero-composer button[type="submit"]').disabled, true);
+    assert.equal(document.getElementById('listing-url').disabled, true);
+    assert.match(document.getElementById('input-note').textContent, /4\/4 cars added.*Remove a car/);
+    await go('compare');
     assert.match(document.querySelector('.card-warnings summary').textContent, /Engine concern/);
     assert.equal(document.querySelector('.shortlist-rail'), null);
     assert.equal(document.querySelectorAll('.comparison-table .vehicle-image').length, 4);

@@ -16,6 +16,8 @@ Annual fuel/charging costs and comfort remain populated using references, model 
 
 For the requested development port, run `npm run dev -- --port 6006` alongside `npm run server`, then open `http://127.0.0.1:6006/dashboard`. The existing production rewrite covers `/dashboard` and `/dashboard/`; API routing is preserved.
 
+The 6 November UI refinement follows [Unslop by Damir Sokolovsky (@heydamir)](https://github.com/heydamir/unslop/blob/main/skills/unslop/SKILL.md), CC BY 4.0. It retains the blue homepage hero and horizon as static atmosphere, uses a visible listing label and Add car button, and simplifies typography, icons, spacing and evidence chrome throughout the app. Existing photos, comparison behavior and calculations remain. Browser/native inspection was unavailable; desktop, phone and 200% zoom rendering remain unverified.
+
 ## Ownership costs and salary guide
 
 Choose **Costs** in the header or **Calculate cost of ownership** in the Affordability explanation to open `#ownership` with the same shortlist. Cash is the default; Finance is optional. Four tabs separate **Summary**, **Purchase**, **Running costs** and **Salary guide**. Summary separates upfront funding and monthly expenses, includes insurance and maintenance, and shows the same required gross salary as Salary guide; the purchase and running-cost tables cover all cars, with editable estimates and source labels. Cash salary guidance covers running expenses only; the purchase amount and optional savings target remain separate. Finance guidance adds loan payments while showing the down payment separately.

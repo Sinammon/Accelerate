@@ -14,9 +14,9 @@
 .ownership-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 20px; margin-block: 16px 24px; }
 .ownership-field { min-width: 0; display: grid; gap: 8px; align-content: start; }
 .ownership-field label { font-weight: 500; font-size: 14px; overflow-wrap: anywhere; }
-.ownership-field input { width: 100%; min-width: 0; min-height: 48px; font-variant-numeric: tabular-nums; caret-color: var(--accent); }
+.ownership-field input { width: 100%; min-width: 0; min-height: 48px; font-variant-numeric: tabular-nums; caret-color: var(--accent); text-align: right; }
 .ownership-field input[aria-invalid='true'] { border-color: var(--error); }
-.ownership-page small { display: block; margin-top: 6px; color: var(--text-secondary); font-weight: 400; font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
+.ownership-page small { display: block; margin-top: 8px; color: var(--text-secondary); font-weight: 400; font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
 .ownership-field .ownership-error { color: var(--error); }
 .ownership-section { margin-top: 48px; }
 .ownership-section > h2 { margin-bottom: 12px; }
@@ -32,7 +32,7 @@
 .ownership-table td > .ownership-field:not(:first-child) { margin-top: 16px; }
 .ownership-table .ownership-total > * { background: var(--surface-hover); }
 .ownership-table .ownership-total th { background: var(--surface-hover); }
-.ownership-amount { color: var(--accent); font-size: 18px; font-weight: 650; }
+.ownership-amount { display: block; color: var(--text); font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
 .ownership-energy-sources { margin-top: 16px; font-size: 14px; }
 .ownership-energy-sources summary { cursor: pointer; min-height: 44px; padding-block: 10px; }
 .ownership-energy-sources p { margin-block: 8px; }

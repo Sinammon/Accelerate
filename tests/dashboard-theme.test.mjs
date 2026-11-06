@@ -31,7 +31,11 @@ test('dashboard themes persist across the real import, comparison and decision w
     assert.equal(window.location.pathname, '/dashboard');
     assert.equal(document.documentElement.dataset.theme, 'dark');
     assert.equal(document.querySelectorAll('[aria-label="What Accelerate offers"] > div').length, 4);
-    assert.match(document.querySelector('h1').textContent, /Find the right car.*Without the guesswork/);
+    assert.equal(document.querySelector('h1').textContent, 'Compare your eBay.ca shortlist');
+    const listingInput = document.getElementById('listing-url');
+    assert.equal(listingInput.labels[0].textContent, 'eBay.ca vehicle listing link');
+    assert.equal(listingInput.labels[0].classList.contains('sr-only'), false);
+    assert.equal(document.querySelector('.hero-composer button[type="submit"]').textContent, 'Add car');
     const originalHero = document.querySelector('.dashboard-hero').innerHTML;
     await act(async () => document.querySelector('.theme-switch').click());
     assert.equal(document.documentElement.classList.contains('dark'), false);

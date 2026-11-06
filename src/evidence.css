@@ -1,36 +1,36 @@
 /* Shared evidence, research and status components. */
 .spec-value { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
 .spec-reason { font-size: 14px; line-height: 1.6; font-weight: 400; overflow-wrap: anywhere; color: var(--text-secondary); }
-.evidence-badge { display: inline-block; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; color: var(--text-secondary); font-size: 14px; line-height: 1.4; font-weight: 500; }
-.evidence-badge.vin-record, .evidence-badge.corroborated, .evidence-badge.factory-reference { color: var(--accent); }
+.evidence-badge { display: inline-block; border: 1px solid var(--border-subtle); border-radius: 4px; padding: 4px 8px; color: var(--text-secondary); font-size: 12px; line-height: 1.5; font-weight: 400; }
+.evidence-badge.vin-record, .evidence-badge.corroborated, .evidence-badge.factory-reference { color: var(--text-secondary); }
 .evidence-badge.conflict { color: var(--warning); border-color: var(--warning); }
-.evidence-badge.model-reference, .evidence-badge.model-context { color: var(--accent); }
+.evidence-badge.model-reference, .evidence-badge.model-context { color: var(--text-secondary); }
 .search-attribution { width: 100%; min-height: 110px; border: 0; margin-top: 16px; background: white; border-radius: var(--radius-control); }
 .source-status { padding: 16px; background: var(--background); border-radius: var(--radius-control); color: var(--text-secondary); font-size: 14px; line-height: 1.7; }
 .source-status p { margin: 0 0 8px; }
 .source-status p:last-child { margin: 0; }
-.vehicle-evidence, .model-research, .recall-research { margin: 20px 0; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--background); font-size: 14px; }
+.vehicle-evidence, .model-research, .recall-research { margin: 20px 0; border: 1px solid var(--border-subtle); border-radius: 12px; background: var(--background); font-size: 14px; }
 .evidence-content, .research-content { padding: 0 20px 20px; color: var(--text-secondary); }
-.evidence-content h3, .research-content h3 { color: var(--text); font-size: 20px; margin: 32px 0 16px; }
+.evidence-content h3, .research-content h3 { color: var(--text); font-size: 22px; margin: 32px 0 16px; }
 .evidence-legend { color: var(--text-secondary); font-size: 14px; line-height: 1.7; margin-top: 16px; }
 .evidence-specs { margin: 24px 0; }
-.evidence-specs > div { display: grid; grid-template-columns: minmax(90px,.8fr) minmax(0,1.4fr); gap: 16px; border-top: 1px solid var(--border); padding: 16px 0; }
+.evidence-specs > div { display: grid; grid-template-columns: minmax(90px,.8fr) minmax(0,1.4fr); gap: 16px; border-top: 1px solid var(--border-subtle); padding: 16px 0; }
 .evidence-specs dt { font-size: 14px; color: var(--text-secondary); }
 .evidence-specs dd { color: var(--text); }
 .spec-citation { display: block; margin-top: 8px; font-size: 14px; line-height: 1.7; color: var(--text-secondary); overflow-wrap: anywhere; }
 .feature-evidence { display: grid; gap: 16px; }
-.feature-evidence > div { display: grid; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+.feature-evidence > div { display: grid; gap: 8px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 16px; }
 .feature-evidence strong { font-weight: 500; color: var(--text-secondary); }
 .feature-evidence strong.present { color: var(--success); }
 .feature-evidence small { color: var(--text-secondary); }
 .fuel-evidence { border-top: 1px solid var(--border); margin-top: 24px; padding-top: 8px; }
 .summary-specs { margin: 16px 0 24px; }
-.summary-specs > div { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.summary-specs > div { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--border-subtle); }
 .summary-specs dt { color: var(--text-secondary); font-size: 14px; }
-.vehicle-summary h3 { margin-top: 32px; font-size: 20px; }
+.vehicle-summary h3 { margin-top: 32px; font-size: 22px; }
 .vehicle-summary > p { color: var(--text-secondary); font-size: 14px; line-height: 1.7; }
 .research-content dl { margin: 24px 0; }
-.research-content dt { color: var(--text); font-weight: 640; margin-top: 24px; }
+.research-content dt { color: var(--text); font-weight: 600; margin-top: 24px; }
 .research-claim { padding: 16px 0; }
 .research-claim p { margin: 0 0 8px; font-size: 14px; }
 .research-citations { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 14px; }

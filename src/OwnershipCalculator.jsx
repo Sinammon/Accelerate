@@ -119,9 +119,9 @@ export default function OwnershipCalculator({ cars, scenario, setScenario, state
 
   return <section className="page-section ownership-page">
     <WorkspaceHeading title="Cost of ownership" description="See what you need upfront and what you could spend each month.">
-      <a className="back-link" href="#compare">Compare cars <Icon name="arrow" size={18} /></a>
+      <a className="back-link" href="#compare">Compare cars <Icon name="arrow" /></a>
     </WorkspaceHeading>
-    {!cars.length ? <div className="empty-state"><h2>Add cars to compare their costs.</h2><p>Import a listing or try the fictional demo to build your shortlist.</p><a className="primary-link" href="#import">Choose your cars <Icon name="arrow" size={18} /></a></div> : <>
+    {!cars.length ? <div className="empty-state"><h2>Add cars to compare their costs</h2><p>Import a listing or try the fictional demo to build your shortlist.</p><a className="primary-link" href="#import">Choose your cars <Icon name="arrow" /></a></div> : <>
       <div className="ownership-toolbar"><fieldset className="ownership-method"><legend>How will you buy?</legend><div>{[['cash', 'Cash'], ['finance', 'Finance']].map(([method, label]) => <button key={method} type="button" aria-pressed={state.method === method} onClick={() => update('method', method)}>{label}</button>)}</div></fieldset><p>Ontario starting scenario · CAD<br /><span>Every assumption is editable.</span></p></div>
       {cars.some(car => car.demo) && <p className="decision-demo-note">Fictional demo listings · These costs are planning estimates, not offers.</p>}
       <WorkspaceTabs id="costs" label="Cost views" tabs={[["summary", "Summary"], ["purchase", "Purchase"], ["running", "Running costs"], ["salary", "Salary guide"]]} value={tab} onChange={setTab} />
@@ -129,7 +129,7 @@ export default function OwnershipCalculator({ cars, scenario, setScenario, state
         {energyField('annualKm', 'Annual driving (km)', '1')}{energyField('pricePerLitre', 'Fuel price (CAD/L)')}{energyField('pricePerKwh', 'Electricity price (CAD/kWh)')}{energyField('electricShare', 'Plug-in hybrid electric driving (%)', '1')}
         {settingField('taxRate', 'Estimated purchase tax (%)')}
         {finance && <>{settingField('apr', 'Annual loan interest (%)')}{settingField('termMonths', 'Loan term (months)', { step: '1' })}</>}
-      </div><p>Valid driving and energy-price changes also apply in Compare and Help Me Decide. Prices are scenario assumptions, not live rates. Financing assumes fixed interest, monthly payments and purchase taxes and fees included in the loan.</p></details>
+      </div><p>Valid driving and energy-price changes also apply in Compare and Recommendation. Prices are scenario assumptions, not live rates. Financing assumes fixed interest, monthly payments and purchase taxes and fees included in the loan.</p></details>
 
       <WorkspacePanel id="costs" value="summary" active={tab}>
         <section className="ownership-summary" aria-labelledby="cost-summary"><h2 id="cost-summary">Your costs at a glance</h2>

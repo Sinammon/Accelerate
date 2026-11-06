@@ -40,3 +40,9 @@ Valid driving and energy edits update the shared Compare/Recommendation scenario
 ## User-directed restoration
 
 The home dashboard restores the pre-compact blue hero, floating import composer, source strip, editorial metrics, walkthrough and horizon. Its Persuade composition is isolated from the retained compact Operate working screens. No left shortlist rail remains on any route: the header Cars menu provides removal and selected-car source access. Working content uses a single 1280px column. Compare shows a 144px-high contained photograph per car, 104px on phones, preserving proportions and complete silhouettes. This instruction supersedes earlier rail and short-entry composition statements in this brief. All data, evidence, tab/state and calculator constraints remain.
+
+## Approved Unslop refinement — 6 November 2026
+
+Preserve every cost calculation, input, override, estimate label and disclosure. Refine the shared working typography to 24px/600 page headings and 400/500/600 interface weights, with consistent 18px/1.5 icons, 4px spacing, 8px controls and 12px surfaces. Align amounts and numeric inputs right with tabular numerals. Normal cost figures use reading text; important totals retain the accent. Local table overflow and sticky row labels stay intact. The homepage retains its user-approved blue atmosphere, now static.
+
+Browser/native access remains unavailable; source and DOM checks are not rendered phone, desktop or 200% zoom approval. Method: [Unslop by Damir Sokolovsky (@heydamir)](https://github.com/heydamir/unslop/blob/main/skills/unslop/SKILL.md), CC BY 4.0.
