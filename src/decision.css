@@ -42,10 +42,10 @@
 .decision-arrow { padding: 12px; background: var(--surface-raised); color: var(--text); }
 .decision-arrow.previous svg { transform: rotate(180deg); }
 .decision-arrow:hover { background: var(--surface-hover); }
-.decision-photo-dialog { padding: 20px; width: min(1100px, calc(100% - 32px)); max-height: calc(100dvh - 32px); border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--surface); color: var(--text); }
+.decision-photo-dialog { position: fixed; inset: 0; margin: auto; padding: 12px; width: min(1100px, calc(100% - 32px)); height: fit-content; max-height: calc(100dvh - 32px); border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--surface); color: var(--text); }
 .decision-photo-dialog::backdrop { background: color-mix(in srgb, var(--text) 72%, transparent); }
-.decision-photo-dialog > button { display: flex; margin: 0 0 16px auto; }
-.decision-photo-dialog .vehicle-image { height: min(70dvh,700px); }
+.decision-photo-dialog > button { display: flex; margin: 0 0 8px auto; }
+.decision-photo-dialog .vehicle-image { height: min(70dvh, 700px, calc(100dvh - 116px)); }
 .decision-photo-dialog .source-pill, .decision-photo-dialog .photo-next { position: absolute; }
 .result-banner { padding: 48px 24px; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 12px; text-align: center; }
 .result-banner > svg { color: var(--accent); margin-bottom: 20px; }

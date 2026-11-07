@@ -23,7 +23,7 @@ test('compact workspace preserves tab choices and private edits across the compl
       if (failImport) return Response.json({ error: 'Synthetic listing unavailable' }, { status: 502 });
       const id = JSON.parse(options.body).url.match(/(\d+)$/)[1];
       return new Promise(resolve => { releaseImport = () => resolve(Response.json({ vehicle: {
-        legacyItemId: id, year: '2018', make: 'Example', model: id.slice(0, 1),
+        legacyItemId: id, year: '2018', make: 'Example', model: id.slice(0, 1), sourceUrl: `https://www.ebay.ca/itm/${id}`,
         priceCAD: { value: '20000', currency: 'CAD' }, location: { city: 'Toronto', country: 'CA' }, images: ['https://images.example.test/front.jpg', 'https://images.example.test/rear.jpg'], itemSpecifics: [],
         ...(id.startsWith('4') ? { description: 'Engine problems. Not running.' } : {}),
       } })); });
@@ -79,7 +79,9 @@ test('compact workspace preserves tab choices and private edits across the compl
     assert.equal(window.location.hash, '#compare');
     assert.equal(document.querySelector('.comparison-table tbody').rows.length, 7);
     assert.match(document.querySelector('.comparison-table tbody tr:first-child').textContent, /Best Value match score/);
-    assert.match(document.querySelector('.comparison-table').textContent, /General baseline/);
+    assert.ok(document.querySelector('.comparison-table').classList.contains('comparison-single'));
+    assert.doesNotMatch(document.querySelector('.comparison-table').textContent, /General baseline|Seller-reported/i);
+    assert.ok(document.querySelector('.comparison-table a[href="https://www.ebay.ca/itm/111111111111"]'));
     await click('.compare-add');
     assert.equal(window.location.hash, '#compare');
     assert.equal(document.activeElement.id, 'listing-url');
@@ -243,7 +245,7 @@ test('compact workspace preserves tab choices and private edits across the compl
     assert.equal(document.activeElement.id, 'costs-tab-running');
     await change('[data-field="insuranceAnnual"]', '3500');
     await go('decide');
-    assert.match(document.querySelector('.decision-reasons').textContent, /Insurance.*3,500 CAD.*Your calculator input/s);
+    assert.match(document.querySelector('.decision-more').textContent, /Insurance.*3,500 CAD/s);
     assert.ok(document.querySelectorAll('.decision-reasons > li').length <= 6);
     await go('compare');
     assert.equal(document.querySelector('.scenario-fields select').value, '2', 'practical needs share the existing scenario');

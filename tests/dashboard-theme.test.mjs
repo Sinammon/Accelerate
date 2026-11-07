@@ -64,7 +64,8 @@ test('dashboard themes persist across the real import, comparison and decision w
     assert.equal(document.querySelector('.vehicle-experience'), null);
     assert.ok(document.querySelectorAll('.decision-reasons > li').length <= 6);
     await act(async () => document.querySelector('[data-mode="comfort"]').click());
-    assert.match(document.querySelector('.decision-reasons').textContent, /Ride quality.*Seat cushioning.*Cabin quietness.*Seat heating/s);
+    assert.match(document.querySelector('.decision-reasons').textContent, /Ride quality.*Seat cushioning.*Cabin quietness/s);
+    assert.match(document.querySelector('.decision-more').textContent, /Seat heating/);
     assert.doesNotMatch(document.querySelector('.decision-reasons').textContent, /CAD\/year/);
     assert.equal(document.documentElement.dataset.theme, 'dark');
     assert.equal(document.querySelectorAll('.decision-match').length, 1);

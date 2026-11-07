@@ -292,6 +292,24 @@ test('image CSS preserves whole-image scaling, consistent frames and neutral let
   }
 });
 
+test('single-vehicle photo styles preserve the full image and the dialog is viewport-centered', async () => {
+  const styles = await Promise.all(['styles', 'compact', 'ownership', 'decision'].map(name => readFile(`src/${name}.css`, 'utf8')));
+  const dom = new JSDOM(`<style>${styles.join('\n')}</style><main class="compact-workspace">
+    <div class="comparison-table comparison-single"><div class="vehicle-image"><img alt="Comparison" /></div></div>
+    <ul><li class="cost-vehicle"><div class="vehicle-image"><img alt="Costs" /></div></li></ul>
+    <dialog open class="decision-photo-dialog"><div class="vehicle-image"><img alt="Larger photo" /></div></dialog>
+  </main>`);
+  try {
+    for (const image of dom.window.document.querySelectorAll('img')) {
+      assert.equal(dom.window.getComputedStyle(image).objectFit, 'contain');
+    }
+    const dialog = dom.window.getComputedStyle(dom.window.document.querySelector('dialog'));
+    assert.equal(dialog.position, 'fixed');
+    assert.equal(dialog.inset, '0px');
+    assert.equal(dialog.margin, 'auto');
+  } finally { dom.window.close(); }
+});
+
 test('performance ranks explicit power or torque, not engine size or drivetrain names', () => {
   const a = listing({ legacyItemId: 'A', description: '158 hp. 140 Nm.' });
   const b = listing({ legacyItemId: 'B', description: '180 hp. 200 Nm.', itemSpecifics: aspects({ Engine: '1.5 L I4', Drivetrain: 'FWD' }) });

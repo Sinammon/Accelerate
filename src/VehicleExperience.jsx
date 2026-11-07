@@ -1,7 +1,8 @@
 import React from 'react';
-import { resolveVehicleExperience, experienceLabel } from './vehicle-experience.js';
+import { resolveVehicleExperience } from './vehicle-experience.js';
 import { safeUrl } from './vehicle-data.js';
 import { DEFAULT_SCENARIO } from '../shared/experience.js';
+import SourceLinks from './SourceLinks.jsx';
 
 export const COMFORT_TOPICS = [['rideQuality', 'Ride quality'], ['seatComfort', 'Seat cushioning'], ['seatHeating', 'Seat heating'], ['cabinQuietness', 'Cabin quietness']];
 const money = amount => `$${amount.toLocaleString('en-CA', { maximumFractionDigits: 0 })} CAD`;
@@ -10,20 +11,20 @@ export const annualCostLabel = energy => energy.powertrain === 'electric' ? 'Est
 export function ExperienceCost({ experience, scenario = DEFAULT_SCENARIO }) {
   const { energy } = experience;
   const s = { ...DEFAULT_SCENARIO, ...scenario };
-  return <div className="experience-cost"><strong>{Number.isFinite(energy.annualCost) ? `${money(energy.annualCost)}/year` : 'Check driving and price assumptions'}</strong><small>{experienceLabel(energy)} · {s.annualKm.toLocaleString('en-CA')} km/year</small><small>{energy.powertrain !== 'electric' && `$${s.pricePerLitre.toFixed(2)}/L`}{energy.powertrain === 'phev' || energy.powertrain === 'mixed' ? ' + ' : ''}{energy.powertrain !== 'liquid' && `$${s.pricePerKwh.toFixed(2)}/kWh`}{energy.powertrain === 'phev' && ` · ${s.electricShare}% electric driving`}</small></div>;
+  return <div className="experience-cost"><strong>{Number.isFinite(energy.annualCost) ? `${money(energy.annualCost)}/year` : 'Check driving and price assumptions'}</strong><SourceLinks sources={energy.evidence} /><small>{s.annualKm.toLocaleString('en-CA')} km/year</small><small>{energy.powertrain !== 'electric' && `$${s.pricePerLitre.toFixed(2)}/L`}{energy.powertrain === 'phev' || energy.powertrain === 'mixed' ? ' + ' : ''}{energy.powertrain !== 'liquid' && `$${s.pricePerKwh.toFixed(2)}/kWh`}{energy.powertrain === 'phev' && ` · ${s.electricShare}% electric driving`}</small></div>;
 }
 
 export function ComfortDetail({ experience, topic }) {
   if (topic === 'seatComfort') {
     const front = experience.ratings.frontSeatComfort, rear = experience.ratings.rearSeatComfort;
-    return <><strong>{experience.seatComfort.toFixed(1)} / 5</strong><small>{[...new Set([front, rear].filter(Boolean).map(experienceLabel))].join(' + ')}</small><p>Front: {front.rationale}{rear && <> Rear: {rear.rationale}</>}</p></>;
+    return <><strong>{experience.seatComfort.toFixed(1)} / 5</strong><SourceLinks sources={[...front.evidence, ...(rear?.evidence || [])]} /><p>Front: {front.rationale}{rear && <> Rear: {rear.rationale}</>}</p></>;
   }
   const rating = experience.ratings[topic];
-  return <><strong>{topic === 'seatHeating' ? ({ present: 'Reported present', absent: 'Absent / not working', likely: 'Likely available', unlikely: 'Unlikely available', 'trim-dependent': 'Trim-dependent' })[rating.availability] : `${rating.rating.toFixed(1)} / 5`}</strong><small>{experienceLabel(rating)}</small><p>{rating.rationale}</p></>;
+  return <><strong>{topic === 'seatHeating' ? ({ present: 'Reported present', absent: 'Absent / not working', likely: 'Likely available', unlikely: 'Unlikely available', 'trim-dependent': 'Trim-dependent' })[rating.availability] : `${rating.rating.toFixed(1)} / 5`}</strong><SourceLinks sources={rating.evidence} /><p>{rating.rationale}</p></>;
 }
 
 export function PracticalitySummary({ experience }) {
-  return <div className="experience-practicality"><strong>Passenger room {experience.passengerSpace.toFixed(1)} / 5 · Cargo {experience.ratings.cargoSpace.rating.toFixed(1)} / 5</strong><small>{[...new Set([experience.ratings.frontPassengerSpace, experience.ratings.rearPassengerSpace, experience.ratings.cargoSpace, experience.practicality].filter(Boolean).map(experienceLabel))].join(' + ')}</small><p>{experience.ratings.frontPassengerSpace.rationale}{experience.ratings.rearPassengerSpace && <> {experience.ratings.rearPassengerSpace.rationale}</>} {experience.ratings.cargoSpace.rationale}</p><p>{experience.practicality.rationale}</p></div>;
+  return <div className="experience-practicality"><strong>Passenger room {experience.passengerSpace.toFixed(1)} / 5 · Cargo {experience.ratings.cargoSpace.rating.toFixed(1)} / 5</strong><SourceLinks sources={[experience.ratings.frontPassengerSpace, experience.ratings.rearPassengerSpace, experience.ratings.cargoSpace, experience.practicality].flatMap(rating => rating?.evidence || [])} /><p>{experience.ratings.frontPassengerSpace.rationale}{experience.ratings.rearPassengerSpace && <> {experience.ratings.rearPassengerSpace.rationale}</>} {experience.ratings.cargoSpace.rationale}</p><p>{experience.practicality.rationale}</p></div>;
 }
 
 export function ExperienceAssumptions({ experience }) {

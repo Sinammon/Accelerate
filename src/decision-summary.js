@@ -4,7 +4,7 @@ import { extractVehicleSpecs, specEvidenceLabel } from './vehicle-specs.js';
 import { DIMENSION_LABELS, supportedPowerToWeight } from './capability-scoring.js';
 import { researchGuidance, researchForCar } from './model-research.js';
 import { resolveVehicleExperience, experienceLabel } from './vehicle-experience.js';
-import { resolveMileage, numeric, vehicleName } from './vehicle-data.js';
+import { resolveMileage, numeric, vehicleName, safeUrl, listingSource, evidenceSources } from './vehicle-data.js';
 import { mileageEvidenceLabel } from './mileage.js';
 import { ownershipContext, sellerHistoryContext } from './ownership-context.js';
 
@@ -29,8 +29,8 @@ export function decisionSummary(cars, mode, year, scenario, ownership) {
 
 export const MAX_DECISION_ITEMS = 6;
 const textKey = text => text.toLowerCase().replace(/[^a-z0-9]/g, '');
-const sourcesFor = records => [...new Map(records.flatMap(record => record?.evidence || [])
-  .filter(e => e.url).map(e => [e.url, { url: e.url, publisher: e.source || e.publisher || 'Reference source' }])).values()];
+const sourcesFor = (records, car) => [...new Map(evidenceSources(records.flatMap(record => record?.evidence || []), car)
+  .map(e => [e.url, { url: e.url, publisher: e.source || e.publisher || 'Reference source' }])).values()];
 const supportedItem = (text, topic, records, key = topic) => {
   const parts = records.filter(Boolean), sources = sourcesFor(parts);
   return { key, text, topic, label: [...new Set(parts.map(experienceLabel))].join(' + '), source: sources[0], sources };
@@ -59,7 +59,8 @@ function modelOverview(car) {
   const fields = ['bodyType', 'fuelType', 'transmission'].filter(key => specs[key].value != null);
   return { key: 'overview', kind: 'overview', topic: 'Model overview',
     text: fields.length ? `${vehicleName(car)}: ${fields.map(key => String(specs[key].value)).join(', ')}.` : 'A model overview is not available for this configuration yet.',
-    label: fields.length ? [...new Set(fields.map(key => specEvidenceLabel(specs[key])))].join(' + ') : 'Model information unavailable' };
+    label: fields.length ? [...new Set(fields.map(key => specEvidenceLabel(specs[key])))].join(' + ') : 'Model information unavailable',
+    sources: sourcesFor(fields.map(key => specs[key]), car) };
 }
 
 function valueReasons(summary, entry) {
@@ -69,7 +70,7 @@ function valueReasons(summary, entry) {
     const peers = summary.ranking.ranked.filter(other => other !== entry && !other.identityMismatch);
     const lowest = peers.length > 0 && peers.every(other => other.values.price != null && price <= other.values.price)
       && peers.some(other => price < other.values.price);
-    candidates.push({ key: 'price', topic: 'Asking price', text: `At ${money(price)}, ${lowest ? 'it has the lowest asking price in this comparison' : 'compare its documented strengths with the asking price'}.`, label: 'Seller-reported asking price' });
+    candidates.push({ key: 'price', topic: 'Asking price', text: lowest ? `${money(price)} is the lowest asking price in this comparison.` : money(price), source: listingSource(entry.car) });
   }
   const guidance = researchGuidance(entry.car, 'value');
   const context = ownershipContext(entry.car, 'value');
@@ -78,7 +79,9 @@ function valueReasons(summary, entry) {
   for (const key of ['age', 'mileage']) {
     const factor = entry.breakdown.find(item => item.key === key);
     if (factor && factor.min < factor.max && factor.value === factor.min) candidates.push({ key, topic: key === 'age' ? 'Model year' : 'Mileage',
-      text: key === 'age' ? 'The newest model year in this comparison.' : `The lowest reported mileage in this comparison: ${number(factor.value)} km.`, label: entry.labels[key] });
+      text: key === 'age' ? 'The newest model year in this comparison.' : `The lowest reported mileage in this comparison: ${number(factor.value)} km.`, label: entry.labels[key],
+      sources: key === 'age' ? sourcesFor([entry.specs.year], entry.car)
+        : [!resolveMileage(entry.car).userEntered && listingSource(entry.car)].filter(Boolean) });
   }
   candidates.push(...guidance.claims.filter(c => !c.contextOnly && c.tone === 'positive').map(claimItem));
   const comfort = comfortReasons(entry.car);
@@ -98,15 +101,15 @@ function costReasons(summary, entry) {
     energy.powertrain !== 'liquid' && (Number.isFinite(scenario.pricePerKwh) ? `$${scenario.pricePerKwh.toFixed(2)}/kWh` : 'electricity price incomplete'),
     energy.powertrain === 'phev' && (Number.isFinite(scenario.electricShare) ? `${scenario.electricShare}% electric driving` : 'electric share incomplete')].filter(Boolean).join(' \u00b7 ');
   const source = energy.evidence?.find(e => e.url);
-  const fuel = { key: 'fuel', topic: 'Fuel / charging', text: `Estimated annual ${kind} cost: ${Number.isFinite(r.energy) ? `${amount(r.energy)}/year` : 'check driving and energy-price assumptions'}.`,
+  const fuel = { key: 'fuel', topic: 'Fuel / charging', text: `Estimated annual ${kind} cost: ${Number.isFinite(r.energy) ? `${amount(r.energy)}/year at ${number(scenario.annualKm)} km/year` : 'check driving and energy-price assumptions'}.`,
     label: `${experienceLabel(energy)} \u00b7 ${Number.isFinite(scenario.annualKm) ? number(scenario.annualKm) + ' km/year' : 'annual driving incomplete'} \u00b7 ${prices} \u00b7 energy only`,
     source: source && { url: source.url, publisher: source.source } };
   if (r.inputs.energyOverride !== '') { fuel.text = `Annual fuel / charging override: ${amount(r.energy)}.`; fuel.label = 'Your calculator input; energy only'; delete fuel.source; }
   return [
-    ...(entry.values.price != null ? [{ key: 'price', topic: 'Purchase price', text: `Purchase price: ${money(entry.values.price)}.`, label: 'Seller-reported asking price' }] : []),
+    ...(entry.values.price != null ? [{ key: 'price', topic: 'Purchase price', text: `Purchase price: ${money(entry.values.price)}.`, source: listingSource(entry.car) }] : []),
     { key: 'running', topic: 'Annual running expenses', text: `Annual running expenses: ${amount(r.annualRunning)}${r.annualRunning == null ? '' : '/year'}.`, label: 'Planning estimates + your calculator inputs; includes parking and other running costs; financing excluded' },
     fuel,
-    { key: 'insurance', topic: 'Insurance', text: `Insurance: ${amount(r.insurance)}${r.insurance == null ? '' : '/year'}.`, label: Object.hasOwn(overrides, 'insuranceAnnual') ? 'Your calculator input; not a verified quote' : r.estimates.insuranceAnnual.label },
+    { key: 'insurance', topic: 'Insurance', text: `Insurance: ${amount(r.insurance)}${r.insurance == null ? '' : '/year'}.`, label: Object.hasOwn(overrides, 'insuranceAnnual') ? 'Your calculator input; not a verified quote' : r.estimates.insuranceAnnual.label, source: Object.hasOwn(overrides, 'insuranceAnnual') ? undefined : r.estimates.insuranceAnnual.source },
     { key: 'maintenance', topic: 'Maintenance reserve', text: `Maintenance, tyres and repair reserve: ${amount(r.maintenance)}${r.maintenance == null ? '' : '/year'}.`, label: Object.hasOwn(overrides, 'maintenancePerKm') ? 'Your calculator input; reserve per km at your annual driving distance' : `${r.estimates.maintenancePerKm.label}; not a repair forecast` },
   ];
 }
@@ -119,9 +122,9 @@ function practicalReasons(summary, entry) {
     supportedItem(`Usable cargo space: ${ratings.cargoSpace.rationale}`, 'Usable cargo space', [ratings.cargoSpace]),
   ];
   const seats = entry.specs.seats;
-  if (seats.value != null) candidates.push({ key: 'seats', topic: 'Seating needs', text: `${seats.value} seats${Number.isFinite(summary.requested.scenario.minSeats) ? `; ${seats.value >= summary.requested.scenario.minSeats ? 'meets' : 'does not meet'} your ${summary.requested.scenario.minSeats}-seat need` : ''}.`, label: specEvidenceLabel(seats), sources: sourcesFor([seats]) });
+  if (seats.value != null) candidates.push({ key: 'seats', topic: 'Seating needs', text: `${seats.value} seats${Number.isFinite(summary.requested.scenario.minSeats) ? `; ${seats.value >= summary.requested.scenario.minSeats ? 'meets' : 'does not meet'} your ${summary.requested.scenario.minSeats}-seat need` : ''}.`, label: specEvidenceLabel(seats), sources: sourcesFor([seats], entry.car) });
   candidates.push(supportedItem(e.practicality.rationale, 'Everyday usability', [e.practicality]));
-  if (summary.requested.scenario.bodyType && entry.specs.bodyType.value) candidates.push({ key: 'body', topic: 'Body preference', text: `${entry.specs.bodyType.value} body; ${entry.values.body ? 'matches' : 'does not match'} your ${summary.requested.scenario.bodyType} preference.`, label: specEvidenceLabel(entry.specs.bodyType), sources: sourcesFor([entry.specs.bodyType]) });
+  if (summary.requested.scenario.bodyType && entry.specs.bodyType.value) candidates.push({ key: 'body', topic: 'Body preference', text: `${entry.specs.bodyType.value} body; ${entry.values.body ? 'matches' : 'does not match'} your ${summary.requested.scenario.bodyType} preference.`, label: specEvidenceLabel(entry.specs.bodyType), sources: sourcesFor([entry.specs.bodyType], entry.car) });
   candidates.push(...researchGuidance(entry.car, 'practical').claims.filter(c => !c.contextOnly).map(claimItem));
   return candidates;
 }
@@ -136,7 +139,7 @@ function performanceReasons(summary, entry) {
   for (const factor of factors) {
     if (comparison?.covers.includes(factor.key)) continue;
     const value = factor.key === 'acceleration' ? `${factor.value} s` : factor.key === 'powerToWeight' ? `${factor.value.toFixed(1)} hp/tonne` : `${number(factor.value)} ${factor.key === 'power' ? 'hp' : 'Nm'}`;
-    const sources = sourcesFor([factor]);
+    const sources = sourcesFor([factor], entry.car);
     candidates.push({ key: factor.key, topic: factor.label, text: `${factor.label}: ${value}`, label: factor.evidenceLabel, source: sources[0], sources });
   }
   candidates.push(...researchGuidance(entry.car, 'performance').claims.filter(c => !c.contextOnly).map(claimItem));
@@ -152,21 +155,32 @@ function purchaseWarning(entry) {
     label: 'Listing claims and evidence concerns; not an independent inspection' } : null;
 }
 
+function comparableTradeoffFactor(entry, factor) {
+  const specKeys = { age: ['year'], power: ['horsepower'], torque: ['torque'], powerToWeight: ['horsepower', 'curbWeightKg'], acceleration: ['zeroTo100KphSeconds', 'zeroTo60MphSeconds'] };
+  if (factor.key === 'price') return true;
+  if (factor.key === 'mileage') return !resolveMileage(entry.car).assumedUnit;
+  if (specKeys[factor.key]) return specKeys[factor.key].every(key => entry.specs[key].quality !== 'estimated' && !entry.specs[key].stale);
+  return !['running', 'capability', 'seats', 'body'].includes(factor.key) && entry.coverage[factor.key] === 1;
+}
+
 function categoryTradeoff(summary, entry) {
+  if (entry.identityMismatch) return null;
   const mode = summary.requested.mode.id;
-  const claim = researchGuidance(entry.car, mode).claims.find(item => item.tone === 'caution' && !item.contextOnly);
-  if (!entry.identityMismatch && claim) return { ...claimItem(claim), key: 'tradeoff', kind: 'tradeoff', topic: 'Trade-off' };
-  const weaker = [...entry.breakdown].sort((a, b) => a.points - b.points)[0];
-  const fallback = {
-    value: 'Model strengths do not establish this used car\u2019s condition. Check service records and arrange an inspection.',
-    cost: 'Running costs are planning estimates, not quotes. Actual insurance and repair spending may differ.',
-    comfort: 'Confirm ride quality, seat support and cabin noise on a test drive; model assessments do not verify this car.',
-    practical: 'Check passenger fit, loading access and usable cargo room in person before choosing.',
-    performance: summary.requested.criteria.some(c => c.key === 'acceleration' && c.active) ? 'Published performance figures do not verify this used car\u2019s current mechanical condition.' : 'Comparable acceleration evidence is incomplete; power figures alone do not establish which car is faster.',
-  };
-  const text = !entry.identityMismatch && weaker && weaker.points < 50
-    ? `${weaker.key === 'capability' ? 'The documented comfort, performance and practicality are less competitive' : `${weaker.label} is a weaker factor`} in this comparison.` : fallback[mode];
-  return { key: 'tradeoff', kind: 'tradeoff', topic: 'Trade-off', text, label: weaker && weaker.points < 50 && !entry.identityMismatch ? weaker.evidenceLabel : 'What to check for this priority', sources: weaker && weaker.points < 50 ? sourcesFor([weaker]) : [] };
+  const claim = researchGuidance(entry.car, mode).claims.find(item => item.tone === 'caution' && !item.contextOnly && item.sources.some(source => safeUrl(source.url)));
+  if (claim) return { ...claimItem(claim), key: 'tradeoff', kind: 'tradeoff', topic: 'Trade-off' };
+  for (const factor of [...entry.breakdown].sort((a, b) => a.points - b.points)) {
+    if (!comparableTradeoffFactor(entry, factor)) continue;
+    const peer = summary.ranking.ranked.find(other => other !== entry && other.breakdown.some(candidate =>
+      candidate.key === factor.key && candidate.points > factor.points && comparableTradeoffFactor(other, candidate)));
+    if (!peer) continue;
+    const descriptions = { price: 'Higher asking price', age: 'Older model year', mileage: 'Higher mileage', acceleration: 'Slower published acceleration', seatHeating: 'Lower seat-heating score' };
+    const text = `${descriptions[factor.key] || `Lower ${factor.label.toLowerCase()}`} than the ${vehicleName(peer.car)}.`;
+    const peerFactor = peer.breakdown.find(candidate => candidate.key === factor.key);
+    const sources = factor.key === 'price' ? [listingSource(entry.car), listingSource(peer.car)].filter(Boolean)
+      : [...sourcesFor([factor], entry.car), ...sourcesFor([peerFactor], peer.car)];
+    return { key: 'tradeoff', kind: 'tradeoff', topic: 'Trade-off', text, sources };
+  }
+  return null;
 }
 
 export function performanceComparison(summary, entry) {
@@ -180,8 +194,10 @@ export function performanceComparison(summary, entry) {
   const acceleration = quicker
     ? ` Comparable ${metric.label} figures are quicker: ${entry.values.acceleration} s versus ${peer.values.acceleration} s (${entry.specs[summary.requested.accelerationMetric].measurementMethod}).`
     : ' Power-to-weight indicates acceleration potential; it does not establish which car is faster.';
+  const sources = [entry, peer].flatMap(record => sourcesFor([{ evidence: record.evidence.powerToWeight },
+    ...(quicker ? [{ evidence: record.evidence.acceleration }] : [])], record.car));
   return { text: `Despite ${number(entry.values.power)} hp versus ${number(peer.values.power)} hp in the ${vehicleName(peer.car)}, its lower weight (${number(entry.specs.curbWeightKg.value)} versus ${number(peer.specs.curbWeightKg.value)} kg) gives it a higher power-to-weight ratio: ${ratio.toFixed(1)} versus ${peer.values.powerToWeight.toFixed(1)} hp/tonne.${acceleration}`,
-    label: `Derived from compatible power and curb weight · ${entry.labels.powerToWeight}`, covers: ['powerToWeight', 'power', ...(quicker ? ['acceleration'] : [])] };
+    label: `Derived from compatible power and curb weight · ${entry.labels.powerToWeight}`, sources, covers: ['powerToWeight', 'power', ...(quicker ? ['acceleration'] : [])] };
 }
 
 
@@ -189,11 +205,11 @@ export function entrySummary(summary, entry) {
   const { ranking, requested, kind } = summary;
   const warning = purchaseWarning(entry);
   const tradeoffItem = categoryTradeoff(summary, entry);
-  const tradeoff = tradeoffItem.text;
+  const tradeoff = tradeoffItem?.text;
   const builders = { value: valueReasons, cost: costReasons, comfort: (_, item) => comfortReasons(item.car), practical: practicalReasons, performance: performanceReasons };
   const candidates = entry.identityMismatch ? [] : builders[requested.mode.id](summary, entry);
-  const seen = new Set([textKey(tradeoff)]);
-  const budget = MAX_DECISION_ITEMS - 1 - Number(!!warning);
+  const seen = new Set(tradeoff ? [textKey(tradeoff)] : []);
+  const budget = MAX_DECISION_ITEMS - Number(!!tradeoffItem) - Number(!!warning);
   const reasons = [];
   for (const item of candidates) {
     const key = textKey(item.text);
@@ -202,18 +218,18 @@ export function entrySummary(summary, entry) {
     reasons.push({ ...item, kind: item.kind || 'reason' });
     if (reasons.length === budget) break;
   }
-  const items = [...reasons, tradeoffItem, ...(warning ? [warning] : [])];
+  const items = [...reasons, ...(tradeoffItem ? [tradeoffItem] : []), ...(warning ? [warning] : [])];
   const active = ranking.criteria.filter(c => c.active).map(c => c.label.toLowerCase());
   const explanation = entry.identityMismatch ? 'Resolve conflicting identity or configuration details before ranking this car.'
     : entry.score == null ? 'Here is what we know so far. More comparable information is needed to choose between the cars.'
     : !ranking.best.includes(entry) ? 'Another contender in your shortlist, scored on the same supported category factors.'
     : kind === 'review' ? `Leads the available ${requested.mode.title.toLowerCase()} comparison, with purchase concerns to review before choosing.`
       : summary.single ? 'Your only contender so far. Add another car for a relative comparison.'
-        : summary.shared ? ['value', 'comfort'].includes(requested.mode.id) ? 'An equal match on the comparable details available. Review the strengths and trade-offs below.' : `An equal match on ${active.join(', ')}.`
+        : summary.shared ? ['value', 'comfort'].includes(requested.mode.id) ? 'An equal match on the comparable details available.' : `An equal match on ${active.join(', ')}.`
           : requested.mode.id === 'value' ? `${summary.provisional ? 'A tentative' : 'Our'} best-value pick: the strongest overall combination of ${ranking.criteria.filter(c => c.active).map(c => c.key === 'capability' ? 'documented strengths' : c.key === 'price' ? 'asking price' : c.key === 'age' ? 'model year' : 'mileage').join(', ')} among these contenders. See what you get for the money below.`
             : requested.mode.id === 'comfort' ? `${summary.provisional ? 'A tentative comfort pick' : 'Our comfort pick'}, based on the available ride, seating and cabin evidence below.`
               : `${summary.provisional ? 'Provisional best fit' : 'Best fit'} for ${requested.mode.title.toLowerCase()} on the supported comparable factors.`;
-  return { items, reasons, tradeoff, tradeoffSource: tradeoffItem.source, explanation };
+  return { items, reasons, tradeoff, tradeoffSource: tradeoffItem?.source, explanation };
 }
 
 export function keyFacts(car, mode = 'value') {

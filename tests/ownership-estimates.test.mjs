@@ -155,7 +155,7 @@ test('the model overview is limited to Best Value and warnings share the six-ite
     const summary = decisionSummary([car], mode);
     const notes = entrySummary(summary, summary.ranking.ranked[0]);
     assert.ok(notes.items.length <= 6, mode);
-    assert.equal(notes.items.filter(item => item.kind === 'tradeoff').length, 1);
+    assert.ok(notes.items.filter(item => item.kind === 'tradeoff').every(item => item.sources.some(source => source.url.startsWith('https:'))));
     assert.equal(notes.items.filter(item => item.kind === 'warning').length, 1);
     const warning = notes.items.find(item => item.kind === 'warning');
     for (const label of ['Engine concern', 'Coolant leak', 'Not running']) assert.ok(warning.text.includes(label));

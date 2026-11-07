@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { unknown, vehicleName, vehicleTrimLine, safeUrl, mileageDisplay, priceDisplay, resolveMileage } from './vehicle-data.js';
+import { unknown, vehicleName, vehicleTrimLine, safeUrl, listingSource, mileageDisplay, priceDisplay, resolveMileage } from './vehicle-data.js';
 import { m, useReducedMotion } from 'motion/react';
 import { emptyComparisonView, reconcileComparisonView } from './comparison-view.js';
 import { extractVehicleSpecs, FIELD_LABELS } from './vehicle-specs.js';
@@ -7,10 +7,11 @@ import { SpecValue } from './VehicleEvidence.jsx';
 import VehicleSummary from './VehicleSummary.jsx';
 import Icon from './Icons.jsx';
 import { detectWarnings } from './decision-engine.js';
-import { resolveVehicleExperience, experienceLabel, DEFAULT_SCENARIO } from './vehicle-experience.js';
+import { resolveVehicleExperience, DEFAULT_SCENARIO } from './vehicle-experience.js';
 import { ExperienceCost, ComfortDetail, PracticalitySummary, ExperienceAssumptions, COMFORT_TOPICS } from './VehicleExperience.jsx';
 import ScenarioFields from './ScenarioFields.jsx';
 import WorkspaceHeading from './WorkspaceHeading.jsx';
+import SourceLinks from './SourceLinks.jsx';
 
 export function vehicleImageUrl(car, index = 0) {
   const value = (car.images || [])[index];
@@ -115,10 +116,16 @@ export default function VehicleComparison({ cars, valueRanking, topValue, remove
   const sourceCar = cars.find(car => car.legacyItemId === view.sourceId) || cars[0];
   const pairClass = car => view.pair.includes(car.legacyItemId) ? `pair-visible pair-${view.pair.indexOf(car.legacyItemId)}` : 'pair-hidden';
   const cellClass = car => `${pairClass(car)}${car.legacyItemId === topValue ? ' comparison-top-match' : ''}`;
-  const spec = (car, key, compact = false) => <SpecValue spec={records.get(car).specs[key]} compact={compact} onViewEvidence={compact ? () => showSources(car) : undefined} />;
+  const spec = (car, key, compact = false) => <SpecValue spec={records.get(car).specs[key]} compact={compact} car={car} onViewEvidence={compact ? () => showSources(car) : undefined} />;
   const sharedGaps = KEY_FIELDS.filter(key => cars.every(car => records.get(car).specs[key].status === 'unknown'));
   const hasEnergy = car => car.enrichment?.fuel?.status === 'matched' || car.enrichment?.catalog?.energy;
-  const fuelRow = ['Fuel / energy use', car => car.enrichment?.fuel?.status === 'matched' ? `${car.enrichment.fuel.combined.toFixed(1)} L/100 km - NRCan reference` : car.enrichment?.catalog?.energy ? `${car.enrichment.catalog.energy.value.toFixed(1)} ${car.enrichment.catalog.energy.unit} - ${car.enrichment.catalog.source.publisher} reference${car.enrichment.catalog.energy.secondaryFuel ? ' - primary fuel only; also uses ' + car.enrichment.catalog.energy.secondaryFuel : ''}` : 'Unknown'];
+  const fuelRow = ['Fuel / energy use', car => {
+    const { fuel, catalog } = car.enrichment || {};
+    if (fuel?.status === 'matched') return <>{fuel.combined.toFixed(1)} L/100 km<SourceLinks sources={[{ url: fuel.source, publisher: 'NRCan' }]} /></>;
+    if (!catalog?.energy) return 'Unknown';
+    const { value, unit, secondaryFuel } = catalog.energy;
+    return <>{value.toFixed(1)} {unit}{secondaryFuel && ` · Primary fuel only, also uses ${secondaryFuel}`}<SourceLinks sources={[catalog.source]} /></>;
+  }];
   const experiences = new Map(cars.map(car => [car, resolveVehicleExperience(car, scenario)]));
   const experienceRows = [['Annual fuel / charging cost', car => <ExperienceCost experience={experiences.get(car)} scenario={scenario} />], ...COMFORT_TOPICS.map(([key, label]) => [label, car => <ComfortDetail experience={experiences.get(car)} topic={key} />]), ['Practicality', car => <PracticalitySummary experience={experiences.get(car)} />], ['Estimate details', car => <ExperienceAssumptions experience={experiences.get(car)} />]];
   const overviewRows = [
@@ -126,27 +133,27 @@ export default function VehicleComparison({ cars, valueRanking, topValue, remove
       const score = valueRanking.ranked.find(entry => entry.car === car)?.score;
       return score == null ? 'Insufficient evidence' : <strong className="comparison-match-score">{score} / 100</strong>;
     }]] : []),
-    ['Asking price · seller', priceDisplay], ['Mileage · seller', mileageDisplay],
+    ['Asking price', priceDisplay], ['Mileage', mileageDisplay],
     ['Annual fuel / charging cost', car => {
       const energy = experiences.get(car).energy;
-      return <><strong>{Number.isFinite(energy.annualCost) ? `$${energy.annualCost.toLocaleString('en-CA', { maximumFractionDigits: 0 })} CAD/year` : 'Check assumptions'}</strong><small>{experienceLabel(energy)}</small></>;
+      return <><strong>{Number.isFinite(energy.annualCost) ? `$${energy.annualCost.toLocaleString('en-CA', { maximumFractionDigits: 0 })} CAD/year` : 'Check assumptions'}</strong><SourceLinks sources={energy.evidence} /></>;
     }],
     ['Comfort', car => {
       const e = experiences.get(car);
-      return <><strong>Ride {e.ratings.rideQuality.rating.toFixed(1)}/5 · Seats {e.seatComfort.toFixed(1)}/5</strong><small>{[...new Set([e.ratings.rideQuality, e.ratings.frontSeatComfort, e.ratings.rearSeatComfort].filter(Boolean).map(experienceLabel))].join(' + ')}</small></>;
+      return <><strong>Ride {e.ratings.rideQuality.rating.toFixed(1)}/5 · Seats {e.seatComfort.toFixed(1)}/5</strong><SourceLinks sources={[e.ratings.rideQuality, e.ratings.frontSeatComfort, e.ratings.rearSeatComfort].flatMap(rating => rating?.evidence || [])} /></>;
     }],
     ['Practicality', car => {
       const e = experiences.get(car);
-      return <><strong>Room {e.passengerSpace.toFixed(1)}/5 · Cargo {e.ratings.cargoSpace.rating.toFixed(1)}/5</strong><small>{[...new Set([e.ratings.frontPassengerSpace, e.ratings.rearPassengerSpace, e.ratings.cargoSpace].filter(Boolean).map(experienceLabel))].join(' + ')}</small></>;
+      return <><strong>Room {e.passengerSpace.toFixed(1)}/5 · Cargo {e.ratings.cargoSpace.rating.toFixed(1)}/5</strong><SourceLinks sources={[e.ratings.frontPassengerSpace, e.ratings.rearPassengerSpace, e.ratings.cargoSpace].flatMap(rating => rating?.evidence || [])} /></>;
     }],
     ['Horsepower', car => spec(car, 'horsepower', true)],
   ];
-  const rows = [['Asking price · seller', priceDisplay], ['Mileage and unit · seller', mileageDisplay],
+  const rows = [['Asking price', priceDisplay], ['Mileage and unit', mileageDisplay],
     ...KEY_FIELDS.filter(key => !sharedGaps.includes(key)).map(key => [FIELD_LABELS[key], car => spec(car, key)]),
     ...(cars.some(hasEnergy) ? [fuelRow] : []), ...experienceRows];
   const reviewCars = cars.filter(car => detectWarnings(car).length);
   function table(tableRows, label) {
-    return <div className="table-scroll comparison-table" role="region" aria-label={label} tabIndex={0}>
+    return <div className={`table-scroll comparison-table${cars.length === 1 ? ' comparison-single' : ''}`} role="region" aria-label={label} tabIndex={0}>
       <table role="table" style={{ '--columns': cars.length, '--mobile-columns': Math.min(cars.length, 2) }}>
         <caption className="sr-only">{label}</caption>
         <thead role="rowgroup"><tr role="row">
@@ -160,6 +167,7 @@ export default function VehicleComparison({ cars, valueRanking, topValue, remove
                 <VehicleImage car={car} badge={car.legacyItemId === topValue ? 'Top match' : undefined} />
                 <h2 className="vehicle-name">{name}</h2>
                 {trim && <p className="vehicle-trim">{trim}</p>}
+                <SourceLinks sources={[listingSource(car)]} />
                 <div className="comparison-car-actions">
                   <button type="button" className="view-details text-button" onClick={() => showSources(car, true)} aria-label={`Details for ${name}`}>Details</button>
                   <button type="button" className="text-button compare-remove" disabled={!removeCar} aria-label={`Remove ${name} from comparison`} onClick={() => removeCar?.(car.legacyItemId, true)}>Remove</button>
@@ -188,8 +196,8 @@ export default function VehicleComparison({ cars, valueRanking, topValue, remove
       {cars.length > 2 && <div className="mobile-pair" role="group" aria-label="Choose two cars to compare">{[0, 1].map(index => <label key={index}>{index === 0 ? 'First car' : 'Second car'}<select value={view.pair[index]} onChange={event => selectPair(index, event.target.value)}>{cars.map(car => <option key={car.legacyItemId} value={car.legacyItemId}>{vehicleName(car)}</option>)}</select></label>)}</div>}
       {TABS.filter(([id]) => id !== view.tab).map(([id]) => <div key={id} id={`compare-panel-${id}`} role="tabpanel" aria-labelledby={`compare-tab-${id}`} hidden />)}
       <m.div key={view.tab} id={`compare-panel-${view.tab}`} role="tabpanel" aria-labelledby={`compare-tab-${view.tab}`} tabIndex={0} className="compare-panel" initial={reduced ? false : { opacity: 0.7 }} animate={{ opacity: 1 }} transition={{ duration: reduced ? 0 : 0.18, ease: [0.22, 1, 0.36, 1] }}>
-        {view.tab === 'overview' && <>{table(overviewRows, 'Vehicle overview')}<p className="overview-note">Comfort and running costs include labeled estimates. Ratings describe the model, not this car’s condition.{valueRanking?.provisional && ' Best Value scores are provisional.'}</p><details className="decision-details scenario-panel"><summary>Adjust fuel assumptions &amp; practical needs</summary><ScenarioFields scenario={scenario} setScenario={setScenario} /></details></>}
-        {view.tab === 'specifications' && <><div className="table-heading"><h2>All supported specifications</h2><p>Seller claims, original records and model references stay clearly labeled.</p></div>{table(rows, 'Vehicle comparison table')}{!!sharedGaps.length && <details className="missing-specs"><summary>Details still missing</summary><p className="shared-gaps">Not documented for any contender: {sharedGaps.map(key => FIELD_LABELS[key]).join(', ')}. Model lookup may fill gaps when suitable sources are available.</p></details>}</>}
+        {view.tab === 'overview' && <>{table(overviewRows, 'Vehicle overview')}<p className="overview-note">Some details come from listings or model estimates.{valueRanking?.provisional && ' Best Value scores are provisional.'}</p><details className="decision-details scenario-panel"><summary>Adjust fuel assumptions &amp; practical needs</summary><ScenarioFields scenario={scenario} setScenario={setScenario} /></details></>}
+        {view.tab === 'specifications' && <><div className="table-heading"><h2>All supported specifications</h2><p>Some specifications come from listings or model estimates. See Sources &amp; checks for supporting evidence.</p></div>{table(rows, 'Vehicle comparison table')}{!!sharedGaps.length && <details className="missing-specs"><summary>Details still missing</summary><p className="shared-gaps">Not documented for any contender: {sharedGaps.map(key => FIELD_LABELS[key]).join(', ')}. Model lookup may fill gaps when suitable sources are available.</p></details>}</>}
         {view.tab === 'sources' && sourceCar && <div className="sources-workspace" ref={evidenceRegion}><div className="source-photo"><VehicleImage key={sourceCar.legacyItemId} car={sourceCar} /></div><div className="source-selection"><label htmlFor="evidence-vehicle">Sources and checks for</label><select id="evidence-vehicle" value={sourceCar.legacyItemId} onChange={event => changeView({ ...view, sourceId: event.target.value })}>{cars.map(car => <option key={car.legacyItemId} value={car.legacyItemId}>{vehicleName(car)}</option>)}</select><ListingLink car={sourceCar} /><button type="button" className="text-button compare-remove" disabled={!removeCar} aria-label={`Remove ${vehicleName(sourceCar)} from comparison`} onClick={() => removeCar?.(sourceCar.legacyItemId, true)}>Remove this car</button></div><p className="car-meta source-listing-context"><strong>Listing location:</strong> {locationDisplay(sourceCar)} · <strong>Mileage:</strong> {mileageDisplay(sourceCar)}</p><ComparisonWarnings car={sourceCar} /><div className="source-status-grid"><VehicleSummary onSaveDetails={onSaveDetails} key={sourceCar.legacyItemId} car={sourceCar} retryResearch={retryResearch} onViewResults={() => showSources(sourceCar, true)} /></div><details className="specifics"><summary>All available seller specifications</summary><dl className="seller-specifics">{sourceCar.itemSpecifics?.length ? sourceCar.itemSpecifics.map((aspect, index) => <div key={index}><dt>{aspect.name}</dt><dd>{unknown([aspect.value].flat().join(', '))}</dd></div>) : <p>No item specifics supplied.</p>}</dl></details><details className="seller-description"><summary>Seller description &amp; mileage evidence</summary><div className="seller-context"><p><strong>Original headline:</strong> {unknown(sourceCar.title)}</p><p>{sourceCar.description || 'Unknown'}</p><p><strong>Mileage:</strong> {resolveMileage(sourceCar).reason}</p>{resolveMileage(sourceCar).evidence.map((item, index) => <p key={index}>{item.source}: “{item.quote}” → {item.amount ?? ''} {item.unit || 'unit unclear'}</p>)}</div></details></div>}
       </m.div>
     </>}

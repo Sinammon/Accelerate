@@ -2,7 +2,8 @@ import { ownershipModelData } from './ownership-estimates.js';
 import React from 'react';
 import { resolveMileage, mileageEvidenceLabel } from './mileage.js';
 import { extractVehicleSpecs, FIELD_LABELS } from './vehicle-specs.js';
-import { safeUrl } from './vehicle-data.js';
+import { safeUrl, evidenceSources } from './vehicle-data.js';
+import SourceLinks from './SourceLinks.jsx';
 import { VPIC_SOURCE } from '../shared/vin.js';
 import { NRCAN_SOURCE, FUEL_LABELS } from './fuel-data.js';
 import { resolveVehicleExperience } from './vehicle-experience.js';
@@ -10,7 +11,7 @@ import { ExperienceCost, ExperienceAssumptions } from './VehicleExperience.jsx';
 import { modelScopeLabel, CORE_SPEC_FIELDS } from '../shared/model-specs.js';
 import { hasExperience } from '../shared/experience.js';
 
-const statusLabel = { 'catalog-reference': 'Government configuration reference', 'user-entered': 'User-entered', 'seller-reported': 'Seller-reported', 'vin-record': 'VIN supplement', 'factory-reference': 'Factory reference', 'model-reference': 'Typical model spec', 'model-estimate': 'Estimated model spec · unverified', 'model-context': 'Typical model · varies', corroborated: 'Sources agree', conflict: 'Conflicting evidence' };
+const statusLabel = { 'catalog-reference': 'Government configuration reference', 'user-entered': 'User-entered', 'vin-record': 'VIN supplement', 'factory-reference': 'Factory reference', 'model-reference': 'Typical model spec', 'model-context': 'Typical model · varies', corroborated: 'Sources agree', conflict: 'Conflicting evidence' };
 const formatted = value => typeof value === 'number' ? Number(value.toFixed(2)).toLocaleString('en-CA') : String(value);
 export function SpecCitations({ evidence = [], sourceUrl }) {
   return evidence.map((item, index) => <span className="spec-citation" key={index}>{item.type === 'vpic' ? <a href={VPIC_SOURCE} target="_blank" rel="noopener noreferrer">NHTSA vPIC ↗</a> : safeUrl(item.url || sourceUrl) ? <a href={safeUrl(item.url || sourceUrl)} target="_blank" rel="noopener noreferrer">{item.source} ↗</a> : item.source} · {item.type === 'model-reference' && 'Research excerpt: '}“{item.label ? `${item.label}: ` : ''}{item.quote}”{item.configuration && ` · ${['year', 'make', 'model', 'trim', 'market', 'transmission'].map(key => item.configuration[key]).filter(Boolean).join(' ')}`}</span>);
@@ -20,12 +21,16 @@ export function ModelSpecAttribution({ car }) {
   // Google attribution is isolated: no scripts, same-origin access or top navigation.
   return typeof html === 'string' && html.length <= 50000 ? <iframe className="search-attribution" title="Google Search suggestions for vehicle specifications" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerPolicy="no-referrer" srcDoc={html} /> : null;
 }
-export function SpecValue({ spec, compact = false, onViewEvidence }) {
+export function SpecValue({ spec, compact = false, car, onViewEvidence }) {
   if (spec?.status === 'not-applicable') return <span className="spec-value">Not applicable{!compact && <small>{spec.reason}</small>}</span>;
   if (!spec || spec.status === 'unknown') return !compact && spec?.reason ? <span className="spec-value">Unresolved<small className="spec-reason">{spec.reason}</small></span> : 'Unknown';
   const value = spec.kind === 'configuration' ? formatted(spec.referenceValue ?? spec.value) : spec.kind === 'range' ? `${formatted(spec.minimum)}–${formatted(spec.maximum)}` : spec.kind === 'alternatives' ? spec.alternatives.map(formatted).join(' / ') : spec.kind === 'optional' ? 'Optional' : spec.value == null ? 'Unknown' : formatted(spec.value);
-  if (compact) return <span className="spec-value compact-spec">{value}{onViewEvidence && <button type="button" className={`evidence-link ${spec.status}`} onClick={onViewEvidence}>{spec.kind !== 'value' && spec.kind ? 'Varies · see source' : spec.status === 'seller-reported' ? 'Seller' : spec.status === 'vin-record' ? 'VIN record' : spec.status === 'model-estimate' ? 'Estimate · unverified' : spec.status === 'corroborated' ? 'Sources agree' : spec.status === 'factory-reference' || spec.quality === 'exact' ? 'Factory source' : statusLabel[spec.status]}</button>}{spec.stale && <small>Older saved value</small>}</span>;
-  return <span className="spec-value">{value}<small className={`evidence-badge ${spec.status}`}>{spec.kind === 'configuration' ? 'Reference version · unconfirmed' : spec.quality === 'exact' ? 'Factory reference' : statusLabel[spec.status]}</small>{spec.listingPreferred && <small>Listing preferred over VIN</small>}{spec.stale && <small>Older saved value · source verification unavailable</small>}{spec.assumptions?.map((assumption, index) => <small className="spec-reason" key={index}>{assumption}</small>)}{spec.status === 'model-context' && <small className="spec-reason">{spec.contextReason || `Configuration varies${modelScopeLabel(spec.scope) ? ` · ${modelScopeLabel(spec.scope)}` : ''}`} · excluded from scoring</small>}</span>;
+  const citations = car && <SourceLinks sources={evidenceSources(spec.evidence, car)} />;
+  if (compact) return <span className="spec-value compact-spec">{value}{citations}{onViewEvidence && <button type="button" className={`evidence-link ${spec.status}`} onClick={onViewEvidence}>{spec.status === 'conflict' ? 'Review conflict' : 'View evidence'}</button>}{spec.stale && <small>Older saved value</small>}</span>;
+  const badge = spec.kind === 'configuration' ? 'Reference version · unconfirmed'
+    : ['conflict', 'corroborated'].includes(spec.status) ? statusLabel[spec.status]
+    : car ? null : spec.quality === 'exact' ? 'Factory reference' : statusLabel[spec.status];
+  return <span className="spec-value">{value}{badge && <small className={`evidence-badge ${spec.status}`}>{badge}</small>}{citations}{spec.listingPreferred && <small>Listing preferred over VIN</small>}{spec.stale && <small>Older saved value · source verification unavailable</small>}{spec.assumptions?.map((assumption, index) => <small className="spec-reason" key={index}>{assumption}</small>)}{spec.status === 'model-context' && <small className="spec-reason">{spec.contextReason || `Configuration varies${modelScopeLabel(spec.scope) ? ` · ${modelScopeLabel(spec.scope)}` : ''}`} · excluded from scoring</small>}</span>;
 }
 export function ResearchAction({ car, retryResearch, compact = false, onViewResults }) {
   if (car.demo || !retryResearch) return null;
@@ -77,7 +82,7 @@ export default function VehicleEvidence({ car, scenario, retryResearch, showStat
   return <details className="vehicle-evidence"><summary>Specifications, amenities &amp; sources</summary><div className="evidence-content">
     {showStatus && <SourceStatus car={car} retryResearch={retryResearch} />}
     {!!vin?.mismatches?.length && <div className="warning-details"><strong>Listing details used for results</strong>{vin.mismatches.map(item => <p key={item.field}>{item.field}: seller lists {String(item.listing)}; VIN record lists {String(item.vin)}. The listing value is used. Incompatible VIN supplements are ignored.</p>)}</div>}
-    <p className="evidence-legend">Seller-reported = a listing claim. VIN supplement = a manufacturer-submitted value used only when the listing has no value and the configuration agrees. Factory reference = published original ratings for the matched configuration. Typical model spec = an approximate sourced reference. Estimated model spec = an unverified AI estimate with assumptions. Approximate values make affected rankings provisional. Sources agree = the cited values agree. None verifies current condition, measured output or installed equipment.</p>
+    <p className="evidence-legend">Listing claims are unverified. VIN data fills gaps when the configuration agrees. Factory references are original ratings for the matched configuration. Approximate values and estimates make affected rankings provisional. These sources do not verify the car’s current condition, measured output or installed equipment.</p>
     <dl className="evidence-specs">{knownSpecs.map(([key, label]) => <div key={key}><dt>{label}</dt><dd><SpecValue spec={specs[key]} /><SpecCitations evidence={specs[key].evidence} sourceUrl={car.sourceUrl} />{!!specs[key].originalEvidence?.length && <div><small>Original imported evidence, superseded by your entry:</small><SpecCitations evidence={specs[key].originalEvidence} sourceUrl={car.sourceUrl} /></div>}</dd></div>)}</dl>
     {!!unknownSpecs.length && <p className="evidence-legend">Not documented: {unknownSpecs.join(', ')}.</p>}
     {mileage.userEntered && <div className="mileage-evidence"><h3>Mileage correction</h3><p>{mileage.amount.toLocaleString('en-CA')} {mileage.unit} · {mileageEvidenceLabel(mileage)}</p><p>Original imported mileage evidence:</p>{mileage.originalEvidence.length ? mileage.originalEvidence.map((e, index) => <p key={index}>{e.source}: {e.quote}</p>) : <p>No explicit reading was supplied.</p>}</div>}

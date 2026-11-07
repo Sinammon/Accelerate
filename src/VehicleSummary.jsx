@@ -21,7 +21,7 @@ export default function VehicleSummary({ car, retryResearch, onViewResults, onSa
     <SourceStatus car={car} retryResearch={retryResearch} onViewResults={onViewResults} />
     <h3>Reference specifications and your entries</h3>
     {documented.length ? <dl className="summary-specs">{documented.map(key => <div key={key}><dt>{FIELD_LABELS[key]}</dt><dd><SpecValue spec={specs[key]} /></dd></div>)}</dl> : <p>No supported VIN, factory or government reference specifications or user entries for these key details yet.</p>}
-    <h3>Seller-reported claims</h3>
+    <h3>Listing claims</h3>
     {seller.length ? <dl className="summary-specs">{seller.map(key => <div key={key}><dt>{FIELD_LABELS[key]}</dt><dd><SpecValue spec={specs[key]} /></dd></div>)}</dl> : <p>No uncorroborated key specification claims available.</p>}
     <p>Amenities reported present or standard for this model: {amenities.join(', ') || 'none documented'}. Missing mentions do not mean equipment is absent.</p>
     {!!typical.length && <><h3>Typical and estimated model specifications</h3><dl className="summary-specs">{typical.map(key => <div key={key}><dt>{FIELD_LABELS[key]}</dt><dd><SpecValue spec={specs[key]} /></dd></div>)}</dl><p>Sourced references include citations below. Unverified estimates state their assumptions. Ranges and alternatives are excluded from rankings.</p></>}

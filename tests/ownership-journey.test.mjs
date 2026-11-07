@@ -60,7 +60,7 @@ test('calculator compares four cars, validates edits, preserves sources and sepa
     assert.equal(document.querySelectorAll('.ownership-results > li').length, 4);
     assert.match(document.querySelector('.ownership-results').textContent, /Gross salary for comfortable running costs.*\$49,981\/year/s);
     assert.match(document.querySelector('#costs-panel-purchase .ownership-table').textContent, /\$23,100/);
-    assert.match(document.body.textContent, /Ontario average—not a quote for this vehicle.*June 2026.*FSRA/s);
+    assert.match(document.body.textContent, /Ontario average, June 2026.*FSRA/s);
     assert.ok(document.querySelector('a[href="https://example.test/energy"]'));
     const energyAmounts = () => [...document.querySelector('#costs-panel-running table').querySelectorAll('tbody tr:first-child .ownership-amount')].map(el => el.textContent);
     assert.deepEqual(energyAmounts(), ['$1,530', '$1,530', '$450', '$1,245']);
@@ -234,7 +234,7 @@ test('automatic model costs preserve edits, reset individual fields and keep Sum
     assert.equal(field('maintenancePerKm').value, '0.14');
     assert.equal(summarySalary(), salaryGuide());
     assert.match(document.querySelector('#costs-panel-summary').textContent, /Insurance \/ year.*\$2,600.*Maintenance.*\$2,100/s);
-    assert.match(document.querySelector('.ownership-estimate-details').textContent, /Low.*Central.*High.*Estimated.*deductibles/s);
+    assert.match(document.querySelector('.ownership-estimate-details').textContent, /Low.*Central.*High.*Planning range.*deductibles/s);
     await change(field('insuranceAnnual'), '1800');
     await change(field('maintenancePerKm'), '0.08');
     await React.act(async () => replaceCars([ownershipCar('a', { insurance: 3500, maintenance: .22 })]));

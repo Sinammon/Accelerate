@@ -34,7 +34,9 @@ test('the six-item budget includes the model overview, trade-off and every purch
     for (const { id } of PRIMARY_MODES) {
       const { notes } = notesFor([vehicle], id);
       assert.ok(notes.items.length >= 1 && notes.items.length <= 6, id);
-      assert.equal(notes.items.filter(item => item.kind === 'tradeoff').length, 1);
+      const tradeoffs = notes.items.filter(item => item.kind === 'tradeoff');
+      assert.ok(tradeoffs.length <= 1);
+      assert.ok(tradeoffs.every(item => item.sources.some(source => source.url.startsWith('https:'))), 'a single car needs a sourced drawback');
       assert.equal(notes.items.filter(item => item.kind === 'overview').length, Number(id === 'value'));
       if (vehicle === car) {
         const warning = notes.items.filter(item => item.kind === 'warning');
@@ -97,7 +99,7 @@ test('sparse data stays concise and unsupported presentation modes normalize wit
   assert.ok(!PRIMARY_MODES.some(item => item.id === 'balanced'));
   const car = { legacyItemId: 'unknown' };
   const { notes } = notesFor([car], 'performance');
-  assert.equal(notes.items.length, 1, 'missing performance evidence is not padded with unrelated facts');
+  assert.equal(notes.items.length, 0, 'missing performance evidence is not padded with a generic trade-off');
   for (const mode of ['balanced', 'invalid', undefined]) assert.equal(decisionSummary([car], mode).requested.mode.id, 'value');
   assert.equal(rankDecisionMode([car], 'balanced').mode.id, 'balanced');
   assert.match(notesFor([car], 'value').notes.items[0].text, /overview is not available/);
@@ -109,4 +111,16 @@ test('sparse data stays concise and unsupported presentation modes normalize wit
   assert.match(JSON.stringify(partial.items), /excluded from comparative score/);
   assert.equal(summary.requested.criteria.some(criterion => criterion.key === 'power' && criterion.active), false);
   assert.equal(entry.score, rankDecisionMode([known, partialPeer], 'performance', 2026).ranked.find(item => item.car === known).score);
+});
+
+test('trade-offs name a real comparison and skip tied baseline ratings', () => {
+  const expensive = { ...ratedCar('expensive', 4, undefined, 26000), make: 'Example', model: 'Higher price', sourceUrl: 'https://www.ebay.ca/itm/123' };
+  const cheaper = { ...expensive, legacyItemId: 'cheaper', model: 'Lower price', priceCAD: { value: '20000', currency: 'CAD' }, sourceUrl: 'https://www.ebay.ca/itm/456' };
+  const summary = decisionSummary([expensive, cheaper], 'cost', 2026);
+  const notes = entrySummary(summary, summary.ranking.ranked.find(item => item.car === expensive));
+  const tradeoff = notes.items.find(item => item.kind === 'tradeoff');
+  assert.match(tradeoff.text, /Higher asking price than the .*Lower price/);
+  assert.deepEqual(tradeoff.sources.map(source => source.url), [expensive.sourceUrl, cheaper.sourceUrl]);
+  const sparse = notesFor([{ legacyItemId: 'a' }, { legacyItemId: 'b' }], 'comfort');
+  assert.equal(sparse.notes.tradeoff, undefined);
 });

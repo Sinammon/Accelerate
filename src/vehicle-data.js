@@ -1,6 +1,7 @@
 import { extractVehicleSpecs } from './vehicle-specs.js';
 export { FEATURE_RULES, extractVehicleSpecs } from './vehicle-specs.js';
 import { resolveMileage } from './mileage.js';
+import { VPIC_SOURCE } from '../shared/vin.js';
 export { unitType, resolveMileage, mileageDisplay } from './mileage.js';
 
 // Conservative interpretation of seller claims. Original listing fields are untouched.
@@ -10,6 +11,17 @@ export function vehicleTrimLine({ trim, drivetrain }) {
   return [trim, drivetrain].filter(spec => spec.value != null && spec.status !== 'conflict').map(spec => spec.value).join(' · ');
 }
 export const safeUrl = value => { try { const url = new URL(value); return url.protocol === 'https:' ? url.href : null; } catch { return null; } };
+export function listingSource(car) {
+  const url = !car.demo && safeUrl(car.sourceUrl);
+  return url ? { url, publisher: 'eBay listing' } : undefined;
+}
+export function evidenceSources(evidence, car) {
+  return (evidence || []).map(item => {
+    if (item.type === 'vpic') return { url: VPIC_SOURCE, publisher: 'NHTSA vPIC' };
+    if (car && item.type?.startsWith('seller-')) return listingSource(car);
+    return item;
+  }).filter(item => safeUrl(item?.url));
+}
 export function specification(car, ...names) {
   const values = [...new Set((car.itemSpecifics || []).filter(a => names.includes(a.name?.trim().toLowerCase())).flatMap(a => Array.isArray(a.value) ? a.value : [a.value]).filter(v => v != null && v !== ''))];
   return values.length > 1 ? values : values[0] ?? null;
