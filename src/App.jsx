@@ -22,6 +22,7 @@ import { validateDetailOptions } from './vehicle-overrides.js';
 import { extractVehicleSpecs } from './vehicle-specs.js';
 import { matchSpecCatalog } from './spec-catalog.js';
 import { referenceMarket } from './reference-market.js';
+import { rankDecisionMode } from './decision-engine.js';
 
 const route = () => ['compare', 'decide', 'ownership'].includes(window.location.hash.slice(1)) ? window.location.hash.slice(1) : 'import';
 function Application() {
@@ -203,6 +204,10 @@ function Application() {
     finally { setLoading(false); }
   }
   const importForm = <ImportComposer cars={cars} page={page} url={url} setUrl={setUrl} loading={loading} error={error} notice={notice} onSubmit={handleSubmit} onDemo={loadDemo} />;
+  const valueRanking = cars.length > 0 && (page === 'compare' || page === 'ownership')
+    ? rankDecisionMode(cars, 'value', new Date().getFullYear(), scenario, ownership) : null;
+  const topValue = cars.length > 1 && valueRanking?.best.length === 1 && !valueRanking.best[0].reviewRequired
+    ? valueRanking.best[0].car.legacyItemId : null;
   const enter = { initial: { opacity: reduced ? 1 : 0 }, animate: { opacity: 1 }, transition: { duration: reduced ? 0 : 0.18, ease: [0.22, 1, 0.36, 1] } };
   return <LazyMotion features={domAnimation} strict><MotionConfig reducedMotion="user"><div className={`site-shell app-shell ${page === 'import' ? 'landing-shell' : 'compact-workspace'}`}>
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); document.getElementById('main-content')?.focus(); }}>Skip to content</a>
@@ -214,9 +219,9 @@ function Application() {
     <div className={page === 'import' ? 'dashboard-layout' : 'workspace-layout'}>
     <main id="main-content" tabIndex={-1}><m.div key={page} className="page-transition" {...enter}>
       {page === 'import' && <Dashboard importForm={importForm} onStart={startImport} onShowCosts={() => { if (cars.length) { setMode('cost'); navigate('decide'); } else requestAnimationFrame(() => document.getElementById('how-it-works')?.scrollIntoView({ block: 'center', behavior: reduced ? 'instant' : 'smooth' })); }} />}
-      {page === 'compare' && <VehicleComparison importLoading={loading} scenario={scenario} setScenario={setScenario} onSaveDetails={saveVehicleDetails} cars={cars} view={comparisonView} onViewChange={setComparisonView} notice={notice} retryResearch={retryResearch} clearSavedSpecs={() => { modelSpecCache.clear(); setNotice('Saved model specifications cleared. Your current comparison is unchanged.'); }} importForm={importForm} navigate={navigate} removeCar={removeCar} clearCars={clearCars} />}
+      {page === 'compare' && <VehicleComparison valueRanking={valueRanking} topValue={topValue} importLoading={loading} scenario={scenario} setScenario={setScenario} onSaveDetails={saveVehicleDetails} cars={cars} view={comparisonView} onViewChange={setComparisonView} notice={notice} retryResearch={retryResearch} clearSavedSpecs={() => { modelSpecCache.clear(); setNotice('Saved model specifications cleared. Your current comparison is unchanged.'); }} importForm={importForm} navigate={navigate} removeCar={removeCar} clearCars={clearCars} />}
       {page === 'decide' && <DecisionDashboard ownership={ownership} scenario={scenario} cars={cars} onViewSources={showSources} onAdjustCosts={adjustCosts} onAdjustPracticalNeeds={adjustPracticalNeeds} mode={mode} setMode={next => { setMode(next); setDecisionView(previous => ({ ...previous, selectedId: null })); }} view={decisionView} onViewChange={setDecisionView} />}
-      {page === 'ownership' && <OwnershipCalculator cars={cars} scenario={scenario} setScenario={setScenario} state={ownership} setState={setOwnership} tab={ownershipTab} onTabChange={setOwnershipTab} />}
+      {page === 'ownership' && <OwnershipCalculator cars={cars} topValue={topValue} valueProvisional={valueRanking?.provisional} scenario={scenario} setScenario={setScenario} state={ownership} setState={setOwnership} tab={ownershipTab} onTabChange={setOwnershipTab} />}
     </m.div></main>
     </div>
     {page === 'import' && <footer><Brand className="footer-brand" /><span>A clearer road to your next car.</span><span>Temporary comparison · Refresh clears your cars</span></footer>}

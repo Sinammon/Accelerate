@@ -6,6 +6,9 @@ export { unitType, resolveMileage, mileageDisplay } from './mileage.js';
 // Conservative interpretation of seller claims. Original listing fields are untouched.
 export const unknown = value => value == null || value === '' || Array.isArray(value) && !value.length ? 'Unknown' : Array.isArray(value) ? value.join(' / ') : String(value);
 export const vehicleName = car => { const { specs } = extractVehicleSpecs(car); return ['year', 'make', 'model'].map(key => unknown(specs[key].value)).join(' '); };
+export function vehicleTrimLine({ trim, drivetrain }) {
+  return [trim, drivetrain].filter(spec => spec.value != null && spec.status !== 'conflict').map(spec => spec.value).join(' · ');
+}
 export const safeUrl = value => { try { const url = new URL(value); return url.protocol === 'https:' ? url.href : null; } catch { return null; } };
 export function specification(car, ...names) {
   const values = [...new Set((car.itemSpecifics || []).filter(a => names.includes(a.name?.trim().toLowerCase())).flatMap(a => Array.isArray(a.value) ? a.value : [a.value]).filter(v => v != null && v !== ''))];

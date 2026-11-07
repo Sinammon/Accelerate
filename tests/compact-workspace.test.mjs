@@ -77,7 +77,8 @@ test('compact workspace preserves tab choices and private edits across the compl
 
     await add('111111111111');
     assert.equal(window.location.hash, '#compare');
-    assert.equal(document.querySelector('.comparison-table tbody').rows.length, 6);
+    assert.equal(document.querySelector('.comparison-table tbody').rows.length, 7);
+    assert.match(document.querySelector('.comparison-table tbody tr:first-child').textContent, /Best Value match score/);
     assert.match(document.querySelector('.comparison-table').textContent, /General baseline/);
     await click('.compare-add');
     assert.equal(window.location.hash, '#compare');
@@ -163,7 +164,9 @@ test('compact workspace preserves tab choices and private edits across the compl
     await go('ownership');
     assert.equal(document.querySelector('#costs-panel-summary').hidden, false);
     assert.equal(document.querySelector('#costs-panel-purchase').hidden, true);
-    assert.match(document.querySelector('#costs-panel-summary').textContent, /Cash needed.*Monthly running budget/s);
+    assert.equal(document.querySelectorAll('.cost-vehicle').length, 4);
+    assert.match(document.querySelector('.cost-vehicle').textContent, /Estimated monthly total · running.*Cash needed/s);
+    assert.match(document.querySelector('.cost-vehicle img').alt, /seller listing photo/);
     for (const [index, destination] of ['purchase', 'running', 'salary'].entries()) {
       await click('#costs-tab-summary');
       await click(`.cost-summary-actions button:nth-child(${index + 1})`);

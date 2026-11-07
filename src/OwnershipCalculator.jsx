@@ -4,7 +4,8 @@ import React, { useId, useState } from 'react';
 import WorkspaceHeading from './WorkspaceHeading.jsx';
 import WorkspaceTabs, { WorkspacePanel } from './WorkspaceTabs.jsx';
 import Icon from './Icons.jsx';
-import { vehicleName, safeUrl } from './vehicle-data.js';
+import { extractVehicleSpecs, vehicleName, vehicleTrimLine, safeUrl } from './vehicle-data.js';
+import { VehicleImage } from './VehicleComparison.jsx';
 import { resolveVehicleExperience, experienceLabel } from './vehicle-experience.js';
 import { SCENARIO_BOUNDS, validScenarioValue } from '../shared/experience.js';
 import { OWNERSHIP_BOUNDS, ownershipNumber, ownershipInputs, calculateOwnership, assessOwnership } from './ownership-calculator.js';
@@ -46,7 +47,7 @@ function CostField({ name, label, context, value, onChange, hint, optional = fal
   </div>;
 }
 
-export default function OwnershipCalculator({ cars, scenario, setScenario, state, setState, tab: suppliedTab, onTabChange }) {
+export default function OwnershipCalculator({ cars, topValue, valueProvisional, scenario, setScenario, state, setState, tab: suppliedTab, onTabChange }) {
   const [localTab, setLocalTab] = useState('summary');
   const tab = suppliedTab || localTab, setTab = onTabChange || setLocalTab;
   function openTab(next) {
@@ -87,11 +88,20 @@ export default function OwnershipCalculator({ cars, scenario, setScenario, state
   const value = (record, key) => <strong className="ownership-amount">{money(record.costs[key])}</strong>;
   const table = (id, rows) => <div className="ownership-table-scroll" role="region" aria-labelledby={id} tabIndex={0}>
     <table className="ownership-table" style={{ '--car-count': cars.length }}>
-      <caption className="sr-only">{id === 'cost-summary' ? 'Ownership summary' : id === 'purchase-costs' ? 'Purchase costs' : 'Running costs'} in Canadian dollars for all shortlisted cars</caption>
+      <caption className="sr-only">{id === 'purchase-costs' ? 'Purchase costs' : 'Running costs'} in Canadian dollars for all shortlisted cars</caption>
       <thead><tr><th scope="col">Cost · CAD</th>{cars.map(car => <th scope="col" key={car.legacyItemId}>{vehicleName(car)}{car.demo && <small>Fictional listing</small>}</th>)}</tr></thead>
       <tbody>{rows.map(([label, render, total]) => <tr key={label} className={total ? 'ownership-total' : undefined}><th scope="row">{label}</th>{records.map(record => <td key={record.car.legacyItemId}>{render(record)}</td>)}</tr>)}</tbody>
     </table>
   </div>;
+  const summaryRows = [
+    [finance ? 'Down payment · upfront' : 'Cash needed · upfront', r => value(r, finance ? 'down' : 'acquisition')],
+    ['Fuel / charging / year', r => <>{value(r, 'energy')}<small>{r.inputs.energyOverride !== '' ? 'Your annual energy estimate' : experienceLabel(r.experience.energy)}</small></>],
+    ['Insurance / year', r => <>{value(r, 'insurance')}<small>{Object.hasOwn(state.vehicles[r.car.legacyItemId] || {}, 'insuranceAnnual') ? 'Your estimate or quote' : r.estimates.insuranceAnnual.label}</small></>],
+    ['Maintenance, tyres & repairs / year', r => <>{value(r, 'maintenance')}<small>{Object.hasOwn(state.vehicles[r.car.legacyItemId] || {}, 'maintenancePerKm') ? 'Your reserve × annual driving' : r.estimates.maintenancePerKm.label}</small></>],
+    [finance ? 'Running expenses / month' : 'Running expenses / year', r => value(r, finance ? 'monthlyRunning' : 'annualRunning')],
+    ...(finance ? [['Loan payment / month', r => value(r, 'payment')]] : []),
+    [finance ? 'Gross salary for comfortable loan + running costs' : 'Gross salary for comfortable running costs', r => <strong className="ownership-amount" data-summary-salary={r.car.legacyItemId}>{r.assessment.requiredSalary == null ? 'Incomplete' : `${money(Math.ceil(r.assessment.requiredSalary))}/year`}</strong>],
+  ];
   const purchaseRows = [
     ['Purchase price', r => carField(r, 'purchasePrice', 'Purchase price (CAD)', Object.hasOwn(state.vehicles[r.car.legacyItemId] || {}, 'purchasePrice') ? 'Your planning amount; original listing unchanged.' : r.costs.price == null ? 'Enter a CAD price; no currency conversion assumed.' : 'Seller asking price; editable for your scenario.')],
     ['Estimated purchase tax', r => <>{value(r, 'tax')}<small>{r.inputs.taxOverride === '' ? `${state.taxRate}% of purchase price` : 'Your tax amount override'}</small>{carField(r, 'taxOverride', 'Tax override (CAD)', 'Optional: blank uses the shared tax rate.', { optional: true })}</>],
@@ -134,16 +144,28 @@ export default function OwnershipCalculator({ cars, scenario, setScenario, state
       <WorkspacePanel id="costs" value="summary" active={tab}>
         <section className="ownership-summary" aria-labelledby="cost-summary"><h2 id="cost-summary">Your costs at a glance</h2>
           <p>Upfront funding and monthly expenses are separate. These are planning estimates in CAD.</p>
-          {table('cost-summary', [
-            [finance ? 'Down payment · upfront' : 'Cash needed · upfront', r => value(r, finance ? 'down' : 'acquisition'), true],
-            ['Insurance / year', r => <>{value(r, 'insurance')}<small>{Object.hasOwn(state.vehicles[r.car.legacyItemId] || {}, 'insuranceAnnual') ? 'Your estimate or quote' : r.estimates.insuranceAnnual.label}</small></>],
-            ['Maintenance, tyres & repairs / year', r => <>{value(r, 'maintenance')}<small>{Object.hasOwn(state.vehicles[r.car.legacyItemId] || {}, 'maintenancePerKm') ? 'Your reserve × annual driving' : r.estimates.maintenancePerKm.label}</small></>],
-            [finance ? 'Running expenses / month' : 'Running expenses / year', r => value(r, finance ? 'monthlyRunning' : 'annualRunning')],
-            ...(finance ? [['Loan payment / month', r => value(r, 'payment')]] : []),
-            [finance ? 'Loan + running / month' : 'Monthly running budget', r => value(r, 'monthlyBudget'), true],
-            [finance ? 'Gross salary for comfortable loan + running costs' : 'Gross salary for comfortable running costs', r => <strong className="ownership-amount" data-summary-salary={r.car.legacyItemId}>{r.assessment.requiredSalary == null ? 'Incomplete' : `${money(Math.ceil(r.assessment.requiredSalary))}/year`}</strong>],
-
-          ])}
+          <ul className="cost-vehicle-grid" role="list" style={{ '--car-count': cars.length }}>
+            {records.map(record => {
+              const { car, costs } = record;
+              const recommended = car.legacyItemId === topValue;
+              const trim = vehicleTrimLine(extractVehicleSpecs(car).specs);
+              return <li className={`cost-vehicle${recommended ? ' cost-vehicle-recommended' : ''}`} key={car.legacyItemId}>
+                <VehicleImage car={car} badge={recommended ? 'Best overall value' : undefined} />
+                <div className="cost-vehicle-body">
+                  <h3>{vehicleName(car)}</h3>
+                  {trim && <p className="vehicle-trim">{trim}</p>}
+                  <dl className="cost-vehicle-monthly" aria-live="polite" aria-atomic="true">
+                    <dt>{finance ? 'Estimated monthly total · loan + running' : 'Estimated monthly total · running'}</dt>
+                    <dd><span key={state.method} className="cost-vehicle-total">{money(costs.monthlyBudget)}</span>{costs.monthlyBudget != null && <span className="cost-vehicle-period">/mo</span>}</dd>
+                  </dl>
+                  <dl className="cost-vehicle-breakdown">
+                    {summaryRows.map(([label, render]) => <div key={label}><dt>{label}</dt><dd>{render(record)}</dd></div>)}
+                  </dl>
+                </div>
+              </li>;
+            })}
+          </ul>
+          {topValue && <p className="ownership-note">The Best Value ranking considers asking price and vehicle capabilities.{valueProvisional && ' The ranking is provisional.'}</p>}
           <p className="ownership-note">Running expenses include fuel or charging, insurance, a maintenance and repair reserve, parking, and other costs. Cash purchase savings are excluded from the monthly budget.</p>
           <div className="cost-summary-actions"><button type="button" onClick={() => openTab('purchase')}>Edit purchase estimates</button><button type="button" className="text-button" onClick={() => openTab('running')}>Edit running costs</button><button type="button" className="text-button" onClick={() => openTab('salary')}>Check your salary</button></div>
           {records.some(r => r.costs.monthlyBudget == null) && <p role="status" className="ownership-error">Incomplete totals need attention. Check Purchase, Running costs, and the shared assumptions above. Missing amounts never count as zero.</p>}

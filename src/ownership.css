@@ -53,7 +53,33 @@
 .ownership-cta h2 { font-size: 24px; margin: 0 0 8px; }
 .ownership-cta p { margin: 0; color: var(--text-secondary); }
 .ownership-cta .decision-primary { flex-shrink: 0; }
+.cost-vehicle-grid { display: grid; grid-template-columns: repeat(var(--car-count), minmax(0, 1fr)); gap: 16px; list-style: none; margin: 0; padding: 0; }
+.cost-vehicle { min-width: 0; overflow: hidden; border: 1px solid var(--border-subtle); border-radius: 16px; background: var(--surface); box-shadow: 0 2px 6px color-mix(in srgb, var(--text) 5%, transparent); }
+.cost-vehicle-recommended { border-color: var(--accent); }
+.cost-vehicle .vehicle-image { height: 176px; }
+.cost-vehicle .source-pill { top: auto; bottom: 8px; left: 8px; max-width: calc(100% - 64px); padding: 4px 8px; font-size: 12px; }
+.cost-vehicle-body { padding: 20px; }
+.cost-vehicle h3 { margin: 0 0 4px; font-family: var(--font-body); font-size: 20px; font-weight: 600; text-wrap: wrap; }
+.cost-vehicle-monthly { margin: 20px 0 8px; padding: 16px; border-radius: 12px; background: var(--surface-raised); }
+.cost-vehicle-monthly dt, .cost-vehicle-breakdown dt { color: var(--text-secondary); font-size: 14px; }
+.cost-vehicle-monthly dd { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px; color: var(--accent); font-variant-numeric: tabular-nums; }
+.cost-vehicle-total { font-size: 30px; line-height: 1.25; font-weight: 600; overflow-wrap: anywhere; }
+.cost-vehicle-period { color: var(--text-secondary); font-size: 14px; }
+.cost-vehicle-breakdown { margin: 0; }
+.cost-vehicle-breakdown > div { display: grid; grid-template-columns: minmax(0, 1fr) fit-content(48%); gap: 12px; align-items: baseline; padding-block: 12px; }
+.cost-vehicle-breakdown > div + div { border-top: 1px solid var(--border-subtle); }
+.cost-vehicle-breakdown dd { text-align: right; overflow-wrap: anywhere; }
+.cost-vehicle-breakdown .ownership-amount { font-size: 14px; }
+.cost-vehicle-breakdown small { margin: 4px 0 0; font-size: 12px; }
+@media (prefers-reduced-motion: no-preference) {
+  #costs-panel-summary:not([hidden]) .cost-vehicle-total { animation: cost-total-update 180ms var(--ease-ui) both; }
+  @keyframes cost-total-update { from { opacity: 0.65; transform: translateY(3px); } }
+}
+@media (max-width: 1050px) {
+  .cost-vehicle-grid:has(> :nth-child(4)) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 @media (max-width: 767px) {
+  .cost-vehicle-grid, .cost-vehicle-grid:has(> :nth-child(4)) { grid-template-columns: minmax(0, 1fr); }
   .ownership-table { min-width: calc(136px + var(--car-count) * 200px); }
   .ownership-table th:first-child { width: 136px; }
   .ownership-table th, .ownership-table td { padding: 16px; }

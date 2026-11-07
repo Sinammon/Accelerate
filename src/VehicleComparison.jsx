@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { unknown, vehicleName, safeUrl, mileageDisplay, priceDisplay, resolveMileage } from './vehicle-data.js';
+import { unknown, vehicleName, vehicleTrimLine, safeUrl, mileageDisplay, priceDisplay, resolveMileage } from './vehicle-data.js';
 import { m, useReducedMotion } from 'motion/react';
 import { emptyComparisonView, reconcileComparisonView } from './comparison-view.js';
 import { extractVehicleSpecs, FIELD_LABELS } from './vehicle-specs.js';
@@ -16,11 +16,13 @@ export function vehicleImageUrl(car, index = 0) {
   const value = (car.images || [])[index];
   return safeUrl(value) || (car.demo === true && /^\/images\/preview\/(civic|corolla|mazda3|jetta)\.jpg$/.test(value) ? value : null);
 }
-export function VehicleImage({ car }) {
+export function VehicleImage({ car, badge }) {
   const [index, setIndex] = useState(0);
   const images = car.images || [];
   const url = vehicleImageUrl(car, index);
-  return <div className="vehicle-image">{url ? <img src={url} alt={car.demo ? `${car.make} ${car.model} model-example photo; fictional vehicle details` : vehicleName(car)} referrerPolicy="no-referrer" onError={() => setIndex(i => i + 1)} /> : <div className="image-placeholder"><Icon name="engine" />Image unavailable</div>}
+  const alt = car.demo ? `${vehicleName(car)} model-example photo; fictional vehicle details` : `${vehicleName(car)} seller listing photo`;
+  return <div className="vehicle-image">{url ? <img src={url} alt={alt} referrerPolicy="no-referrer" onError={() => setIndex(i => i + 1)} /> : <div className="image-placeholder"><Icon name="engine" />Image unavailable</div>}
+    {badge && <span className="vehicle-photo-badge"><Icon name="trophy" size={14} />{badge}</span>}
     <span className="source-pill">{car.demo ? 'Model photo · fictional details' : 'Seller listing · eBay'}</span>
     {images.length > 1 && url && <button className="photo-next" aria-label={`Next photo of ${vehicleName(car)}`} onClick={() => setIndex(i => (i + 1) % images.length)}><Icon name="chevron" /></button>}
   </div>;
@@ -38,7 +40,7 @@ function ComparisonWarnings({ car }) {
 const TABS = [['overview', 'Overview'], ['specifications', 'Specifications'], ['sources', 'Sources & checks']];
 const KEY_FIELDS = ['transmission', 'transmissionSpeeds', 'displacement', 'engineType', 'induction', 'cylinders', 'horsepower', 'torque', 'curbWeightKg', 'zeroTo100KphSeconds', 'zeroTo60MphSeconds', 'drivetrain', 'fuelType', 'bodyType', 'seats'];
 
-export default function VehicleComparison({ cars, removeCar, clearCars, importForm, importLoading = false, navigate, retryResearch, clearSavedSpecs, onSaveDetails, view: suppliedView, onViewChange, notice, scenario: suppliedScenario, setScenario: suppliedSetScenario }) {
+export default function VehicleComparison({ cars, valueRanking, topValue, removeCar, clearCars, importForm, importLoading = false, navigate, retryResearch, clearSavedSpecs, onSaveDetails, view: suppliedView, onViewChange, notice, scenario: suppliedScenario, setScenario: suppliedSetScenario }) {
   const [localScenario, setLocalScenario] = useState(DEFAULT_SCENARIO);
   const scenario = suppliedScenario || localScenario, setScenario = suppliedSetScenario || setLocalScenario;
   const [localView, setLocalView] = useState(emptyComparisonView);
@@ -111,7 +113,8 @@ export default function VehicleComparison({ cars, removeCar, clearCars, importFo
   }
   const records = new Map(cars.map(car => [car, extractVehicleSpecs(car)]));
   const sourceCar = cars.find(car => car.legacyItemId === view.sourceId) || cars[0];
-  const cellClass = car => view.pair.includes(car.legacyItemId) ? `pair-visible pair-${view.pair.indexOf(car.legacyItemId)}` : 'pair-hidden';
+  const pairClass = car => view.pair.includes(car.legacyItemId) ? `pair-visible pair-${view.pair.indexOf(car.legacyItemId)}` : 'pair-hidden';
+  const cellClass = car => `${pairClass(car)}${car.legacyItemId === topValue ? ' comparison-top-match' : ''}`;
   const spec = (car, key, compact = false) => <SpecValue spec={records.get(car).specs[key]} compact={compact} onViewEvidence={compact ? () => showSources(car) : undefined} />;
   const sharedGaps = KEY_FIELDS.filter(key => cars.every(car => records.get(car).specs[key].status === 'unknown'));
   const hasEnergy = car => car.enrichment?.fuel?.status === 'matched' || car.enrichment?.catalog?.energy;
@@ -119,6 +122,10 @@ export default function VehicleComparison({ cars, removeCar, clearCars, importFo
   const experiences = new Map(cars.map(car => [car, resolveVehicleExperience(car, scenario)]));
   const experienceRows = [['Annual fuel / charging cost', car => <ExperienceCost experience={experiences.get(car)} scenario={scenario} />], ...COMFORT_TOPICS.map(([key, label]) => [label, car => <ComfortDetail experience={experiences.get(car)} topic={key} />]), ['Practicality', car => <PracticalitySummary experience={experiences.get(car)} />], ['Estimate details', car => <ExperienceAssumptions experience={experiences.get(car)} />]];
   const overviewRows = [
+    ...(valueRanking ? [['Best Value match score', car => {
+      const score = valueRanking.ranked.find(entry => entry.car === car)?.score;
+      return score == null ? 'Insufficient evidence' : <strong className="comparison-match-score">{score} / 100</strong>;
+    }]] : []),
     ['Asking price · seller', priceDisplay], ['Mileage · seller', mileageDisplay],
     ['Annual fuel / charging cost', car => {
       const energy = experiences.get(car).energy;
@@ -139,7 +146,32 @@ export default function VehicleComparison({ cars, removeCar, clearCars, importFo
     ...(cars.some(hasEnergy) ? [fuelRow] : []), ...experienceRows];
   const reviewCars = cars.filter(car => detectWarnings(car).length);
   function table(tableRows, label) {
-    return <div className="table-scroll comparison-table" role="region" aria-label={label} tabIndex={0}><table role="table" style={{ '--columns': cars.length }}><caption className="sr-only">{label}</caption><thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">Detail</th>{cars.map(car => <th role="columnheader" scope="col" className={cellClass(car)} key={car.legacyItemId}><article className={`car-card ${cellClass(car)}`} tabIndex={-1} data-car-id={car.legacyItemId}><VehicleImage key={car.legacyItemId} car={car} /><h2 className="vehicle-name">{vehicleName(car)}</h2><div className="comparison-car-actions"><button type="button" className="view-details text-button" onClick={() => showSources(car, true)} aria-label={`Details for ${vehicleName(car)}`}>Details</button><button type="button" className="text-button compare-remove" disabled={!removeCar} aria-label={`Remove ${vehicleName(car)} from comparison`} onClick={() => removeCar?.(car.legacyItemId, true)}>Remove</button></div>{detectWarnings(car).length > 0 && <details className="card-warnings"><summary>Review before choosing · {detectWarnings(car).map(warning => warning.label).join(', ')}</summary><ComparisonWarnings car={car} /></details>}</article></th>)}</tr></thead><tbody role="rowgroup">{tableRows.map(([label, format]) => <tr role="row" key={label}><th role="rowheader" scope="row">{label}</th>{cars.map(car => <td role="cell" className={cellClass(car)} key={car.legacyItemId}>{format(car)}</td>)}</tr>)}</tbody></table></div>;
+    return <div className="table-scroll comparison-table" role="region" aria-label={label} tabIndex={0}>
+      <table role="table" style={{ '--columns': cars.length, '--mobile-columns': Math.min(cars.length, 2) }}>
+        <caption className="sr-only">{label}</caption>
+        <thead role="rowgroup"><tr role="row">
+          <th role="columnheader" scope="col">{view.tab === 'overview' ? 'At a glance' : 'Detail'}</th>
+          {cars.map(car => {
+            const name = vehicleName(car);
+            const trim = vehicleTrimLine(records.get(car).specs);
+            const warnings = detectWarnings(car);
+            return <th role="columnheader" scope="col" className={cellClass(car)} key={car.legacyItemId}>
+              <article className={`car-card ${pairClass(car)}`} tabIndex={-1} data-car-id={car.legacyItemId}>
+                <VehicleImage car={car} badge={car.legacyItemId === topValue ? 'Top match' : undefined} />
+                <h2 className="vehicle-name">{name}</h2>
+                {trim && <p className="vehicle-trim">{trim}</p>}
+                <div className="comparison-car-actions">
+                  <button type="button" className="view-details text-button" onClick={() => showSources(car, true)} aria-label={`Details for ${name}`}>Details</button>
+                  <button type="button" className="text-button compare-remove" disabled={!removeCar} aria-label={`Remove ${name} from comparison`} onClick={() => removeCar?.(car.legacyItemId, true)}>Remove</button>
+                </div>
+                {!!warnings.length && <details className="card-warnings"><summary>Review before choosing · {warnings.map(warning => warning.label).join(', ')}</summary><ComparisonWarnings car={car} /></details>}
+              </article>
+            </th>;
+          })}
+        </tr></thead>
+        <tbody role="rowgroup">{tableRows.map(([label, format]) => <tr role="row" key={label}><th role="rowheader" scope="row">{label}</th>{cars.map(car => <td role="cell" className={cellClass(car)} key={car.legacyItemId}>{format(car)}</td>)}</tr>)}</tbody>
+      </table>
+    </div>;
   }
   const decisionButton = <button type="button" className="compare-decide" onClick={() => navigate?.('decide')}>Help me decide <Icon name="arrow" /></button>;
   return <section className="comparison-section page-section">
@@ -156,7 +188,7 @@ export default function VehicleComparison({ cars, removeCar, clearCars, importFo
       {cars.length > 2 && <div className="mobile-pair" role="group" aria-label="Choose two cars to compare">{[0, 1].map(index => <label key={index}>{index === 0 ? 'First car' : 'Second car'}<select value={view.pair[index]} onChange={event => selectPair(index, event.target.value)}>{cars.map(car => <option key={car.legacyItemId} value={car.legacyItemId}>{vehicleName(car)}</option>)}</select></label>)}</div>}
       {TABS.filter(([id]) => id !== view.tab).map(([id]) => <div key={id} id={`compare-panel-${id}`} role="tabpanel" aria-labelledby={`compare-tab-${id}`} hidden />)}
       <m.div key={view.tab} id={`compare-panel-${view.tab}`} role="tabpanel" aria-labelledby={`compare-tab-${view.tab}`} tabIndex={0} className="compare-panel" initial={reduced ? false : { opacity: 0.7 }} animate={{ opacity: 1 }} transition={{ duration: reduced ? 0 : 0.18, ease: [0.22, 1, 0.36, 1] }}>
-        {view.tab === 'overview' && <>{table(overviewRows, 'Vehicle overview')}<p className="overview-note">Comfort and running costs include labeled estimates. Ratings describe the model, not this car’s condition.</p><details className="decision-details scenario-panel"><summary>Adjust fuel assumptions &amp; practical needs</summary><ScenarioFields scenario={scenario} setScenario={setScenario} /></details></>}
+        {view.tab === 'overview' && <>{table(overviewRows, 'Vehicle overview')}<p className="overview-note">Comfort and running costs include labeled estimates. Ratings describe the model, not this car’s condition.{valueRanking?.provisional && ' Best Value scores are provisional.'}</p><details className="decision-details scenario-panel"><summary>Adjust fuel assumptions &amp; practical needs</summary><ScenarioFields scenario={scenario} setScenario={setScenario} /></details></>}
         {view.tab === 'specifications' && <><div className="table-heading"><h2>All supported specifications</h2><p>Seller claims, original records and model references stay clearly labeled.</p></div>{table(rows, 'Vehicle comparison table')}{!!sharedGaps.length && <details className="missing-specs"><summary>Details still missing</summary><p className="shared-gaps">Not documented for any contender: {sharedGaps.map(key => FIELD_LABELS[key]).join(', ')}. Model lookup may fill gaps when suitable sources are available.</p></details>}</>}
         {view.tab === 'sources' && sourceCar && <div className="sources-workspace" ref={evidenceRegion}><div className="source-photo"><VehicleImage key={sourceCar.legacyItemId} car={sourceCar} /></div><div className="source-selection"><label htmlFor="evidence-vehicle">Sources and checks for</label><select id="evidence-vehicle" value={sourceCar.legacyItemId} onChange={event => changeView({ ...view, sourceId: event.target.value })}>{cars.map(car => <option key={car.legacyItemId} value={car.legacyItemId}>{vehicleName(car)}</option>)}</select><ListingLink car={sourceCar} /><button type="button" className="text-button compare-remove" disabled={!removeCar} aria-label={`Remove ${vehicleName(sourceCar)} from comparison`} onClick={() => removeCar?.(sourceCar.legacyItemId, true)}>Remove this car</button></div><p className="car-meta source-listing-context"><strong>Listing location:</strong> {locationDisplay(sourceCar)} · <strong>Mileage:</strong> {mileageDisplay(sourceCar)}</p><ComparisonWarnings car={sourceCar} /><div className="source-status-grid"><VehicleSummary onSaveDetails={onSaveDetails} key={sourceCar.legacyItemId} car={sourceCar} retryResearch={retryResearch} onViewResults={() => showSources(sourceCar, true)} /></div><details className="specifics"><summary>All available seller specifications</summary><dl className="seller-specifics">{sourceCar.itemSpecifics?.length ? sourceCar.itemSpecifics.map((aspect, index) => <div key={index}><dt>{aspect.name}</dt><dd>{unknown([aspect.value].flat().join(', '))}</dd></div>) : <p>No item specifics supplied.</p>}</dl></details><details className="seller-description"><summary>Seller description &amp; mileage evidence</summary><div className="seller-context"><p><strong>Original headline:</strong> {unknown(sourceCar.title)}</p><p>{sourceCar.description || 'Unknown'}</p><p><strong>Mileage:</strong> {resolveMileage(sourceCar).reason}</p>{resolveMileage(sourceCar).evidence.map((item, index) => <p key={index}>{item.source}: “{item.quote}” → {item.amount ?? ''} {item.unit || 'unit unclear'}</p>)}</div></details></div>}
       </m.div>

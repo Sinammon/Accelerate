@@ -53,7 +53,8 @@ test('calculator compares four cars, validates edits, preserves sources and sepa
     }
     await React.act(async () => root.render(React.createElement(Harness)));
     const field = name => `[data-field="${name}"]`;
-    assert.equal(document.querySelectorAll('table').length, 3);
+    assert.equal(document.querySelectorAll('table').length, 2);
+    assert.equal(document.querySelectorAll('.cost-vehicle').length, 4);
     for (const table of document.querySelectorAll('table')) assert.equal(table.querySelectorAll('thead th').length, 5);
     assert.equal(document.querySelector('.ownership-method button[aria-pressed="true"]').textContent, 'Cash');
     assert.equal(document.querySelectorAll('.ownership-results > li').length, 4);
@@ -99,10 +100,15 @@ test('calculator compares four cars, validates edits, preserves sources and sepa
     assert.equal(document.querySelector(field('purchasePrice')).value, '25000');
     assert.equal(document.querySelector(field('energyOverride')).value, '1200');
     assert.equal(currentState.vehicles['car-0'].taxOverride, '100');
+    const monthlyTotal = () => document.querySelector('.cost-vehicle-total').textContent;
+    const cashTotal = monthlyTotal();
     await React.act(async () => document.querySelectorAll('.ownership-method button')[1].click());
+    assert.notEqual(monthlyTotal(), cashTotal);
+    assert.match(document.querySelector('.cost-vehicle').textContent, /Estimated monthly total · loan \+ running.*Down payment.*Loan payment/s);
     assert.equal(document.querySelector('.ownership-savings'), null);
     assert.match(document.querySelector('#costs-panel-purchase .ownership-table').textContent, /Monthly loan payment.*Total loan interest.*Total purchase repayment/s);
     await change(field('downPayment'), '999999');
+    assert.equal(monthlyTotal(), 'Incomplete');
     assert.match(document.querySelector(field('downPayment')).nextElementSibling.textContent, /cannot exceed/);
     assert.match(document.querySelector('.ownership-result-status').textContent, /Complete/);
     await change(field('downPayment'), '1000');
@@ -169,7 +175,8 @@ test('ownership journey preserves private inputs, cleans removed cars, resets on
     assert.equal(document.querySelector('#costs-tab-running').getAttribute('aria-selected'), 'true');
     assert.equal(document.querySelector('#primary-navigation [aria-current="page"]').getAttribute('href'), '#ownership');
     assert.equal(document.querySelector('.workflow'), null);
-    assert.equal(document.querySelectorAll('table').length, 3);
+    assert.equal(document.querySelectorAll('table').length, 2);
+    assert.equal(document.querySelectorAll('.cost-vehicle').length, 3);
     await change('[data-field="salary"]', '120000');
     await change('[data-field="insuranceAnnual"]', '999');
     await go('decide');
