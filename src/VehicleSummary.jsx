@@ -4,6 +4,7 @@ import VehicleDetailsEditor from './VehicleDetailsEditor.jsx';
 import { extractVehicleSpecs, FIELD_LABELS } from './vehicle-specs.js';
 import VehicleEvidence, { SpecValue, SourceStatus } from './VehicleEvidence.jsx';
 import ModelResearch from './ModelResearch.jsx';
+import RecallResearch from './RecallResearch.jsx';
 
 const summaryKeys = ['displacement', 'horsepower', 'torque', 'transmission', 'drivetrain', 'bodyType', 'seats'];
 export const INDIVIDUAL_CHECKS = 'Current mechanical condition, accident history, maintenance, modifications and recall completion are not verified by these sources. Confirm installed equipment and arrange an independent inspection.';
@@ -24,7 +25,7 @@ export default function VehicleSummary({ car, retryResearch, onViewResults, onSa
     {seller.length ? <dl className="summary-specs">{seller.map(key => <div key={key}><dt>{FIELD_LABELS[key]}</dt><dd><SpecValue spec={specs[key]} /></dd></div>)}</dl> : <p>No uncorroborated key specification claims available.</p>}
     <p>Amenities reported present or standard for this model: {amenities.join(', ') || 'none documented'}. Missing mentions do not mean equipment is absent.</p>
     {!!typical.length && <><h3>Typical and estimated model specifications</h3><dl className="summary-specs">{typical.map(key => <div key={key}><dt>{FIELD_LABELS[key]}</dt><dd><SpecValue spec={specs[key]} /></dd></div>)}</dl><p>Sourced references include citations below. Unverified estimates state their assumptions. Ranges and alternatives are excluded from rankings.</p></>}
-    <ModelAdvice car={car} /><ModelResearch car={car} />
+    <ModelAdvice car={car} /><ModelResearch car={car} /><RecallResearch key={car.legacyItemId} car={car} />
     <h3>Still to verify on this car</h3><p>{gaps.length ? `Missing or conflicting specifications: ${gaps.map(key => FIELD_LABELS[key]).join(', ')}. ` : ''}{INDIVIDUAL_CHECKS}</p>
     {gaps.some(key => ['horsepower', 'torque'].includes(key)) && <p>{specs.horsepower.reason || specs.torque.reason || 'Power specifications conflict; review the cited claims and confirm the engine with the seller.'}</p>}
     <VehicleEvidence car={car} retryResearch={retryResearch} showStatus={false} />

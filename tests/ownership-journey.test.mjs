@@ -165,7 +165,8 @@ test('ownership journey preserves private inputs, cleans removed cars, resets on
       await new Promise(resolve => setTimeout(resolve, 30));
     });
     assert.equal(window.location.hash, '#ownership');
-    assert.equal(document.activeElement, document.querySelector('h1'));
+    assert.equal(document.activeElement.id, 'costs-tab-running');
+    assert.equal(document.querySelector('#costs-tab-running').getAttribute('aria-selected'), 'true');
     assert.equal(document.querySelector('#primary-navigation [aria-current="page"]').getAttribute('href'), '#ownership');
     assert.equal(document.querySelector('.workflow'), null);
     assert.equal(document.querySelectorAll('table').length, 3);

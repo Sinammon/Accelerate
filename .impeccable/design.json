@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-06T00:00:00Z",
+  "generatedAt": "2026-11-07T00:00:00Z",
   "title": "Design System: Accelerate",
   "extensions": {
     "colorMeta": {
@@ -606,7 +606,7 @@
       "name": "Selected priority",
       "kind": "chip",
       "refersTo": "priority-selected",
-      "description": "Pressed priority control; all six modes are available in the live workspace.",
+      "description": "Pressed priority control; five priorities are available in the live workspace.",
       "html": "<button class=\"ds-priority\" aria-pressed=\"true\">Comfort</button>",
       "css": ".ds-priority{min-height:44px;padding:8px 12px;border:1px solid var(--accent);border-radius:8px;background:var(--accent);color:var(--ink);font:600 14px var(--font-sans);cursor:pointer}.ds-priority:hover{background:var(--action)}.ds-priority:focus-visible{outline:3px solid var(--accent);outline-offset:4px}"
     },
@@ -631,7 +631,7 @@
       "kind": "custom",
       "refersTo": "metric-grid",
       "description": "Four existing product facts with fine dividers, tabular figures and no ornamental dots or diamond.",
-      "html": "<dl class=\"ds-metrics\"><div><dt>Cars in one shortlist</dt><dd>4</dd></div><div><dt>Ways to find your match</dt><dd>6</dd></div><div><dt>Clearer comparison</dt><dd>1</dd></div><div><dt>Accounts required</dt><dd>0</dd></div></dl>",
+      "html": "<dl class=\"ds-metrics\"><div><dt>Cars in one shortlist</dt><dd>4</dd></div><div><dt>Ways to find your match</dt><dd>5</dd></div><div><dt>Clearer comparison</dt><dd>1</dd></div><div><dt>Accounts required</dt><dd>0</dd></div></dl>",
       "css": ".ds-metrics{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;color:var(--text,#041222);font-family:var(--font-sans,Satoshi,sans-serif)}.ds-metrics>div{display:flex;flex-direction:column;min-width:0;padding:24px 0;border-color:var(--border-subtle,#E3EBF1);border-style:solid;border-width:0}.ds-metrics>div:nth-child(-n+2){border-bottom-width:1px}.ds-metrics>div:nth-child(odd){border-right-width:1px;padding-right:24px}.ds-metrics>div:nth-child(even){padding-left:24px}.ds-metrics dt{order:2;max-width:208px;margin-top:12px;font-size:14px;line-height:1.625;color:var(--text-secondary,#46596C)}.ds-metrics dd{order:1;margin:0;font-size:36px;font-weight:500;line-height:1;font-variant-numeric:tabular-nums}@media(min-width:640px){.ds-metrics dd{font-size:48px}.ds-metrics>div:nth-child(odd){padding-right:32px}.ds-metrics>div:nth-child(even){padding-left:32px}}"
     },
     {
@@ -645,7 +645,7 @@
   ],
   "narrative": {
     "northStar": "A familiar welcome, a clear comparison",
-    "overview": "The restored navy/electric-blue home dashboard welcomes shoppers with its floating import composer, source strip, editorial section and horizon. Working screens remain compact and use the full content width, with no left sidebar. Compare displays contained vehicle photos above the six-row overview. A header Cars menu keeps removal and selected-car source access available. Compare supports inline import from its heading or the header action, plus per-car removal beside each photo. Recommendations present complete reasons and model context once in the main card, with no repeated explanation disclosure. The 6 November Unslop refinement retains the blue atmosphere as an explicit user preference, makes it static, and simplifies the composer, type, icon system and evidence chrome. Practical, measured and candid is the direction; existing car photos and aligned CAD figures carry the detail.",
+    "overview": "The static blue homepage retains the working composer, source strip, editorial product facts and horizon. Compact Compare keeps contained photos above six essential rows. Help me decide offers five priorities and one result capped at six information items including overview, category-specific takeaways, trade-off and grouped warnings. Full model advice, optional recall lookup and evidence live in Compare > Sources & checks. Costs and practical needs remain editable through existing shared state. No scoring, API or storage behavior changes.",
     "keyCharacteristics": [
       "Compact hierarchy, flat surfaces and explicit selected states.",
       "Satoshi interface text with the retained Clash Grotesk wordmark.",
@@ -675,7 +675,7 @@
       },
       {
         "name": "Direct comparison actions",
-        "body": "Keep adding and removing cars on Compare; show the recommendation explanation once and fully, with citations and visible trade-offs and warnings.",
+        "body": "Keep adding and removing cars on Compare. Recommendation has at most six category-specific information items including trade-off and warnings, plus direct links to the displayed car’s full sources and relevant editable assumptions.",
         "section": "components"
       },
       {

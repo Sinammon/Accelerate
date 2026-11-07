@@ -114,7 +114,7 @@ test('engine reliability requires exact applicability and supporting engine-fami
   assert.equal(validResearchInsight({ ...insight, text: 'This car is reliable and has no accident history.' }, engineScope), false);
 });
 
-test('reliability and seller history appear in value and affordability explanations without scoring bonuses', () => {
+test('value retains qualified ownership context while affordability stays focused on costs without scoring bonuses', () => {
   const car = { ...ratedCar('reliability'), ...engineScope, year: '2018', description: '3.0 L I6. 300 hp. 400 Nm. Curb weight: 1500 kg. Clean Carfax.' };
   const original = structuredClone(car);
   car.enrichment.modelSpecs.insights = [insight];
@@ -122,8 +122,10 @@ test('reliability and seller history appear in value and affordability explanati
     const summary = decisionSummary([car], mode, 2026);
     const entry = summary.ranking.ranked[0];
     const notes = entrySummary(summary, entry);
-    assert.match(JSON.stringify(notes.reasons), /B58 engine/);
-    assert.match(JSON.stringify(notes.reasons), /report not verified/);
+    if (mode === 'value') {
+      assert.match(JSON.stringify(notes.reasons), /B58 engine/);
+      assert.match(JSON.stringify(notes.reasons), /report not verified/);
+    } else assert.doesNotMatch(JSON.stringify(notes.reasons), /B58 engine|Seller states/);
     assert.equal(entry.score, decisionSummary([original], mode, 2026).ranking.ranked[0].score);
     if (mode === 'cost') assert.match(JSON.stringify(notes.reasons), /Estimated annual fuel cost.*km\/year/);
   }

@@ -1,127 +1,62 @@
 import React, { useRef, useState } from 'react';
-import { DEFAULT_SCENARIO } from './decision-engine.js';
-import { decisionSummary, entrySummary, keyFacts, PRIMARY_MODES } from './decision-summary.js';
-import VehicleEvidence from './VehicleEvidence.jsx';
-import { priceDisplay, vehicleName } from './vehicle-data.js';
-import { ListingLink, VehicleImage, vehicleImageUrl } from './VehicleComparison.jsx';
-import { DecisionResearch } from './ModelResearch.jsx';
+import { decisionSummary, entrySummary, PRIMARY_MODES } from './decision-summary.js';
+import { vehicleName } from './vehicle-data.js';
+import { VehicleImage, vehicleImageUrl } from './VehicleComparison.jsx';
 import Icon from './Icons.jsx';
 import WorkspaceHeading from './WorkspaceHeading.jsx';
-import WorkspaceTabs, { WorkspacePanel } from './WorkspaceTabs.jsx';
-import { DIMENSION_LABELS } from './capability-scoring.js';
-import { FIELD_LABELS, specEvidenceLabel } from './vehicle-specs.js';
-import { SpecCitations } from './VehicleEvidence.jsx';
-import OwnershipCosts from './OwnershipCosts.jsx';
-import VehicleExperience from './VehicleExperience.jsx';
-import ScenarioFields from './ScenarioFields.jsx';
 
-function CategoryDetails({ entry, mode }) {
-  const rows = mode === 'comfort' ? ['rideQuality', 'cabinQuietness', 'seatComfort', 'seatHeating'].map(key => ({ key, label: DIMENSION_LABELS[key], value: entry.values[key] == null ? 'Unknown' : `${entry.values[key]} / 5`, evidence: entry.evidence[key] }))
-    : mode === 'performance' ? ['horsepower', 'torque', 'curbWeightKg', 'zeroTo100KphSeconds', 'zeroTo60MphSeconds'].map(key => ({ key, label: FIELD_LABELS[key], value: entry.specs[key].value?.toLocaleString('en-CA', { maximumFractionDigits: 2 }) ?? 'Unknown', evidence: entry.specs[key].evidence, source: entry.specs[key].value != null ? `${specEvidenceLabel(entry.specs[key])}${entry.specs[key].measurementMethod ? ` · ${entry.specs[key].measurementMethod}` : ''}` : '' }))
-      : ['seats', 'body', 'passengerSpace', 'cargoSpace'].map(key => ({ key, label: DIMENSION_LABELS[key] || (key === 'seats' ? 'Meets seating need' : 'Preferred body style'), value: entry.values[key] ?? 'Unknown', evidence: entry.evidence[key] }));
-  if (mode === 'performance') rows.push({ key: 'ratio', label: 'Power-to-weight (hp/tonne)', value: entry.values.powerToWeight?.toFixed(1) ?? 'Unknown', evidence: entry.evidence.powerToWeight, source: 'Derived from compatible power and curb weight' });
-  return <dl className="capability-details" aria-label={`${mode} evidence`}>{rows.map(row => <div key={row.key}><dt>{row.label}</dt><dd><strong>{row.value}</strong>{row.source && <small>{row.source}</small>}<SpecCitations evidence={row.evidence} />{mode === 'comfort' && (row.key === 'seatComfort' ? ['frontSeatComfort', 'rearSeatComfort'] : row.key === 'passengerSpace' ? ['frontPassengerSpace', 'rearPassengerSpace'] : [row.key]).map(key => entry.ratings[key] && <small key={key}>{DIMENSION_LABELS[key]}: {entry.ratings[key].rationale}</small>)}</dd></div>)}</dl>;
-}
-
-function CapabilityComponents({ entry, result }) {
-  if (result.mode.id === 'cost') return null;
-  if (!['value', 'balanced'].includes(result.mode.id)) return <CategoryDetails entry={entry} mode={result.mode.id} />;
-  return <details><summary>Capability components &amp; evidence</summary>{['comfort', 'performance', 'practical'].map(key => {
-    const group = result.componentScores[key], component = group.entries.find(item => item.car === entry.car);
-    return <section key={key}><h4>{key === 'practical' ? 'Practicality' : key[0].toUpperCase() + key.slice(1)} · {component.score == null ? 'Unscored' : `${component.score.toFixed(1)} / 100`} · {(group.coverage * 100).toFixed(0)}% coverage</h4><CategoryDetails entry={component} mode={key} /></section>;
-  })}</details>;
-}
-
-function ModeButton({ item, mode, setMode }) {
-  return <button type="button" className={`mode-card ${mode === item.id ? 'selected' : ''}`} data-mode={item.id} aria-pressed={mode === item.id} onClick={() => setMode(item.id)}>
-    <span className="mode-icon"><Icon name={mode === item.id ? 'check-circle' : item.icon || 'compare'} /></span>
-    <strong>{item.label || item.title}</strong>
-  </button>;
-}
-function ListingWarnings({ entry }) {
-  return !!entry.warnings.length && <div className="warning-details" role="note"><strong>Review before choosing</strong>{entry.warnings.map((warning, index) => <p key={index}><b>{warning.label}:</b> {warning.evidence}</p>)}</div>;
-}
-function MatchCard({ summary, selectedId, onSelect }) {
+function MatchCard({ summary, selectedId, onSelect, onViewSources, onAdjustCosts, onAdjustPracticalNeeds }) {
   const index = Math.max(0, summary.ranking.ranked.findIndex(entry => entry.car.legacyItemId === selectedId));
+  const entry = summary.ranking.ranked[index], { car } = entry;
+  const endorsed = summary.ranking.best.includes(entry);
   const move = delta => onSelect(summary.ranking.ranked[(index + delta + summary.ranking.ranked.length) % summary.ranking.ranked.length].car.legacyItemId);
   const dialog = useRef(null);
-  const entry = summary.ranking.ranked[index % summary.ranking.ranked.length];
-  const { car } = entry;
-  const endorsed = summary.ranking.best.includes(entry);
   const notes = entrySummary(summary, entry);
-  const facts = keyFacts(car, summary.requested.mode.id).filter(fact => !notes.reasons.some(reason => reason.text.includes(fact.value)));
-  const label = entry.score == null ? 'What we know so far' : entry.reviewRequired ? 'Review before choosing'
-    : !endorsed ? 'Other contender' : summary.provisional ? 'Provisional match' : summary.shared ? 'Equal match' : 'Best category fit';
-  const explanation = notes.explanation;
+  const mode = summary.requested.mode.id;
+  const label = entry.identityMismatch ? 'Resolve configuration' : entry.score == null ? 'More information needed' : entry.reviewRequired ? 'Review before choosing'
+    : summary.single ? 'Only contender' : !endorsed ? 'Other contender' : summary.provisional ? 'Provisional match' : summary.shared ? 'Equal match' : 'Best category fit';
   const canView = (car.images || []).some((_, i) => vehicleImageUrl(car, i));
+  const navigate = (event, action) => { if (action) { event.preventDefault(); action(car); } };
   return <>
-    <article className={`decision-match ${endorsed ? 'best-match' : ''}`} data-basis={summary.kind}>
-      <div className="decision-photo"><VehicleImage key={car.legacyItemId} car={car} />{canView && <button type="button" className="view-photo" onClick={() => dialog.current?.showModal()}><Icon name="expand" />View larger photo</button>}</div>
-      <div className="decision-match-copy"><div className="match-topline"><span className={`recommendation-badge ${!endorsed ? 'neutral' : ''} ${entry.warnings.length ? 'caution' : ''}`}><Icon name={endorsed && summary.kind === 'supported' && !entry.warnings.length ? 'trophy' : 'info'} />{summary.requested.mode.title.toLowerCase()} &middot; {label}</span></div>
-        <h2>{vehicleName(car)}</h2><p className="decision-reason">{explanation}</p>
-        <p className="evidence-coverage">{entry.score == null ? 'Available details and next checks.' : summary.provisional ? 'Tentative recommendation · estimates may affect the result.' : 'Based on comparable vehicle details.'} Confirm this car’s equipment and condition.</p>
-        <ul className="decision-reasons">{notes.reasons.map(reason => <li key={reason.text} className={reason.source || reason.context ? 'model-context' : ''}><Icon name={reason.source ? 'book' : reason.context ? 'info' : 'check-circle'} /><span>{reason.topic && <strong className="model-advice-topic">{reason.topic}</strong>}{reason.text}<small>{reason.label}{reason.checked && <> · {new Date(reason.checked).toLocaleDateString('en-CA')}</>}{(reason.sources || (reason.source ? [reason.source] : [])).map((source, index) => <React.Fragment key={source.url || index}> &middot; <a href={source.url} target="_blank" rel="noopener noreferrer">{source.publisher} <Icon name="arrow" /></a></React.Fragment>)}</small></span></li>)}</ul>
-        <div className="decision-tradeoff"><Icon name="balance" /><b>Trade-off</b><span>{notes.tradeoff}{notes.tradeoffSource && <small><a href={notes.tradeoffSource.url} target="_blank" rel="noopener noreferrer">{notes.tradeoffSource.publisher} <Icon name="arrow" /></a></small>}</span></div>
-        <ListingWarnings entry={entry} />
-        {summary.requested.mode.id === 'cost' && <a className="decision-primary ownership-match-action" href="#ownership">Calculate cost of ownership <Icon name="arrow" /></a>}
+    <article className={`decision-match ${endorsed ? 'best-match' : ''}`} data-basis={summary.kind} data-car-id={car.legacyItemId}>
+      <div className="decision-photo"><VehicleImage key={car.legacyItemId} car={car} />{canView && <button type="button" className="view-photo" onClick={() => dialog.current?.showModal()}><Icon name="expand" />View larger photo</button>}{car.demo && <a className="decision-photo-credit" href="/images/preview/credits.html" target="_blank" rel="noreferrer">Model-example photo &middot; credits</a>}</div>
+      <div className="decision-match-copy">
+        <div className="match-topline"><span className={`recommendation-badge ${entry.reviewRequired || entry.identityMismatch ? 'caution' : ''}`}>{label}</span></div>
+        <h2>{vehicleName(car)}</h2>
+        <ol className="decision-reasons" aria-label={`${PRIMARY_MODES.find(item => item.id === mode).label} information`}>
+          {notes.items.map((item, itemIndex) => {
+            const labeled = item.topic && item.text.startsWith(`${item.topic}: `);
+            return <li key={`${item.kind}-${item.key || 'item'}-${itemIndex}`} data-kind={item.kind} className={item.kind === 'warning' ? 'decision-warning-item' : item.kind === 'tradeoff' ? 'decision-tradeoff-item' : undefined}>
+            <span>{item.topic && <strong className="decision-item-topic">{item.topic}{labeled && ': '}</strong>}{labeled ? item.text.slice(item.topic.length + 2) : item.text}
+              <small>{item.label}{item.checked && <> &middot; {new Date(item.checked).toLocaleDateString('en-CA')}</>}{itemIndex === 0 && summary.provisional && <> &middot; Estimates or incomplete evidence make this result provisional</>}
+                {(item.sources || (item.source ? [item.source] : [])).map((source, sourceIndex) => <React.Fragment key={source.url || sourceIndex}> &middot; <a href={source.url} target="_blank" rel="noopener noreferrer">{source.publisher}</a></React.Fragment>)}
+              </small>
+            </span>
+          </li>; })}
+        </ol>
+        <div className="decision-result-actions"><a className="decision-sources-link" href="#compare" onClick={event => navigate(event, onViewSources)}>Sources &amp; checks<Icon name="arrow" /></a>
+          {mode === 'cost' && <a className="decision-adjust-costs" href="#ownership" onClick={event => navigate(event, onAdjustCosts)}>Adjust costs<Icon name="arrow" /></a>}
+          {mode === 'practical' && <a className="decision-adjust-practical" href="#compare" onClick={event => navigate(event, onAdjustPracticalNeeds)}>Adjust practical needs<Icon name="arrow" /></a>}
+        </div>
       </div>
-      <details className="match-detail-disclosure"><summary>Vehicle details, comfort &amp; estimate sources</summary>{!!facts.length && <div className="decision-key-facts">{facts.map(fact => <div key={fact.label}><span className="fact-icon"><Icon name={fact.icon} /></span><div><span>{fact.label}</span><strong>{fact.value}</strong><small>{fact.sourceUrl ? <a href={fact.sourceUrl} target="_blank" rel="noopener noreferrer">{fact.source}</a> : fact.source}</small></div></div>)}</div>}
-      <VehicleExperience car={car} scenario={summary.requested.scenario} showComfort={summary.requested.mode.id === 'comfort'} showPracticality={summary.requested.mode.id === 'practical'} /></details>
-      <div className="decision-card-foot">{summary.ranking.ranked.length > 1 && <div className="contender-controls"><button type="button" className="decision-arrow previous" aria-label="Previous contender" onClick={() => move(-1)}><Icon name="chevron" />Previous</button><button type="button" className="decision-arrow next" aria-label="Next contender" onClick={() => move(1)}>Next<Icon name="chevron" /></button></div>}<span>{index % summary.ranking.ranked.length + 1} of {summary.ranking.ranked.length} contenders</span>{car.demo && <a href="/images/preview/credits.html" target="_blank" rel="noreferrer">Photo credits</a>}<ListingLink car={car} /></div>
+      {summary.ranking.ranked.length > 1 && <div className="decision-card-foot"><span>{index + 1} of {summary.ranking.ranked.length} contenders</span><div className="contender-controls"><button type="button" className="decision-arrow previous" aria-label="Previous contender" onClick={() => move(-1)}><Icon name="chevron" />Previous</button><button type="button" className="decision-arrow next" aria-label="Next contender" onClick={() => move(1)}>Next<Icon name="chevron" /></button></div></div>}
     </article>
-    <dialog className="decision-photo-dialog" ref={dialog} aria-label={`Larger photos of ${vehicleName(car)}`} onClick={e => { if (e.target === e.currentTarget) dialog.current.close(); }}><button type="button" autoFocus onClick={() => dialog.current.close()} aria-label="Close larger photo">Close ×</button><VehicleImage key={`large-${car.legacyItemId}`} car={car} /></dialog>
+    <dialog className="decision-photo-dialog" ref={dialog} aria-label={`Larger photos of ${vehicleName(car)}`} onClick={event => { if (event.target === event.currentTarget) dialog.current.close(); }}><button type="button" autoFocus onClick={() => dialog.current.close()} aria-label="Close larger photo">Close<Icon name="close" /></button><VehicleImage key={`large-${car.legacyItemId}`} car={car} /></dialog>
   </>;
 }
 
-export default function DecisionDashboard({ cars, mode = 'value', setMode, retryResearch, scenario: suppliedScenario, setScenario: suppliedSetScenario, view: suppliedView, onViewChange, ownership }) {
-  const [localScenario, setLocalScenario] = useState(DEFAULT_SCENARIO);
-  const scenario = suppliedScenario || localScenario, setScenario = suppliedSetScenario || setLocalScenario;
-  const [localView, setLocalView] = useState({ tab: 'summary', selectedId: null });
+export default function DecisionDashboard({ cars, mode = 'value', setMode, scenario, view: suppliedView, onViewChange, ownership, onViewSources, onAdjustCosts, onAdjustPracticalNeeds }) {
+  const [localView, setLocalView] = useState({ selectedId: null });
   const view = suppliedView || localView, changeView = onViewChange || setLocalView;
-  const setTab = tab => changeView(previous => ({ ...previous, tab }));
-  const scenarioPanel = useRef(null);
   const summary = decisionSummary(cars, mode, new Date().getFullYear(), scenario, ownership);
-  const result = summary.requested;
-  const missing = result.criteria.filter(c => c.weight > 0 && !c.active);
-  return <section className="page-section decision-page">
-    <WorkspaceHeading className="decision-heading" title="Your recommendation" description="Choose what matters most. See your match, the reasons, and the trade-off.">
-      <a className="back-link" href="#compare">Back to comparison <Icon name="arrow" /></a>
+  return <section className="page-section decision-page focused-decision">
+    <WorkspaceHeading className="decision-heading" title="Your recommendation" description="Choose a priority to see the points that matter.">
+      <a className="back-link" href="#compare">Back to comparison<Icon name="arrow" /></a>
     </WorkspaceHeading>
-    <div className="priority-picker"><span id="priority-label">What matters most?</span><div className="mode-grid" role="group" aria-labelledby="priority-label">{[...PRIMARY_MODES, { id: 'balanced', label: 'Balanced', icon: 'balance' }].map(item => <ModeButton key={item.id} item={item} mode={mode} setMode={setMode} />)}</div></div>
-    <WorkspaceTabs id="recommendation" label="Recommendation views" tabs={[["summary", "Summary"], ["ranking", "Ranking & evidence"], ["assumptions", "Assumptions"]]} value={view.tab} onChange={setTab} />
-    {cars.some(car => car.demo) && <p className="decision-demo-note">Fictional demo cars · Listing details are examples; linked model research is real.</p>}
-    {cars.some(car => ['loading', 'loading-model'].includes(car.enrichment?.status)) && <p className="decision-status" role="status">Checking specifications and typical model sources… Your result may update.</p>}
-    <WorkspacePanel id="recommendation" value="summary" active={view.tab}><div className="decision-result" aria-live="polite" aria-atomic="false">
-      {summary.kind === 'empty' ? <div className="decision-empty result-banner"><Icon name="compare" /><h2>Your shortlist comes first</h2><p>Add a vehicle or use the fictional demo to explore your options.</p><a className="primary-link" href="#compare">Choose your cars <Icon name="arrow" /></a></div>
-        : <MatchCard summary={summary} selectedId={view.selectedId} onSelect={selectedId => changeView(previous => ({ ...previous, selectedId }))} />}
-    </div></WorkspacePanel>
-    <WorkspacePanel id="recommendation" value="ranking" active={view.tab}>
-    {!!cars.length && <>
-      {mode === 'cost' && <OwnershipCosts ownership={ownership} cars={cars} scenario={scenario} research={result.research} onAdjustFuel={() => {
-        setTab('assumptions');
-        requestAnimationFrame(() => {
-        const panel = scenarioPanel.current;
-        if (!panel) return;
-        panel.open = true;
-        panel.querySelector('input')?.focus({ preventScroll: true });
-        panel.scrollIntoView?.({ block: 'start', behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
-        });
-      }} />}
-      <details className="decision-details" open><summary>Why this result? Sources &amp; checks</summary><div className="decision-detail-content">
-        <p>{result.limitation}</p>
-        {!!missing.length && <p className="missing-measurements"><strong>Not compared:</strong> {missing.map(c => c.label).join(', ')}. Missing details never count as absent equipment.</p>}
-        <DecisionResearch result={result} />
-        <div className="ranking-list">{summary.ranking.ranked.map(entry => <article className="ranking-row" key={entry.car.legacyItemId}><div className="ranking-main"><div><h3>{vehicleName(entry.car)}</h3><p>{priceDisplay(entry.car)}</p></div><strong className="ranking-score">{entry.score == null ? 'Unscored' : `${entry.score.toFixed(2)} / 100`}</strong></div><p className="score-basis">{`Preference score | ${(result.evidenceCoverage * 100).toFixed(0)}% evidence coverage${result.provisional ? ' | provisional' : ''}. Not a market valuation or condition rating.`}</p><div className="score-parts">{entry.breakdown.map(c => <span key={c.key}>{c.label}: {c.points.toFixed(1)} × {(c.share * 100).toFixed(1)}% = {c.contribution.toFixed(2)} · {c.evidenceLabel}</span>)}</div><CapabilityComponents entry={entry} result={result} /><ListingWarnings entry={entry} /><VehicleEvidence car={entry.car} scenario={scenario} retryResearch={retryResearch} /><details><summary>Original seller description</summary><p className="inline-description">{entry.car.description || 'No description supplied.'}</p><ListingLink car={entry.car} /></details></article>)}</div>
-        <p className="evidence-legend">Model reviews describe tested or typical configurations. They do not verify equipment, condition, accident history or recall completion on these cars.</p>
-      </div></details>
-    </>}
-    {!cars.length && <p>Add cars to see their ranking and evidence.</p>}
-    </WorkspacePanel>
-    <WorkspacePanel id="recommendation" value="assumptions" active={view.tab}>
-    <p className="mode-explanation">{result.mode.description}</p>
-    <details className="decision-details scenario-panel" ref={scenarioPanel} open><summary>Adjust fuel assumptions &amp; practical needs</summary><ScenarioFields scenario={scenario} setScenario={setScenario} /></details>
-    <details className="decision-details more-priorities"><summary>How the scoring works</summary><p>{result.limitation}</p><p>Sourced information, model estimates and general baselines contribute to scores. Every eligible car uses the same category factors. Comfort and energy gaps receive labeled estimates; other unavailable factors are excluded. Comfort and Performance never switch to a price-based winner. Coverage is the share of intended scoring weight, not an accuracy estimate. Under 80% of the intended evidence, an unranked contender or a single contender makes the comparison provisional.</p><p>Comfort uses one cross-class scale: 0 severe deficiency, 1 poor, 2 basic, 3 good mainstream, 4 premium, 5 exceptional. Front and rear cushioning count equally where rear seats exist. Passenger and cargo space belong to Practicality. Heating has a neutral allowance when availability is unresolved. Brand, price, marketing and gadget counts do not establish refinement. Broad review sentiment adds no bonus points.</p><p>Category scores and purchase warnings are separate. Seating discrepancies do not demote comfort; serious mechanical concerns mark a category leader review required. Identity/configuration conflicts remain excluded. Unconfirmed equipment is labeled as estimated; no installed equipment is implied. Scores are neither market valuations nor condition inspections.</p></details>
-    </WorkspacePanel>
-    <p className="decision-footnote">Confirm seller claims and arrange an independent inspection before buying.</p>
+    <div className="priority-picker"><span id="priority-label">What matters most?</span><div className="mode-grid" role="group" aria-labelledby="priority-label">{PRIMARY_MODES.map(item => <button type="button" key={item.id} className={`mode-card ${summary.requested.mode.id === item.id ? 'selected' : ''}`} data-mode={item.id} aria-pressed={summary.requested.mode.id === item.id} onClick={() => setMode?.(item.id)}><strong>{item.label}</strong></button>)}</div></div>
+    <div className="decision-result" aria-live="polite" aria-atomic="false">
+      {!cars.length ? <div className="decision-empty result-banner"><h2>Your shortlist comes first</h2><p>Add a vehicle or use the fictional demo to explore your options.</p><a className="primary-link" href="#compare">Choose your cars<Icon name="arrow" /></a></div>
+        : <MatchCard summary={summary} selectedId={view.selectedId} onSelect={selectedId => changeView(previous => ({ ...previous, selectedId }))} onViewSources={onViewSources} onAdjustCosts={onAdjustCosts} onAdjustPracticalNeeds={onAdjustPracticalNeeds} />}
+    </div>
   </section>;
 }

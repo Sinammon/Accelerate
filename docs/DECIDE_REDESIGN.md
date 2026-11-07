@@ -1,23 +1,21 @@
-# Help Me Decide: capability scoring
+# Focused Help me decide
 
-Five primary priorities are visible: Best Value, Affordability, Comfort, Balanced and Performance. Practicality remains under More priorities. The approved dark purple design, source disclosures, contender navigation and photo dialog remain.
+Five priorities are visible: Best Value, Affordability, Comfort, Practicality and Performance. Balanced stays inside the ranking engine for compatibility and is not a UI choice. Unsupported presentation modes normalize to Best Value.
 
-## Category scores
+## Six-item contract
 
-Comfort uses ride 35%, quietness 30%, seats 25% and passenger space 10%, with front and rear occupants equally weighted within seating and space. The cross-class review rubric is 0 severe deficiency, 1 poor, 2 basic, 3 good mainstream, 4 premium, 5 exceptional. Unknown is never a middle rating; brand, price, marketing and gadget counts cannot supply a refinement score.
+Each selected-car result has one list with at most six information items, counting its overview, trade-off and consolidated purchase warning. Warning labels have a reserved slot and are never dropped for optional strengths. Photo/identity, match status and navigation controls are outside the count. Provenance and uncertainty accompany the relevant item. Missing evidence produces fewer points rather than filler.
 
-Performance compares the same acceleration metric and method (50%), compatible horsepower per tonne (30%) and torque (20%). With no comparable acceleration it uses power-to-weight 70%, horsepower 20%, torque 10%; with no comparable weight it uses horsepower 70%, torque 30%. These proxy strategies cap evidence coverage at 70% and 50% respectively. Curb weight is kilograms; output is hp and Nm. Gross/dry weights, incompatible configurations and converted acceleration metrics are rejected.
+Best Value leads with validated model guidance, an applicable reviewed profile or supported configuration context, and clearly identifies unavailable overview data. It then prioritizes asking-price context, supported standouts and ownership concerns. Comfort selects ride, seat cushioning/support, cabin quietness and heating. Practicality selects passenger/cargo room, seating and everyday usability. Performance selects supported acceleration, power-to-weight and engine output. Affordability selects purchase price, annual running total, energy, insurance and maintenance. All trade-offs are category-specific. General model benefits and reliability briefs are not appended to every mode.
 
-Capability combines Comfort 40%, Performance 35% and Practicality 25%. Practicality uses seating-needs fit, an optional body preference, front/rear passenger space and usable cargo capacity. Best Value uses capability/asking price/age/mileage at 50/35/10/5. Balanced uses capability/affordability/age/mileage at 75/15/5/5. Affordability uses asking price/fuel at 80/20 when comparable. Broad favourable/mixed/unfavourable sentiment contributes no extra points.
+## Navigation and source authority
 
-## Missing evidence and purchase warnings
+The result has no Summary/Ranking/Assumptions tabs, extra fact grid or general detail disclosure. Previous/Next preserves contender browsing. Sources & checks opens and focuses the displayed car in Compare; full model advice, citations, warnings, configuration editing, seller evidence and optional recall lookup remain there. Adjust costs opens and focuses Running costs; Adjust practical needs opens Compare Overview assumptions and focuses seating. Existing shared state preserves valid edits and private inputs.
 
-Eligible contenders share the same compared factors. No category evidence means unranked; no common factors means no winner. Comfort and Performance never fall back to Best Value. Coverage tracks supported original factor weight, including nested capability. Below 80%, an unranked contender or only one contender makes a result provisional.
+Presentation selection and budgeting live in `src/decision-summary.js`; rendering lives in `src/DecisionDashboard.jsx`; App owns navigation and shared state. Existing category-tagged research and structured ratings/specifications supply category facts. No new provider request or keyword-based classification is added.
 
-Scores describe category fit. A seating-count mismatch stays visible without demoting ride comfort. Serious mechanical concerns mark a category leader review required without pretending another car is more comfortable. Identity/configuration mismatches remain excluded. A score is neither a market valuation nor a condition inspection.
+## Scoring and validation
 
-## Research and checks
+The five priorities retain their existing ranking formulas, comparable-evidence rules, provisional estimates and purchase-warning safeguards. Acceleration metrics/methods are not mixed, power-to-weight does not establish a quicker car without compatible acceleration evidence, and missing costs never become zero. The internal Balanced calculation is unchanged.
 
-The existing free-tier Gemini endpoint returns validated numeric findings plus professional-review dimension ratings, scope, rationale and citations. Manufacturer marketing cannot supply subjective dimension ratings. Older notes remain readable. Failed refreshes preserve usable specifications, notes and ratings. Demo cars use bundled sources and make no AI calls. No new storage, billing, paid fallback or deployment configuration is introduced.
-
-Regressions cover the reviewed Maybach/mainstream comfort comparison, gadget-count independence, equal front/rear weighting, performance proxies, weight definitions, acceleration methods, scope conflicts, missing evidence, ties, changed Value/Balanced winners, warnings, async retry and the rendered Import/Compare/Decide journey. Browser visual verification depends on the local browser connector; source and DOM checks do not establish screenshot approval.
+Regression tests cover the inclusive cap, model overview attribution, category leakage, grouped warnings, missing data, research updates, citations, cost overrides, unchanged winners and navigation to the correct car and assumptions. Run `npm test` and `npm run build`. The design detector returned no findings. Computer Use stopped browser input because it could not confidently determine the current Chrome URL; DOM checks do not establish rendered desktop, phone or 200% zoom approval.

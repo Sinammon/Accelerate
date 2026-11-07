@@ -206,3 +206,20 @@
 .compact-workspace .comparison-car-actions .compare-remove { min-height: 44px; padding: 8px; font-size: 12px; }
 .compact-workspace .compare-add { min-height: 44px; padding: 8px 12px; font-size: 14px; }
 .compact-workspace .comparison-import-cancel { margin-top: 12px; font-size: 14px; }
+
+/* One result per priority; detailed evidence stays in the comparison workspace. */
+.compact-workspace .focused-decision .priority-picker { margin-bottom: 24px; }
+.compact-workspace .focused-decision .decision-match-copy { grid-row: 1; padding: 24px; }
+.compact-workspace .focused-decision .decision-reasons { margin: 16px 0; }
+.compact-workspace .focused-decision .decision-reasons li { display: block; margin: 0; padding: 16px 0; border-top: 1px solid var(--border-subtle); font-size: 14px; line-height: 1.5; }
+.compact-workspace .focused-decision .decision-reasons li:first-child { padding-top: 0; border-top: 0; }
+.decision-item-topic { display: block; margin-bottom: 4px; font-size: 14px; font-weight: 600; }
+.compact-workspace .focused-decision .decision-reasons small { display: block; margin-top: 8px; font-size: 12px; line-height: 1.5; }
+.compact-workspace .focused-decision .decision-reasons .decision-warning-item { padding: 12px; border: 0; border-radius: 8px; color: var(--warning); background: var(--warning-surface); }
+.decision-result-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; padding-top: 16px; border-top: 1px solid var(--border-subtle); }
+.decision-result-actions a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; font-weight: 500; }
+.decision-photo-credit { display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px; color: var(--text-secondary); font-size: 12px; background: var(--surface); }
+@media (max-width: 767px) {
+  .compact-workspace .focused-decision .decision-match-copy { padding: 16px; }
+  .compact-workspace .focused-decision .decision-card-foot { padding: 12px 16px; }
+}

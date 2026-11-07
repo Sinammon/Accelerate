@@ -31,6 +31,7 @@ test('dashboard themes persist across the real import, comparison and decision w
     assert.equal(window.location.pathname, '/dashboard');
     assert.equal(document.documentElement.dataset.theme, 'dark');
     assert.equal(document.querySelectorAll('[aria-label="What Accelerate offers"] > div').length, 4);
+    assert.equal(document.querySelectorAll('[aria-label="What Accelerate offers"] dd')[1].textContent, '5');
     assert.equal(document.querySelector('h1').textContent, 'Compare your eBay.ca shortlist');
     const listingInput = document.getElementById('listing-url');
     assert.equal(listingInput.labels[0].textContent, 'eBay.ca vehicle listing link');
@@ -59,19 +60,21 @@ test('dashboard themes persist across the real import, comparison and decision w
       window.location.hash = 'decide';
       window.dispatchEvent(new window.HashChangeEvent('hashchange'));
     });
-    assert.equal(document.querySelectorAll('.mode-card').length, 6);
-    assert.match(document.querySelector('.vehicle-experience').textContent, /CAD\/year/);
-    assert.equal(document.querySelector('.decision-match .experience-comfort'), null);
+    assert.equal(document.querySelectorAll('.mode-card').length, 5);
+    assert.equal(document.querySelector('.vehicle-experience'), null);
+    assert.ok(document.querySelectorAll('.decision-reasons > li').length <= 6);
     await act(async () => document.querySelector('[data-mode="comfort"]').click());
-    assert.match(document.querySelector('.vehicle-experience').textContent, /Ride quality.*Seat cushioning.*Seat heating.*Cabin quietness/s);
+    assert.match(document.querySelector('.decision-reasons').textContent, /Ride quality.*Seat cushioning.*Cabin quietness.*Seat heating/s);
+    assert.doesNotMatch(document.querySelector('.decision-reasons').textContent, /CAD\/year/);
     assert.equal(document.documentElement.dataset.theme, 'dark');
-    assert.equal(document.querySelectorAll('.ranking-row').length, count);
+    assert.equal(document.querySelectorAll('.decision-match').length, 1);
+    const selectedCar = document.querySelector('.decision-match h2').textContent;
     await act(async () => {
       window.localStorage.setItem(THEME_STORAGE_KEY, 'light');
       window.dispatchEvent(new window.StorageEvent('storage', { key: THEME_STORAGE_KEY, newValue: 'light' }));
     });
     assert.equal(document.documentElement.dataset.theme, 'light');
-    assert.equal(document.querySelectorAll('.ranking-row').length, count);
+    assert.equal(document.querySelector('.decision-match h2').textContent, selectedCar);
   } finally {
     await act(async () => root.unmount());
     await vite.close(); dom.window.close();

@@ -31,7 +31,7 @@ function Application() {
   const [comparisonView, setComparisonView] = useState(emptyComparisonView);
   const [page, setPage] = useState(route);
   const [mode, setMode] = useState('value');
-  const [decisionView, setDecisionView] = useState({ tab: 'summary', selectedId: null });
+  const [decisionView, setDecisionView] = useState({ selectedId: null });
   const [ownershipTab, setOwnershipTab] = useState('summary');
   const [scenario, setScenario] = useState(DEFAULT_SCENARIO);
   const [ownership, setOwnership] = useState(createOwnershipState);
@@ -87,7 +87,7 @@ function Application() {
     if (!remaining.length) {
       setOwnership(createOwnershipState());
       setOwnershipTab('summary');
-      setDecisionView({ tab: 'summary', selectedId: null });
+      setDecisionView({ selectedId: null });
     }
     requestAnimationFrame(() => {
       const target = focusInComparison
@@ -99,7 +99,7 @@ function Application() {
   function clearCars() {
     for (const controller of enrichmentTasks.current) controller.abort();
     setCars([]); setOwnership(createOwnershipState()); setOwnershipTab('summary');
-    setDecisionView({ tab: 'summary', selectedId: null }); setComparisonView(emptyComparisonView());
+    setDecisionView({ selectedId: null }); setComparisonView(emptyComparisonView());
     setNotice('Comparison cleared.');
     requestAnimationFrame(() => document.getElementById('listing-url')?.focus());
   }
@@ -107,6 +107,22 @@ function Application() {
     setComparisonView(previous => ({ ...previous, tab: 'sources', sourceId: car.legacyItemId }));
     navigate('compare');
     requestAnimationFrame(() => document.querySelector('.vehicle-summary')?.focus());
+  }
+  function adjustCosts() {
+    setOwnershipTab('running');
+    navigate('ownership');
+    requestAnimationFrame(() => document.getElementById('costs-tab-running')?.focus());
+  }
+  function adjustPracticalNeeds() {
+    setComparisonView(previous => ({ ...previous, tab: 'overview' }));
+    navigate('compare');
+    requestAnimationFrame(() => {
+      const panel = document.querySelector('.comparison-section .scenario-panel');
+      if (!panel) return;
+      panel.open = true;
+      panel.querySelector('select')?.focus({ preventScroll: true });
+      panel.scrollIntoView?.({ block: 'center', behavior: reduced ? 'instant' : 'smooth' });
+    });
   }
   function enrichImported(imported) {
     const controller = new AbortController();
@@ -199,7 +215,7 @@ function Application() {
     <main id="main-content" tabIndex={-1}><m.div key={page} className="page-transition" {...enter}>
       {page === 'import' && <Dashboard importForm={importForm} onStart={startImport} onShowCosts={() => { if (cars.length) { setMode('cost'); navigate('decide'); } else requestAnimationFrame(() => document.getElementById('how-it-works')?.scrollIntoView({ block: 'center', behavior: reduced ? 'instant' : 'smooth' })); }} />}
       {page === 'compare' && <VehicleComparison importLoading={loading} scenario={scenario} setScenario={setScenario} onSaveDetails={saveVehicleDetails} cars={cars} view={comparisonView} onViewChange={setComparisonView} notice={notice} retryResearch={retryResearch} clearSavedSpecs={() => { modelSpecCache.clear(); setNotice('Saved model specifications cleared. Your current comparison is unchanged.'); }} importForm={importForm} navigate={navigate} removeCar={removeCar} clearCars={clearCars} />}
-      {page === 'decide' && <DecisionDashboard ownership={ownership} scenario={scenario} setScenario={setScenario} cars={cars} retryResearch={retryResearch} mode={mode} setMode={next => { setMode(next); setDecisionView(previous => ({ ...previous, selectedId: null })); }} view={decisionView} onViewChange={setDecisionView} />}
+      {page === 'decide' && <DecisionDashboard ownership={ownership} scenario={scenario} cars={cars} onViewSources={showSources} onAdjustCosts={adjustCosts} onAdjustPracticalNeeds={adjustPracticalNeeds} mode={mode} setMode={next => { setMode(next); setDecisionView(previous => ({ ...previous, selectedId: null })); }} view={decisionView} onViewChange={setDecisionView} />}
       {page === 'ownership' && <OwnershipCalculator cars={cars} scenario={scenario} setScenario={setScenario} state={ownership} setState={setOwnership} tab={ownershipTab} onTabChange={setOwnershipTab} />}
     </m.div></main>
     </div>

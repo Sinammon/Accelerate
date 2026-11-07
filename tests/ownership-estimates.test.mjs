@@ -148,23 +148,35 @@ test('running expenses can reverse Affordability while every unrelated mode and 
   assert.ok(Number.isFinite(rankDecisionMode(cars, 'cost', 2026, DEFAULT_SCENARIO, ownership).ranked[0].running.annualRunning));
 });
 
-test('one model brief retains AI attribution, uncertain engine scope, seller context and purchase warnings in every mode', () => {
+test('the model overview is limited to Best Value and warnings share the six-item budget in every priority', () => {
   const car = ownershipCar();
-  car.description = 'Engine problems. Clean Carfax.';
-  for (const mode of ['value', 'cost', 'comfort', 'performance', 'practical', 'balanced']) {
+  car.description += ' Engine problems. Coolant leak. Not running. Clean Carfax.';
+  for (const mode of ['value', 'cost', 'comfort', 'performance', 'practical']) {
     const summary = decisionSummary([car], mode);
     const notes = entrySummary(summary, summary.ranking.ranked[0]);
-    const ai = notes.reasons.filter(r => r.label === 'AI model guidance—not independently verified');
-    assert.ok(ai.length >= 3, mode); assert.ok(ai.every(r => !r.source));
-    assert.equal(notes.reasons.filter(r => r.text === planningData().modelAdvice.overview).length, 1);
-    assert.ok(notes.reasons.some(r => r.text.includes('Exact engine variant unresolved')));
-    assert.ok(summary.ranking.ranked[0].warnings.some(w => w.label === 'Engine concern'));
-    if (['value','cost'].includes(mode)) assert.ok(notes.reasons.some(r => /Seller states/.test(r.text)));
-    assert.ok(!notes.reasons.some(r => r.text === planningData().modelAdvice.engineAndReliability));
+    assert.ok(notes.items.length <= 6, mode);
+    assert.equal(notes.items.filter(item => item.kind === 'tradeoff').length, 1);
+    assert.equal(notes.items.filter(item => item.kind === 'warning').length, 1);
+    const warning = notes.items.find(item => item.kind === 'warning');
+    for (const label of ['Engine concern', 'Coolant leak', 'Not running']) assert.ok(warning.text.includes(label));
+    const overview = notes.items.find(item => item.kind === 'overview');
+    if (mode === 'value') {
+      assert.equal(notes.items[0], overview);
+      assert.equal(overview.text, planningData().modelAdvice.overview);
+      assert.equal(overview.label, 'AI model guidance\u2014not independently verified');
+      assert.equal(overview.source, undefined);
+    } else {
+      assert.equal(overview, undefined);
+      assert.ok(!notes.items.some(item => item.text === planningData().modelAdvice.overview));
+      assert.ok(!notes.items.some(item => item.text === planningData().modelAdvice.engineAndReliability));
+    }
   }
+  const fullAdvice = modelAdviceSummary(car);
+  assert.ok(fullAdvice.some(item => item.topic === 'Engine & reliability context'), 'full model guidance remains available for Sources & checks');
+  const unresolved = { ...car, description: 'Engine problems.' };
+  assert.ok(modelAdviceSummary(unresolved).some(item => item.topic === 'Engine scope'), 'unresolved variants retain their caveat in full sources');
   assert.deepEqual(modelAdviceSummary(car, [planningData().modelAdvice.overview]).filter(r => r.topic === 'Model overview'), []);
-  const demo = ratedCar('source');
-  const sourced = modelAdviceSummary(demo);
+  const sourced = modelAdviceSummary(ratedCar('source'));
   assert.ok(sourced.some(r => r.source));
   assert.ok(sourced.filter(r => r.source).every(r => r.sources.length && !r.label.includes('AI model guidance')));
 });

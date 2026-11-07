@@ -267,7 +267,7 @@ The listing input has a visible label, 48px minimum height, compact corners, can
 
 ### Navigation and tabs
 
-Selected top navigation uses `aria-current`, accent text and a semantic hover field. Comparison tabs are Overview, Specifications and Sources & checks. Recommendation tabs are Summary, Ranking & evidence and Assumptions; Costs tabs are Summary, Purchase, Running costs and Salary guide. Tab controls have a 44px minimum height, selected accent/field treatment and visible focus. Arrow keys, Home and End move selection and focus; panels have stable labels. Cost summary shortcuts focus the destination tab. Tab choices and selected recommendation contender survive route navigation in App memory.
+Selected top navigation uses `aria-current`, accent text and a semantic hover field. Comparison tabs are Overview, Specifications and Sources & checks. Recommendation has five pressed-state priority controls and one concise result; Costs tabs are Summary, Purchase, Running costs and Salary guide. Tab controls have a 44px minimum height, selected accent/field treatment and visible focus. Arrow keys, Home and End move selection and focus; panels have stable labels. Cost summary shortcuts focus the destination tab. Comparison and Costs tab choices and the selected recommendation contender survive route navigation in App memory.
 
 ### Cars menu
 
@@ -279,13 +279,15 @@ Dashboard.jsx and HeroImportComposer.jsx retain the blue hero, floating URL comp
 
 ### Comparison table
 
-Each car column begins with a contained, proportionally scaled vehicle photo and a Details action. Overview has six rows: asking price, mileage, annual fuel/charging cost, Comfort (ride/seats), Practicality (passenger/cargo room) and horsepower. Dense values use interface text with smaller explicit evidence labels. Specifications retains all supported details; Sources & checks retains photos, source selection, original listing location/mileage, configuration editing, warnings, seller specifics and safe plain-text description. It also presents the same model brief available in Recommendation, with its provenance and engine-scope caveat. Keep local overflow within a labeled keyboard-focusable data region.
+Each car column begins with a contained, proportionally scaled vehicle photo and a Details action. Overview has six rows: asking price, mileage, annual fuel/charging cost, Comfort (ride/seats), Practicality (passenger/cargo room) and horsepower. Dense values use interface text with smaller explicit evidence labels. Specifications retains all supported details; Sources & checks retains photos, source selection, original listing location/mileage, configuration editing, warnings, seller specifics and safe plain-text description. It also presents the full model brief, optional recall lookup, provenance and engine-scope caveat; Recommendation selects only a short relevant subset. Keep local overflow within a labeled keyboard-focusable data region.
 
 ### Recommendation
 
-All six priorities are visible. The Summary card holds the vehicle photograph, match status, short explanation and one fully visible list of complete reasons. Its model brief joins that existing list: overview, benefits, problems to investigate and engine/reliability context. Applicable sourced observations take priority by topic and retain links; fallback observations show the date and explicit label AI model guidance—not independently verified. Unresolved engines receive a model-level caveat. Avoid repeating observations already present in the reasons or trade-off, and do not add another expandable explanation. Seller-history attribution, the trade-off and purchase warnings remain separate and visible.
+Five priorities are visible: Best Value, Affordability, Comfort, Practicality and Performance. One selected-car result contains an ordered semantic list of at most six information items. Count the Best Value overview, every takeaway, the category trade-off and the consolidated purchase warning toward the same limit. Vehicle identity, photo, status and navigation are outside this count. Avoid nested lists and separate explanation/fact panels; uncertainty and provenance are inline with each item. Do not pad sparse results.
 
-Detailed facts and experience sources retain their disclosure; Ranking & evidence retains comparison and citations; Assumptions retains scenario inputs and scoring explanation. Affordability links to Costs beside its explanation and combines 80% seller asking price with 20% annual running expenses: fuel/charging, insurance, maintenance, parking/tolls and other costs. The calculator and ranking share the same running-cost resolver and shopper overrides. Planning estimates make the result provisional; incomplete totals exclude the running-expense factor for every eligible contender rather than counting missing amounts as zero. Other priorities retain their scoring, including Balanced's existing price/fuel affordability subscore. Browsing contenders and switching tabs preserve the shopper's context.
+Best Value starts with the available model overview, then selects meaningful asking-price context, supported comparative advantages or ownership concerns. Comfort covers ride, cushioning, cabin noise and heating; Practicality covers passenger/cargo room, seating and everyday use; Performance covers supported acceleration, power-to-weight and engine output; Affordability covers purchase price and running expenses. General model advice does not spill into the other priorities. Trade-offs stay category-specific. Warning labels remain visible together in one reserved item, with full evidence accessible from Sources & checks.
+
+The card retains its existing photo, status, title, source labels and Previous/Next contender controls. Topic labels use 14px/600, body text 14px, metadata 12px and 16px row padding with subtle separators. A warning uses the existing warning surface with 12px padding and 8px corners. Desktop copy remains beside the photo; phones stack with 16px copy padding. Sources & checks opens the displayed car in Compare; Adjust costs opens Running costs; Adjust practical needs opens the comparison assumptions and focuses seating. There are no recommendation tabs or general detail disclosure. Scoring, privacy and shared state remain unchanged; internal Balanced calculation remains compatible.
 
 ### Costs
 
@@ -301,7 +303,7 @@ Compare has an Add car button beside its heading; the shared header Add car acti
 
 Each car's comparison header has Details and Remove actions alongside its photograph; Sources & checks also provides Remove this car for the selected contender. Removal uses the existing cancellation/state cleanup and reconciles phone pairs. Focus moves to a remaining selected car's Remove action or, after the final removal, the import field. These controls and the sidebar-free home/workspace composition remain in place through the ownership-planning extension.
 
-Help me decide shows its complete reasons and model context once, fully visible in the main card with source labels and links. The separate repeated Full explanation & model context disclosure is removed. Trade-offs, purchase warnings and the separate detailed vehicle/estimate evidence remain available.
+Help me decide shows one bounded, category-specific list. The overview, trade-off and consolidated warnings all count toward its six-item maximum. Full model advice and optional recall lookup are available in Compare > Sources & checks; editable scenarios remain in Compare and Costs.
 
 
 ## Unslop refinement — 6 November 2026
@@ -332,3 +334,7 @@ The final full suite passed 212/212 tests, and the production build passed with 
 - **Don't** replace evidence wording with color alone or imply individual condition is verified.
 - **Don't** treat source checks, test passes or CSS breakpoints as rendered desktop, phone or zoom approval.
 - **Don't** add new identity assets, palette families or decorative raster work to this compact system.
+
+## Focused result verification — 7 November 2026
+
+All 216 tests passed with `npm test -- --test-concurrency=2`, and `npm run build` passed (500 modules; existing Motion directive and bundle-size advisories remain). The design detector ran once and returned no findings. Unit and DOM journeys cover category isolation, the inclusive six-item cap, warnings, attribution, missing data, unchanged ranking, source-car selection and shared cost/practicality edits. Native Chrome was available, but Computer Use stopped input because it could not determine the browser URL with enough confidence to enforce policy. Desktop/phone, theme and 200% zoom screenshots are not claimed; rendered layout remains unverified.

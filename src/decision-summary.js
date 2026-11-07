@@ -2,11 +2,11 @@ import { modelAdviceSummary } from './model-advice.js';
 import { rankDecisionMode, DEFAULT_SCENARIO } from './decision-engine.js';
 import { extractVehicleSpecs, specEvidenceLabel } from './vehicle-specs.js';
 import { DIMENSION_LABELS, supportedPowerToWeight } from './capability-scoring.js';
-import { researchGuidance } from './model-research.js';
+import { researchGuidance, researchForCar } from './model-research.js';
 import { resolveVehicleExperience, experienceLabel } from './vehicle-experience.js';
 import { resolveMileage, numeric, vehicleName } from './vehicle-data.js';
 import { mileageEvidenceLabel } from './mileage.js';
-import { ownershipContext } from './ownership-context.js';
+import { ownershipContext, sellerHistoryContext } from './ownership-context.js';
 
 export const PRIMARY_MODES = [
   { id: 'value', label: 'Best Value', icon: 'trophy' },
@@ -20,50 +20,153 @@ const number = n => n.toLocaleString('en-CA', { maximumFractionDigits: 0 });
 
 // The requested category always owns its result; missing evidence never switches priorities.
 export function decisionSummary(cars, mode, year, scenario, ownership) {
-  const requested = rankDecisionMode(cars, mode, year, scenario, ownership);
+  const selectedMode = PRIMARY_MODES.some(item => item.id === mode) ? mode : 'value';
+  const requested = rankDecisionMode(cars, selectedMode, year, scenario, ownership);
   const kind = !cars.length ? 'empty' : !requested.best.length ? 'guidance' : requested.best[0].reviewRequired ? 'review' : 'supported';
-  return { requested, ranking: requested, kind, provisional: requested.provisional, shared: requested.best.length > 1, single: cars.length === 1 };
+  return { requested, ranking: requested, ownership, kind, provisional: requested.provisional, shared: requested.best.length > 1, single: cars.length === 1 };
 }
 
-// Describe evidence, rather than translating a score into an unsupported claim.
+
+export const MAX_DECISION_ITEMS = 6;
+const textKey = text => text.toLowerCase().replace(/[^a-z0-9]/g, '');
+const sourcesFor = records => [...new Map(records.flatMap(record => record?.evidence || [])
+  .filter(e => e.url).map(e => [e.url, { url: e.url, publisher: e.source || e.publisher || 'Reference source' }])).values()];
+const supportedItem = (text, topic, records, key = topic) => {
+  const parts = records.filter(Boolean), sources = sourcesFor(parts);
+  return { key, text, topic, label: [...new Set(parts.map(experienceLabel))].join(' + '), source: sources[0], sources };
+};
+const claimItem = claim => ({ key: claim.id || claim.text, text: claim.text, topic: 'Model evidence',
+  label: 'Sourced model context; confirm on this car', source: claim.sources[0], sources: claim.sources });
+
 function comfortReasons(car) {
   const experience = resolveVehicleExperience(car);
-  return ['rideQuality', 'seatComfort', 'seatHeating', 'cabinQuietness'].map(key => {
+  return ['rideQuality', 'seatComfort', 'cabinQuietness', 'seatHeating'].map(key => {
     const record = key === 'seatComfort' ? experience.ratings.frontSeatComfort : experience.ratings[key];
-    const evidence = record.evidence?.find(e => e.url);
-    const rationale = key === 'seatComfort' && experience.hasRearSeats ? `Front: ${record.rationale} Rear: ${experience.ratings.rearSeatComfort.rationale}` : record.rationale;
     const parts = key === 'seatComfort' ? [record, experience.ratings.rearSeatComfort].filter(Boolean) : [record];
-    return { text: `${DIMENSION_LABELS[key]}: ${rationale}`, topic: DIMENSION_LABELS[key], label: [...new Set(parts.map(experienceLabel))].join(' + '), source: evidence ? { url: evidence.url, publisher: evidence.source } : undefined };
+    const rationale = key === 'seatComfort' && experience.hasRearSeats
+      ? `Front: ${record.rationale} Rear: ${experience.ratings.rearSeatComfort.rationale}` : record.rationale;
+    return supportedItem(`${DIMENSION_LABELS[key]}: ${rationale}`, DIMENSION_LABELS[key], parts, key);
   });
+}
+
+function modelOverview(car) {
+  const overview = modelAdviceSummary(car).find(item => item.topic === 'Model overview');
+  if (overview) return { ...overview, key: 'overview', kind: 'overview' };
+  const profile = researchForCar(car);
+  if (profile.status === 'matched') return { key: 'overview', kind: 'overview', topic: 'Model overview', text: profile.scope,
+    label: 'Reviewed model profile; not an individual condition check', source: profile.claims[0]?.sources[0] };
+  const { specs } = extractVehicleSpecs(car);
+  const fields = ['bodyType', 'fuelType', 'transmission'].filter(key => specs[key].value != null);
+  return { key: 'overview', kind: 'overview', topic: 'Model overview',
+    text: fields.length ? `${vehicleName(car)}: ${fields.map(key => String(specs[key].value)).join(', ')}.` : 'A model overview is not available for this configuration yet.',
+    label: fields.length ? [...new Set(fields.map(key => specEvidenceLabel(specs[key])))].join(' + ') : 'Model information unavailable' };
 }
 
 function valueReasons(summary, entry) {
-  const reasons = [];
+  const candidates = [modelOverview(entry.car)];
   const price = entry.values.price;
   if (price != null) {
-    const peers = summary.ranking.ranked.filter(e => e !== entry && !e.identityMismatch);
-    const comparable = peers.length > 0 && peers.every(e => e.values.price != null);
-    const lowest = comparable && peers.every(e => price <= e.values.price) && peers.some(e => price < e.values.price);
-    reasons.push({ text: `At ${money(price)}, ${lowest ? 'it has the lowest asking price in this comparison' : 'here is what you get for the asking price'}.`, label: 'Seller-reported asking price' });
+    const peers = summary.ranking.ranked.filter(other => other !== entry && !other.identityMismatch);
+    const lowest = peers.length > 0 && peers.every(other => other.values.price != null && price <= other.values.price)
+      && peers.some(other => price < other.values.price);
+    candidates.push({ key: 'price', topic: 'Asking price', text: `At ${money(price)}, ${lowest ? 'it has the lowest asking price in this comparison' : 'compare its documented strengths with the asking price'}.`, label: 'Seller-reported asking price' });
   }
+  const guidance = researchGuidance(entry.car, 'value');
+  const context = ownershipContext(entry.car, 'value');
+  // A sourced ownership concern outranks a general benefit; history claims stay qualified.
+  candidates.push(...guidance.claims.filter(c => !c.contextOnly && c.tone === 'caution').map(claimItem));
+  for (const key of ['age', 'mileage']) {
+    const factor = entry.breakdown.find(item => item.key === key);
+    if (factor && factor.min < factor.max && factor.value === factor.min) candidates.push({ key, topic: key === 'age' ? 'Model year' : 'Mileage',
+      text: key === 'age' ? 'The newest model year in this comparison.' : `The lowest reported mileage in this comparison: ${number(factor.value)} km.`, label: entry.labels[key] });
+  }
+  candidates.push(...guidance.claims.filter(c => !c.contextOnly && c.tone === 'positive').map(claimItem));
   const comfort = comfortReasons(entry.car);
-  reasons.push(...comfort.slice(0, 1));
-  const model = researchGuidance(entry.car, 'value');
-  reasons.push(...model.claims.filter(c => c.tone === 'positive' && !c.contextOnly).slice(0, 1).map(c => ({ text: c.text, label: 'Sourced model strength', source: c.sources[0] })));
-  for (const key of ['powerToWeight', 'power', 'seats']) {
-    if (reasons.length >= 3) break;
-    if (entry.values[key] == null) continue;
-    const text = key === 'powerToWeight' ? `${number(entry.values[key])} hp/tonne from compatible power and weight specifications.`
-      : key === 'power' ? `${number(entry.values[key])} hp of supported engine output.`
-        : entry.values.seats ? `Meets your ${summary.requested.scenario.minSeats}-seat need.` : null;
-    if (text) reasons.push({ text, label: entry.labels[key], source: entry.evidence[key]?.[0] && { url: entry.evidence[key][0].url, publisher: entry.evidence[key][0].source } });
+  candidates.push(...comfort.filter(item => item.sources.length));
+  candidates.push(...context.map(item => ({ ...item, topic: 'Ownership context' })));
+  candidates.push(...modelAdviceSummary(entry.car).filter(item => ['Benefits', 'Problems to investigate', 'Engine & reliability context'].includes(item.topic)));
+  return candidates;
+}
+
+function costReasons(summary, entry) {
+  const r = entry.running, energy = r.experience.energy;
+  const scenario = { ...DEFAULT_SCENARIO, ...r.scenario };
+  const overrides = summary.ownership?.vehicles?.[entry.car.legacyItemId] || {};
+  const amount = n => Number.isFinite(n) ? money(n) : 'Incomplete';
+  const kind = energy.powertrain === 'electric' ? 'charging' : energy.powertrain === 'liquid' ? 'fuel' : 'fuel / charging';
+  const prices = [energy.powertrain !== 'electric' && (Number.isFinite(scenario.pricePerLitre) ? `$${scenario.pricePerLitre.toFixed(2)}/L` : 'fuel price incomplete'),
+    energy.powertrain !== 'liquid' && (Number.isFinite(scenario.pricePerKwh) ? `$${scenario.pricePerKwh.toFixed(2)}/kWh` : 'electricity price incomplete'),
+    energy.powertrain === 'phev' && (Number.isFinite(scenario.electricShare) ? `${scenario.electricShare}% electric driving` : 'electric share incomplete')].filter(Boolean).join(' \u00b7 ');
+  const source = energy.evidence?.find(e => e.url);
+  const fuel = { key: 'fuel', topic: 'Fuel / charging', text: `Estimated annual ${kind} cost: ${Number.isFinite(r.energy) ? `${amount(r.energy)}/year` : 'check driving and energy-price assumptions'}.`,
+    label: `${experienceLabel(energy)} \u00b7 ${Number.isFinite(scenario.annualKm) ? number(scenario.annualKm) + ' km/year' : 'annual driving incomplete'} \u00b7 ${prices} \u00b7 energy only`,
+    source: source && { url: source.url, publisher: source.source } };
+  if (r.inputs.energyOverride !== '') { fuel.text = `Annual fuel / charging override: ${amount(r.energy)}.`; fuel.label = 'Your calculator input; energy only'; delete fuel.source; }
+  return [
+    ...(entry.values.price != null ? [{ key: 'price', topic: 'Purchase price', text: `Purchase price: ${money(entry.values.price)}.`, label: 'Seller-reported asking price' }] : []),
+    { key: 'running', topic: 'Annual running expenses', text: `Annual running expenses: ${amount(r.annualRunning)}${r.annualRunning == null ? '' : '/year'}.`, label: 'Planning estimates + your calculator inputs; includes parking and other running costs; financing excluded' },
+    fuel,
+    { key: 'insurance', topic: 'Insurance', text: `Insurance: ${amount(r.insurance)}${r.insurance == null ? '' : '/year'}.`, label: Object.hasOwn(overrides, 'insuranceAnnual') ? 'Your calculator input; not a verified quote' : r.estimates.insuranceAnnual.label },
+    { key: 'maintenance', topic: 'Maintenance reserve', text: `Maintenance, tyres and repair reserve: ${amount(r.maintenance)}${r.maintenance == null ? '' : '/year'}.`, label: Object.hasOwn(overrides, 'maintenancePerKm') ? 'Your calculator input; reserve per km at your annual driving distance' : `${r.estimates.maintenancePerKm.label}; not a repair forecast` },
+  ];
+}
+
+function practicalReasons(summary, entry) {
+  const e = entry.experience, ratings = e.ratings;
+  const passengers = [ratings.frontPassengerSpace, ratings.rearPassengerSpace].filter(Boolean);
+  const candidates = [
+    supportedItem(`Passenger room: ${passengers.map((rating, index) => `${index ? 'Rear' : 'Front'}: ${rating.rationale}`).join(' ')}`, 'Passenger room', passengers),
+    supportedItem(`Usable cargo space: ${ratings.cargoSpace.rationale}`, 'Usable cargo space', [ratings.cargoSpace]),
+  ];
+  const seats = entry.specs.seats;
+  if (seats.value != null) candidates.push({ key: 'seats', topic: 'Seating needs', text: `${seats.value} seats${Number.isFinite(summary.requested.scenario.minSeats) ? `; ${seats.value >= summary.requested.scenario.minSeats ? 'meets' : 'does not meet'} your ${summary.requested.scenario.minSeats}-seat need` : ''}.`, label: specEvidenceLabel(seats), sources: sourcesFor([seats]) });
+  candidates.push(supportedItem(e.practicality.rationale, 'Everyday usability', [e.practicality]));
+  if (summary.requested.scenario.bodyType && entry.specs.bodyType.value) candidates.push({ key: 'body', topic: 'Body preference', text: `${entry.specs.bodyType.value} body; ${entry.values.body ? 'matches' : 'does not match'} your ${summary.requested.scenario.bodyType} preference.`, label: specEvidenceLabel(entry.specs.bodyType), sources: sourcesFor([entry.specs.bodyType]) });
+  candidates.push(...researchGuidance(entry.car, 'practical').claims.filter(c => !c.contextOnly).map(claimItem));
+  return candidates;
+}
+
+function performanceReasons(summary, entry) {
+  const comparison = performanceComparison(summary, entry);
+  const factors = ['acceleration', 'powerToWeight', 'power', 'torque'].flatMap(key => entry.breakdown.filter(f => f.key === key));
+  for (const [key, label] of [['powerToWeight', 'Power-to-weight'], ['power', 'Horsepower'], ['torque', 'Torque']]) {
+    if (!factors.some(factor => factor.key === key) && Number.isFinite(entry.values[key])) factors.push({ key, label, value: entry.values[key], evidence: entry.evidence[key], evidenceLabel: `${entry.labels[key]}; unavailable for some contenders, excluded from comparative score` });
   }
-  const comparison = ['age', 'mileage'].flatMap(key => {
-    const factor = entry.breakdown.find(c => c.key === key);
-    return factor && factor.min < factor.max && factor.value === factor.min ? [{ text: key === 'age' ? 'The newest model year in this comparison.' : `The lowest reported mileage in this comparison: ${number(factor.value)} km.`, label: entry.labels[key] }] : [];
-  });
-  if (comparison.length) reasons.splice(2, reasons.length > 2 ? 1 : 0, comparison[0]);
-  return reasons.slice(0, 3);
+  const candidates = comparison ? [{ ...comparison, key: 'powerToWeight', topic: 'Power-to-weight' }] : [];
+  for (const factor of factors) {
+    if (comparison?.covers.includes(factor.key)) continue;
+    const value = factor.key === 'acceleration' ? `${factor.value} s` : factor.key === 'powerToWeight' ? `${factor.value.toFixed(1)} hp/tonne` : `${number(factor.value)} ${factor.key === 'power' ? 'hp' : 'Nm'}`;
+    const sources = sourcesFor([factor]);
+    candidates.push({ key: factor.key, topic: factor.label, text: `${factor.label}: ${value}`, label: factor.evidenceLabel, source: sources[0], sources });
+  }
+  candidates.push(...researchGuidance(entry.car, 'performance').claims.filter(c => !c.contextOnly).map(claimItem));
+  return candidates;
+}
+
+function purchaseWarning(entry) {
+  const labels = [...new Set(entry.warnings.map(warning => warning.label))];
+  if (entry.identityMismatch) labels.unshift('Resolve conflicting identity or configuration');
+  const history = sellerHistoryContext(entry.car);
+  if (history && /^(Seller history concern|Conflicting seller history claims)/.test(history.text)) labels.push('Seller history concern; check the actual report');
+  return labels.length ? { key: 'warning', kind: 'warning', topic: 'Review before choosing', text: `${[...new Set(labels)].join('; ')}. Review the full evidence before buying.`,
+    label: 'Listing claims and evidence concerns; not an independent inspection' } : null;
+}
+
+function categoryTradeoff(summary, entry) {
+  const mode = summary.requested.mode.id;
+  const claim = researchGuidance(entry.car, mode).claims.find(item => item.tone === 'caution' && !item.contextOnly);
+  if (!entry.identityMismatch && claim) return { ...claimItem(claim), key: 'tradeoff', kind: 'tradeoff', topic: 'Trade-off' };
+  const weaker = [...entry.breakdown].sort((a, b) => a.points - b.points)[0];
+  const fallback = {
+    value: 'Model strengths do not establish this used car\u2019s condition. Check service records and arrange an inspection.',
+    cost: 'Running costs are planning estimates, not quotes. Actual insurance and repair spending may differ.',
+    comfort: 'Confirm ride quality, seat support and cabin noise on a test drive; model assessments do not verify this car.',
+    practical: 'Check passenger fit, loading access and usable cargo room in person before choosing.',
+    performance: summary.requested.criteria.some(c => c.key === 'acceleration' && c.active) ? 'Published performance figures do not verify this used car\u2019s current mechanical condition.' : 'Comparable acceleration evidence is incomplete; power figures alone do not establish which car is faster.',
+  };
+  const text = !entry.identityMismatch && weaker && weaker.points < 50
+    ? `${weaker.key === 'capability' ? 'The documented comfort, performance and practicality are less competitive' : `${weaker.label} is a weaker factor`} in this comparison.` : fallback[mode];
+  return { key: 'tradeoff', kind: 'tradeoff', topic: 'Trade-off', text, label: weaker && weaker.points < 50 && !entry.identityMismatch ? weaker.evidenceLabel : 'What to check for this priority', sources: weaker && weaker.points < 50 ? sourcesFor([weaker]) : [] };
 }
 
 export function performanceComparison(summary, entry) {
@@ -73,61 +176,33 @@ export function performanceComparison(summary, entry) {
     && entry.values.power < other.values.power && entry.specs.curbWeightKg.value < other.specs.curbWeightKg.value && ratio > other.values.powerToWeight);
   if (!peer) return null;
   const metric = summary.requested.criteria.find(c => c.key === 'acceleration' && c.active);
-  const acceleration = metric && Number.isFinite(entry.values.acceleration) && entry.values.acceleration < peer.values.acceleration
+  const quicker = metric && Number.isFinite(entry.values.acceleration) && entry.values.acceleration < peer.values.acceleration;
+  const acceleration = quicker
     ? ` Comparable ${metric.label} figures are quicker: ${entry.values.acceleration} s versus ${peer.values.acceleration} s (${entry.specs[summary.requested.accelerationMetric].measurementMethod}).`
     : ' Power-to-weight indicates acceleration potential; it does not establish which car is faster.';
   return { text: `Despite ${number(entry.values.power)} hp versus ${number(peer.values.power)} hp in the ${vehicleName(peer.car)}, its lower weight (${number(entry.specs.curbWeightKg.value)} versus ${number(peer.specs.curbWeightKg.value)} kg) gives it a higher power-to-weight ratio: ${ratio.toFixed(1)} versus ${peer.values.powerToWeight.toFixed(1)} hp/tonne.${acceleration}`,
-    label: `Derived from compatible power and curb weight · ${entry.labels.powerToWeight}` };
+    label: `Derived from compatible power and curb weight · ${entry.labels.powerToWeight}`, covers: ['powerToWeight', 'power', ...(quicker ? ['acceleration'] : [])] };
 }
+
 
 export function entrySummary(summary, entry) {
   const { ranking, requested, kind } = summary;
-  const model = requested.research.find(item => item.car === entry.car)?.guidance;
-  const describe = factor => {
-    const value = factor.key === 'price' ? money(factor.value)
-      : factor.key === 'mileage' ? `${number(factor.value)} km`
-      : factor.key === 'power' ? `${number(factor.value)} hp`
-      : factor.key === 'torque' ? `${number(factor.value)} Nm`
-      : factor.key === 'powerToWeight' ? `${number(factor.value)} hp/tonne`
-      : factor.key === 'acceleration' ? `${factor.value} s`
-      : ['rideQuality', 'cabinQuietness', 'seatComfort', 'seatHeating', 'passengerSpace', 'cargoSpace'].includes(factor.key) ? `${factor.value} / 5`
-      : ['capability', 'affordability', 'comfort', 'performance', 'practical'].includes(factor.key) ? `${factor.value.toFixed(1)} / 100`
-      : ['fuel', 'running'].includes(factor.key) ? `${money(factor.value)}/year` : factor.key === 'seats' || factor.key === 'body' ? factor.value ? 'Yes' : 'No' : `${factor.value} years`;
-    const evidence = factor.evidence?.find(e => e.url);
-    return { text: `${factor.label}: ${value}`, label: factor.evidenceLabel, source: evidence ? { url: evidence.url, publisher: evidence.source } : undefined };
-  };
-  const factors = [...entry.breakdown].sort((a, b) => b.contribution - a.contribution);
-  let reasons = factors.slice(0, 3).map(describe);
-  if (!entry.identityMismatch && requested.mode.id === 'value') reasons = valueReasons(summary, entry);
-  if (!entry.identityMismatch && requested.mode.id === 'comfort') reasons = comfortReasons(entry.car).slice(0, 3);
-  if (!entry.identityMismatch && requested.mode.id === 'practical') reasons = [{ text: `Passenger room: ${entry.experience.passengerSpace.toFixed(1)} / 5. ${entry.experience.ratings.frontPassengerSpace.rationale}`, label: experienceLabel(entry.experience.ratings.frontPassengerSpace) }, { text: `Usable cargo space: ${entry.experience.ratings.cargoSpace.rationale}`, label: experienceLabel(entry.experience.ratings.cargoSpace) }, { text: entry.experience.practicality.rationale, label: experienceLabel(entry.experience.practicality) }];
-  if (!reasons.length) reasons = (model?.claims || []).filter(c => !c.contextOnly).slice(0, 2).map(c => ({ text: c.text, label: 'Model context | not a comparative score', source: c.sources[0] }));
-  if (!entry.identityMismatch && ['value', 'cost'].includes(requested.mode.id)) {
-    const context = ownershipContext(entry.car, requested.mode.id);
-    if (requested.mode.id === 'cost') {
-      const energy = entry.running.experience.energy, scenario = { ...DEFAULT_SCENARIO, ...entry.running.scenario };
-      const label = energy.powertrain === 'electric' ? 'charging' : energy.powertrain === 'liquid' ? 'fuel' : 'fuel / charging';
-      const cost = Number.isFinite(energy.annualCost) ? `${money(energy.annualCost)}/year` : 'check driving and energy-price assumptions';
-      const prices = [energy.powertrain !== 'electric' && (Number.isFinite(scenario.pricePerLitre) ? `$${scenario.pricePerLitre.toFixed(2)}/L` : 'fuel price incomplete'), energy.powertrain !== 'liquid' && (Number.isFinite(scenario.pricePerKwh) ? `$${scenario.pricePerKwh.toFixed(2)}/kWh` : 'electricity price incomplete'), energy.powertrain === 'phev' && (Number.isFinite(scenario.electricShare) ? `${scenario.electricShare}% electric driving` : 'electric share incomplete')].filter(Boolean).join(' · ');
-      const source = energy.evidence?.find(e => e.url);
-      const fuel = { text: `Estimated annual ${label} cost: ${cost}.`, label: `${experienceLabel(energy)} · ${Number.isFinite(scenario.annualKm) ? number(scenario.annualKm) + ' km/year' : 'annual driving incomplete'} · ${prices} · energy only`, source: source && { url: source.url, publisher: source.source } };
-      const r = entry.running, amount = n => Number.isFinite(n) ? money(n) : 'Incomplete';
-      const running = { text: `Annual running expenses: ${amount(r.annualRunning)}. Insurance ${amount(r.insurance)}, maintenance/tyres/repairs ${amount(r.maintenance)}, parking/tolls ${amount(r.parking == null ? null : r.parking * 12)}, other ${amount(r.other)}; fuel/charging ${amount(r.energy)}.`, label: 'Planning estimates + your calculator inputs · provisional; financing excluded' };
-      if (r.inputs.energyOverride !== '') { fuel.text = `Annual fuel / charging override: ${amount(r.energy)}.`; fuel.label = 'Your calculator input · energy only'; delete fuel.source; }
-      reasons = [...(entry.values.price != null ? [{ text: `Purchase price: ${money(entry.values.price)}.`, label: 'Seller-reported asking price' }] : []), fuel, running, ...context];
-    } else if (context.length) reasons = [...reasons.slice(0, 2), ...context];
+  const warning = purchaseWarning(entry);
+  const tradeoffItem = categoryTradeoff(summary, entry);
+  const tradeoff = tradeoffItem.text;
+  const builders = { value: valueReasons, cost: costReasons, comfort: (_, item) => comfortReasons(item.car), practical: practicalReasons, performance: performanceReasons };
+  const candidates = entry.identityMismatch ? [] : builders[requested.mode.id](summary, entry);
+  const seen = new Set([textKey(tradeoff)]);
+  const budget = MAX_DECISION_ITEMS - 1 - Number(!!warning);
+  const reasons = [];
+  for (const item of candidates) {
+    const key = textKey(item.text);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    reasons.push({ ...item, kind: item.kind || 'reason' });
+    if (reasons.length === budget) break;
   }
-  if (!entry.identityMismatch && requested.mode.id === 'performance') {
-    const comparison = performanceComparison(summary, entry);
-    if (comparison) reasons = [comparison, ...reasons.filter(reason => !reason.text.startsWith('Power-to-weight'))].slice(0, 3);
-  }
-  if (!entry.identityMismatch && ['value', 'comfort'].includes(requested.mode.id) && !comfortReasons(entry.car).length) {
-    const check = { text: 'Ride quality and seat comfort still need checking. On a test drive, check bump absorption, seat support and rear-seat comfort.', label: 'What to check in this car' };
-    reasons = [...reasons.slice(0, 2), check];
-  }
-  const weaker = [...entry.breakdown].sort((a, b) => a.points - b.points)[0];
-  const modelDrawback = model?.claims.find(c => c.tone === 'caution' && !c.contextOnly);
-  const tradeoff = modelDrawback?.text || (weaker && weaker.points < 50 ? `${weaker.key === 'capability' ? 'The documented comfort, performance and practicality' : weaker.label} ${weaker.key === 'capability' ? 'are less competitive' : 'is a weaker factor'} in this comparison.` : summary.provisional ? 'Includes estimates or incomplete evidence. This result may improve as research completes.' : 'Model assessments do not establish the condition of this used car; confirm on a test drive.');
+  const items = [...reasons, tradeoffItem, ...(warning ? [warning] : [])];
   const active = ranking.criteria.filter(c => c.active).map(c => c.label.toLowerCase());
   const explanation = entry.identityMismatch ? 'Resolve conflicting identity or configuration details before ranking this car.'
     : entry.score == null ? 'Here is what we know so far. More comparable information is needed to choose between the cars.'
@@ -138,9 +213,7 @@ export function entrySummary(summary, entry) {
           : requested.mode.id === 'value' ? `${summary.provisional ? 'A tentative' : 'Our'} best-value pick: the strongest overall combination of ${ranking.criteria.filter(c => c.active).map(c => c.key === 'capability' ? 'documented strengths' : c.key === 'price' ? 'asking price' : c.key === 'age' ? 'model year' : 'mileage').join(', ')} among these contenders. See what you get for the money below.`
             : requested.mode.id === 'comfort' ? `${summary.provisional ? 'A tentative comfort pick' : 'Our comfort pick'}, based on the available ride, seating and cabin evidence below.`
               : `${summary.provisional ? 'Provisional best fit' : 'Best fit'} for ${requested.mode.title.toLowerCase()} on the supported comparable factors.`;
-  reasons = reasons.filter(r => r.text !== tradeoff);
-  if (!entry.identityMismatch) reasons.push(...modelAdviceSummary(entry.car, [...reasons.map(r => r.text), tradeoff]));
-  return { reasons, tradeoff, tradeoffSource: modelDrawback?.sources[0], explanation };
+  return { items, reasons, tradeoff, tradeoffSource: tradeoffItem.source, explanation };
 }
 
 export function keyFacts(car, mode = 'value') {

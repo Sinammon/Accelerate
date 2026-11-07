@@ -40,7 +40,7 @@ test('comfort prioritizes sourced ride and separate seat descriptions without re
 test('comfort keeps required topics populated and labels baseline checks', () => {
   const car = ratedCar('shared');
   const summary = decisionSummary([car], 'comfort', 2026);
-  assert.equal(entrySummary(summary, summary.ranking.ranked[0]).reasons.filter(r => r.text.includes('Synthetic assessment')).length, 2);
+  assert.equal(entrySummary(summary, summary.ranking.ranked[0]).reasons.filter(r => r.text.includes('Synthetic assessment')).length, 3);
   const unknown = decisionSummary([{ legacyItemId: 'unknown' }], 'comfort', 2026);
   const notes = entrySummary(unknown, unknown.ranking.ranked[0]);
   assert.match(notes.reasons[0].text, /Ride quality: Mainstream bump absorption assumed/);
