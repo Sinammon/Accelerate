@@ -32,7 +32,7 @@ test('dashboard themes persist across the real import, comparison and decision w
     assert.equal(document.documentElement.dataset.theme, 'dark');
     assert.equal(document.querySelectorAll('[aria-label="What Accelerate offers"] > div').length, 4);
     assert.equal(document.querySelectorAll('[aria-label="What Accelerate offers"] dd')[1].textContent, '5');
-    assert.equal(document.querySelector('h1').textContent, 'Compare your eBay.ca shortlist');
+    assert.equal(document.querySelector('h1').textContent, "Find the Car That's Right for You.");
     const listingInput = document.getElementById('listing-url');
     assert.equal(listingInput.labels[0].textContent, 'eBay.ca vehicle listing link');
     assert.equal(listingInput.labels[0].classList.contains('sr-only'), false);

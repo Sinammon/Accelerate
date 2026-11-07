@@ -44,7 +44,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     await act(async () => { document.querySelector('#primary-navigation a').click(); await new Promise(resolve => setTimeout(resolve, 20)); });
     await act(async () => { document.querySelector('.nav-button').click(); await new Promise(resolve => setTimeout(resolve, 20)); });
     assert.equal(menuButton.getAttribute('aria-expanded'), 'false', 'selecting navigation closes the mobile menu');
-    assert.equal(document.querySelector('h1').textContent, 'Compare your eBay.ca shortlist');
+    assert.equal(document.querySelector('h1').textContent, "Find the Car That's Right for You.");
     assert.equal(document.querySelector('.mode-grid'), null);
     assert.equal(document.querySelectorAll('.preview-vehicle').length, 4);
     assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 0);
