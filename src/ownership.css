@@ -4,8 +4,8 @@
 .ownership-toolbar > p { margin: 0; font-size: 14px; }
 .ownership-method { padding: 0; margin: 0; border: 0; }
 .ownership-method legend { font-weight: 600; margin-bottom: 12px; }
-.ownership-method > div { display: flex; gap: 8px; }
-.ownership-method button { background: var(--surface); color: var(--text); border: 1px solid var(--border); min-width: 100px; }
+.ownership-method > div { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border: 1px solid var(--border-subtle); border-radius: 12px; background: var(--surface); }
+.ownership-method button { background: transparent; color: var(--text); border: 1px solid transparent; min-width: 96px; }
 .ownership-method button:hover { background: var(--surface-hover); }
 .ownership-method button[aria-pressed='true'] { background: var(--action); border-color: var(--action); color: var(--ink); }
 .ownership-assumptions { padding: 0 20px; margin-block: 24px; border: 1px solid var(--border-subtle); border-radius: 12px; background: var(--surface); }
@@ -21,17 +21,20 @@
 .ownership-section { margin-top: 48px; }
 .ownership-section > h2 { margin-bottom: 12px; }
 .ownership-section > p { margin-block: 0 24px; }
-.ownership-table-scroll { max-width: 100%; overflow-x: auto; border: 1px solid var(--border-subtle); border-radius: 12px; scrollbar-color: var(--accent) var(--surface); }
+.ownership-table-scroll { max-width: 100%; overflow-x: auto; border: 1px solid var(--border-subtle); border-radius: 16px; scrollbar-color: var(--accent) var(--surface); }
 .ownership-table { width: 100%; min-width: calc(180px + var(--car-count) * 220px); table-layout: fixed; border-collapse: separate; border-spacing: 0; font-variant-numeric: tabular-nums; background: var(--surface); }
 .ownership-table th, .ownership-table td { padding: 20px; vertical-align: top; text-align: left; border-bottom: 1px solid var(--border-subtle); border-right: 1px solid var(--border-subtle); overflow-wrap: anywhere; }
-.ownership-table thead th { background: var(--surface-raised); color: var(--text); font-size: 18px; }
+.ownership-table thead th { background: var(--surface); color: var(--text); font-size: 18px; }
 .ownership-table th:first-child { position: sticky; left: 0; width: 180px; background: var(--surface); z-index: 1; }
-.ownership-table thead th:first-child { background: var(--surface-raised); z-index: 2; }
-.ownership-table tr:last-child > * { border-bottom: 0; }
+.ownership-table thead th:first-child { color: var(--text-secondary); z-index: 2; }
+.ownership-table tbody tr:last-child > * { border-bottom: 0; }
 .ownership-table tr > :last-child { border-right: 0; }
 .ownership-table td > .ownership-field:not(:first-child) { margin-top: 16px; }
 .ownership-table .ownership-total > * { background: var(--surface-hover); }
 .ownership-table .ownership-total th { background: var(--surface-hover); }
+.ownership-column-photo .vehicle-image { width: min(100%, 112px); height: 72px; margin-bottom: 8px; border-radius: 8px; }
+.ownership-column-photo .vehicle-image img { object-fit: cover; }
+.ownership-column-name, .ownership-table thead .vehicle-trim { display: block; }
 .ownership-amount { display: block; color: var(--text); font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
 .ownership-energy-sources { margin-top: 16px; font-size: 14px; }
 .ownership-energy-sources summary { cursor: pointer; min-height: 44px; padding-block: 10px; }
@@ -53,10 +56,10 @@
 .ownership-cta h2 { font-size: 24px; margin: 0 0 8px; }
 .ownership-cta p { margin: 0; color: var(--text-secondary); }
 .ownership-cta .decision-primary { flex-shrink: 0; }
-.cost-vehicle-grid { display: grid; grid-template-columns: repeat(var(--car-count), minmax(0, 1fr)); gap: 16px; list-style: none; margin: 0; padding: 0; }
-.cost-vehicle { min-width: 0; overflow: hidden; border: 1px solid var(--border-subtle); border-radius: 16px; background: var(--surface); box-shadow: 0 2px 6px color-mix(in srgb, var(--text) 5%, transparent); outline: 2px solid transparent; outline-offset: 2px; }
+.cost-vehicle-grid { display: grid; grid-template-columns: repeat(var(--car-count), minmax(0, 1fr)); gap: 20px; list-style: none; margin: 0; padding: 0; }
+.cost-vehicle { min-width: 0; overflow: hidden; border: 1px solid var(--border-subtle); border-radius: 16px; background: var(--surface); outline: 2px solid transparent; outline-offset: 2px; }
 .cost-vehicle-recommended { border-color: var(--accent); }
-.cost-vehicle .vehicle-image { height: 176px; }
+.cost-vehicle .vehicle-image { height: clamp(148px, 14vw, 192px); }
 .cost-vehicle:only-child { width: min(100%, 480px); }
 .cost-vehicle:only-child .vehicle-image { height: auto; aspect-ratio: 16 / 9; }
 .cost-vehicle:only-child .vehicle-image img { position: absolute; inset: 0; object-fit: contain; object-position: center; }
@@ -65,13 +68,15 @@
 @media (hover: hover) {
   .cost-vehicle:hover { outline-color: var(--accent); }
 }
-.cost-vehicle .source-pill { top: auto; bottom: 8px; left: 8px; max-width: calc(100% - 64px); padding: 4px 8px; font-size: 12px; }
+.cost-vehicle .source-pill { display: none; }
 .cost-vehicle-body { padding: 20px; }
-.cost-vehicle h3 { margin: 0 0 4px; font-family: var(--font-body); font-size: 20px; font-weight: 600; text-wrap: wrap; }
+.ownership-summary .cost-vehicle h3 { margin: 0 0 4px; font-family: var(--font-body); font-size: 22px; font-weight: 600; text-wrap: wrap; }
+.cost-vehicle-identity small { margin-top: 4px; font-size: 12px; }
 .cost-vehicle-monthly { margin: 20px 0 8px; padding: 16px; border-radius: 12px; background: var(--surface-raised); }
 .cost-vehicle-monthly dt, .cost-vehicle-breakdown dt { color: var(--text-secondary); font-size: 14px; }
 .cost-vehicle-monthly dd { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px; color: var(--accent); font-variant-numeric: tabular-nums; }
-.cost-vehicle-total { font-size: 30px; line-height: 1.25; font-weight: 600; overflow-wrap: anywhere; }
+.cost-vehicle-total { font-size: 36px; line-height: 1.2; font-weight: 600; overflow-wrap: anywhere; }
+.cost-vehicle-total[data-incomplete] { font-size: 18px; color: var(--text-secondary); }
 .cost-vehicle-period { color: var(--text-secondary); font-size: 14px; }
 .cost-vehicle-breakdown { margin: 0; }
 .cost-vehicle-breakdown > div { display: grid; grid-template-columns: minmax(0, 1fr) fit-content(48%); gap: 12px; align-items: baseline; padding-block: 12px; }
@@ -79,9 +84,17 @@
 .cost-vehicle-breakdown dd { text-align: right; overflow-wrap: anywhere; }
 .cost-vehicle-breakdown .ownership-amount { font-size: 14px; }
 .cost-vehicle-breakdown small { margin: 4px 0 0; font-size: 12px; }
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 768px) {
+    .cost-vehicle:not(:only-child) { display: grid; grid-row: span 4; grid-template-rows: subgrid; row-gap: 0; }
+    .cost-vehicle:not(:only-child) .cost-vehicle-body { display: grid; grid-row: span 3; grid-template-rows: subgrid; row-gap: 0; }
+  }
+}
 @media (prefers-reduced-motion: no-preference) {
-  .cost-vehicle { transition: outline-color 180ms var(--ease-ui); }
+  .cost-vehicle { transition: outline-color 180ms var(--ease-ui), border-color 180ms var(--ease-ui); }
+  .ownership-page .workspace-panel:not([hidden]) .ownership-table-scroll { animation: ownership-table-enter 180ms var(--ease-ui) both; }
   #costs-panel-summary:not([hidden]) .cost-vehicle-total { animation: cost-total-update 180ms var(--ease-ui) both; }
+  @keyframes ownership-table-enter { from { opacity: 0.75; } }
   @keyframes cost-total-update { from { opacity: 0.65; transform: translateY(3px); } }
 }
 @media (max-width: 1050px) {

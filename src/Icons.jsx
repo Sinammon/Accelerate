@@ -7,6 +7,7 @@ export default function Icon({ name, size = 18, ...props }) {
     moon: <path d="M20 14a8 8 0 0 1-10-10 8.5 8.5 0 1 0 10 10Z" />,
     close: <path d="m6 6 12 12M6 18 18 6" />,
     trophy: <><path d="M8 3h8v6a4 4 0 0 1-8 0V3Zm4 10v6m-4 2h8M8 5H4v3a4 4 0 0 0 5 4m7-7h4v3a4 4 0 0 1-5 4" /></>,
+    sparkle: <path d="M12 3c.9 5.1 3.9 8.1 9 9-5.1.9-8.1 3.9-9 9-.9-5.1-3.9-8.1-9-9 5.1-.9 8.1-3.9 9-9Z" />,
     dollar: <><path d="M12 2v20m6-15c-1-4-12-4-12 1 0 5 12 3 12 8 0 5-11 5-12 1" /></>,
     seat: <><path d="M7 4v10H4v6h14V5a2 2 0 0 0-4 0v10H7M4 20v2m14-2v2" /></>,
     balance: <><path d="M12 3v17M7 21h10M4 7h16M6 7l-4 8h8L6 7Zm12 0-4 8h8l-4-8Z" /><circle cx="12" cy="5" r="2" /></>,

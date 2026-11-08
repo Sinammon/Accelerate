@@ -109,6 +109,7 @@ test('calculator compares four cars, validates edits, preserves sources and sepa
     assert.match(document.querySelector('#costs-panel-purchase .ownership-table').textContent, /Monthly loan payment.*Total loan interest.*Total purchase repayment/s);
     await change(field('downPayment'), '999999');
     assert.equal(monthlyTotal(), 'Incomplete');
+    assert.ok(document.querySelector('.cost-vehicle-total').hasAttribute('data-incomplete'));
     assert.match(document.querySelector(field('downPayment')).nextElementSibling.textContent, /cannot exceed/);
     assert.match(document.querySelector('.ownership-result-status').textContent, /Complete/);
     await change(field('downPayment'), '1000');

@@ -17,7 +17,7 @@ export function vehicleImageUrl(car, index = 0) {
   const value = (car.images || [])[index];
   return safeUrl(value) || (car.demo === true && /^\/images\/preview\/(civic|corolla|mazda3|jetta)\.jpg$/.test(value) ? value : null);
 }
-export function VehicleImage({ car, badge, adaptiveFit = false }) {
+export function VehicleImage({ car, badge, adaptiveFit = false, thumbnail = false }) {
   const [index, setIndex] = useState(0);
   const [coverUrl, setCoverUrl] = useState(null);
   const frame = useRef(null);
@@ -40,10 +40,14 @@ export function VehicleImage({ car, badge, adaptiveFit = false }) {
     };
   }, [adaptiveFit, url]);
   const alt = car.demo ? `${vehicleName(car)} model-example photo; fictional vehicle details` : `${vehicleName(car)} seller listing photo`;
-  return <div className="vehicle-image" ref={frame} data-fit={adaptiveFit && url && coverUrl === url ? 'cover' : undefined}>{url ? <img src={url} alt={alt} referrerPolicy="no-referrer" onError={() => setIndex(i => i + 1)} /> : <div className="image-placeholder"><Icon name="engine" />Image unavailable</div>}
-    {badge && <span className="vehicle-photo-badge"><Icon name="trophy" size={14} />{badge}</span>}
-    <span className="source-pill">{car.demo ? 'Model photo · fictional details' : 'Seller listing · eBay'}</span>
-    {images.length > 1 && url && <button className="photo-next" aria-label={`Next photo of ${vehicleName(car)}`} onClick={() => setIndex(i => (i + 1) % images.length)}><Icon name="chevron" /></button>}
+  return <div className="vehicle-image" ref={frame} data-fit={adaptiveFit && url && coverUrl === url ? 'cover' : undefined}>
+    {url ? <img key={url} src={url} alt={thumbnail ? '' : alt} referrerPolicy="no-referrer" onError={() => setIndex(i => i + 1)} />
+      : <div className="image-placeholder"><Icon name="engine" />{!thumbnail && 'Image unavailable'}</div>}
+    {badge && <span className="vehicle-photo-badge"><Icon name="sparkle" size={14} />{badge}</span>}
+    {!thumbnail && <>
+      <span className="source-pill">{car.demo ? 'Model photo · fictional details' : 'Seller listing · eBay'}</span>
+      {images.length > 1 && url && <button className="photo-next" aria-label={`Next photo of ${vehicleName(car)}`} onClick={() => setIndex(i => (i + 1) % images.length)}><Icon name="chevron" /></button>}
+    </>}
   </div>;
 }
 export const locationDisplay = car => [car.location?.city, car.location?.stateOrProvince, car.location?.postalCode, car.location?.country].filter(Boolean).join(', ') || 'Unknown';
@@ -152,7 +156,7 @@ export default function VehicleComparison({ cars, valueRanking, topValue, owners
   const performance = showScores ? rankDecisionMode(cars, 'performance', year, scenario) : null;
   const scoreFor = (ranking, car) => {
     const score = ranking?.ranked.find(entry => entry.car === car)?.score;
-    return score == null ? 'Insufficient evidence' : <strong className="comparison-match-score">{score} / 100</strong>;
+    return score == null ? 'Insufficient evidence' : <strong className="comparison-match-score">{score}<span> / 100</span></strong>;
   };
   const provisionalScores = [valueRanking, affordability, performance].filter(ranking => ranking?.provisional && ranking.best.length)
     .map(ranking => ({ value: 'Best Value', cost: 'Affordability', performance: 'Performance' })[ranking.mode.id]);
@@ -175,7 +179,8 @@ export default function VehicleComparison({ cars, valueRanking, topValue, owners
     ...(cars.some(hasEnergy) ? [fuelRow] : []), ...experienceRows];
   const reviewCars = cars.filter(car => detectWarnings(car).length);
   function table(tableRows, label) {
-    return <div className={`table-scroll comparison-table${cars.length === 1 ? ' comparison-single' : ''}`} role="region" aria-label={label} tabIndex={0}>
+    return <>{cars.length > 1 && <p className="comparison-scroll-hint"><Icon name="chevron" size={14} /> Scroll sideways to see both cars</p>}
+    <div className={`table-scroll comparison-table${cars.length === 1 ? ' comparison-single' : ''}`} role="region" aria-label={label} tabIndex={0}>
       <table role="table" style={{ '--columns': cars.length, '--mobile-columns': Math.min(cars.length, 2) }}>
         <caption className="sr-only">{label}</caption>
         <thead role="rowgroup"><tr role="row">
@@ -201,7 +206,7 @@ export default function VehicleComparison({ cars, valueRanking, topValue, owners
         </tr></thead>
         <tbody role="rowgroup">{tableRows.map(([label, format]) => <tr role="row" key={label}><th role="rowheader" scope="row">{label}</th>{cars.map(car => <td role="cell" className={cellClass(car)} key={car.legacyItemId}>{format(car)}</td>)}</tr>)}</tbody>
       </table>
-    </div>;
+    </div></>;
   }
   const decisionButton = <button type="button" className="compare-decide" onClick={() => navigate?.('decide')}>Help me decide <Icon name="arrow" /></button>;
   return <section className="comparison-section page-section">

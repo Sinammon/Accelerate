@@ -67,6 +67,7 @@ test('compact workspace preserves tab choices and private edits across the compl
     assert.deepEqual([...document.querySelectorAll('#primary-navigation a')].map(a => a.textContent), ['Compare', 'Recommendation', 'Costs']);
     assert.equal(document.querySelector('.workflow'), null);
     assert.ok(document.querySelector('.dashboard-hero'));
+    assert.equal(document.querySelector('.brand-mark'), null);
     assert.equal(document.querySelector('.shortlist-rail'), null);
     assert.equal(document.querySelector('.workspace-help'), null);
     assert.equal(document.querySelector('.dashboard-preview').open, false);
@@ -80,6 +81,8 @@ test('compact workspace preserves tab choices and private edits across the compl
     assert.equal(document.querySelector('.comparison-table tbody').rows.length, 7);
     assert.match(document.querySelector('.comparison-table tbody tr:first-child').textContent, /Best Value match score/);
     assert.ok(document.querySelector('.comparison-table').classList.contains('comparison-single'));
+    assert.equal(document.querySelector('.comparison-scroll-hint'), null);
+    assert.equal(document.querySelector('.site-header .brand-mark').getAttribute('aria-hidden'), 'true');
     assert.doesNotMatch(document.querySelector('.comparison-table').textContent, /General baseline|Seller-reported/i);
     assert.ok(document.querySelector('.comparison-table a[href="https://www.ebay.ca/itm/111111111111"]'));
     await click('.compare-add');
@@ -169,6 +172,8 @@ test('compact workspace preserves tab choices and private edits across the compl
     assert.equal(document.querySelectorAll('.cost-vehicle').length, 4);
     assert.match(document.querySelector('.cost-vehicle').textContent, /Estimated monthly total · running.*Cash needed/s);
     assert.match(document.querySelector('.cost-vehicle img').alt, /seller listing photo/);
+    assert.ok(document.querySelector('.cost-vehicle-identity a[href="https://www.ebay.ca/itm/111111111111"]'));
+    assert.equal(document.querySelectorAll('.ownership-column-photo').length, 0);
     for (const [index, destination] of ['purchase', 'running', 'salary'].entries()) {
       await click('#costs-tab-summary');
       await click(`.cost-summary-actions button:nth-child(${index + 1})`);
@@ -178,6 +183,8 @@ test('compact workspace preserves tab choices and private edits across the compl
     await click('#costs-tab-summary');
     await click('.cost-summary-actions button:nth-child(2)');
     assert.equal(document.activeElement.id, 'costs-tab-running');
+    assert.equal(document.querySelectorAll('#costs-panel-running .ownership-column-photo img').length, 4);
+    assert.equal(document.querySelectorAll('#costs-panel-running .ownership-column-photo button').length, 0);
     await change('[data-field="insuranceAnnual"]', '3000');
     await click('#costs-tab-purchase');
     await change('[data-field="purchasePrice"]', '25000');
