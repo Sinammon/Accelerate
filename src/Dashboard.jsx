@@ -29,7 +29,7 @@ export default function Dashboard({ importForm, onStart, onShowCosts }) {
     <section className="dashboard-hero relative isolate overflow-hidden bg-secondary-950 px-5 pb-16 pt-28 text-white sm:px-8 lg:pb-20 lg:pt-32" aria-label="Find your next car">
       <Atmosphere />
       <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center">
-        <h1 tabIndex={-1} className="hero-headline mb-6 font-sans font-medium text-white">Find the Car That's Right for You.</h1>
+        <h1 tabIndex={-1} className="mb-5 max-w-5xl font-sans text-5xl font-medium leading-none tracking-tight text-white sm:text-6xl lg:text-7xl">Find the Car{' '}<br /><em className="hero-italic font-normal">That's Right for You.</em></h1>
         <p className="hero-intro mx-auto mb-8 max-w-lg text-base leading-relaxed text-neutral-200">Bring up to four listings together. Compare seller details, running costs and the evidence behind each recommendation.</p>
         <div className="w-full max-w-2xl text-left">{importForm}</div>
       </div>

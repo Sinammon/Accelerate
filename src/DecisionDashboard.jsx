@@ -34,7 +34,7 @@ function MatchCard({ summary, selectedId, onSelect, onViewSources, onAdjustCosts
   const navigate = (event, action) => { if (action) { event.preventDefault(); action(car); } };
   return <>
     <article className={`decision-match ${endorsed ? 'best-match' : ''}`} data-basis={summary.kind} data-car-id={car.legacyItemId}>
-      <div className="decision-photo"><VehicleImage key={car.legacyItemId} car={car} />{canView && <button ref={photoOpener} type="button" className="view-photo" onClick={() => dialog.current?.showModal()}><Icon name="expand" />View larger photo</button>}{car.demo && <a className="decision-photo-credit" href="/images/preview/credits.html" target="_blank" rel="noreferrer">Model-example photo &middot; credits</a>}</div>
+      <div className="decision-photo"><VehicleImage key={car.legacyItemId} car={car} adaptiveFit />{canView && <button ref={photoOpener} type="button" className="view-photo" onClick={() => dialog.current?.showModal()}><Icon name="expand" />View larger photo</button>}{car.demo && <a className="decision-photo-credit" href="/images/preview/credits.html" target="_blank" rel="noreferrer">Model-example photo &middot; credits</a>}</div>
       <div className="decision-match-copy">
         <div className="match-topline"><span className={`recommendation-badge ${entry.reviewRequired || entry.identityMismatch ? 'caution' : ''}`}>{label}</span></div>
         <h2>{vehicleName(car)}</h2>

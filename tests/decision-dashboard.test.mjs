@@ -131,9 +131,10 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     await tab('specifications');
     assert.equal(document.querySelector('.mode-grid'), null);
     await tab('overview');
-    assert.match(document.querySelector('table').textContent, /Annual fuel \/ charging cost.*CAD\/year.*Comfort.*Ride.*Seats.*Practicality/s);
+    assert.match(document.querySelector('table').textContent, /Affordability score.*\/ 100.*Comfort.*Ride.*Seats.*Practicality.*Performance score.*Insufficient evidence/s);
+    assert.doesNotMatch(document.querySelector('table').textContent, /Annual fuel \/ charging cost|Horsepower/);
     await change('.scenario-panel input', '10000');
-    const costText = () => document.querySelector('tbody tr:nth-child(3)').textContent;
+    const costText = () => [...document.querySelectorAll('tbody tr')].find(row => row.cells[0].textContent === 'Affordability score').textContent;
     const validCost = costText();
     await change('.scenario-panel input', '');
     assert.equal(document.querySelector('.scenario-panel input').getAttribute('aria-invalid'), 'true');
@@ -141,6 +142,15 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     await go('decide');
     assert.equal(document.querySelector('.scenario-panel'), null);
     assert.ok(document.querySelectorAll('.decision-reasons > li').length <= 6);
+    const photoFrame = document.querySelector('.decision-photo .vehicle-image');
+    const photo = photoFrame.querySelector('img');
+    Object.defineProperties(photoFrame, { clientWidth: { value: 400 }, clientHeight: { value: 300 } });
+    Object.defineProperties(photo, { naturalWidth: { value: 1400, configurable: true }, naturalHeight: { value: 1000 } });
+    await act(async () => photo.dispatchEvent(new dom.window.Event('load')));
+    assert.equal(photoFrame.dataset.fit, 'cover');
+    Object.defineProperty(photo, 'naturalWidth', { value: 560 });
+    await act(async () => photo.dispatchEvent(new dom.window.Event('load')));
+    assert.equal(photoFrame.dataset.fit, undefined, 'a portrait photo uses the uncropped fit');
     const opener = document.querySelector('.view-photo');
     const dialog = document.querySelector('.decision-photo-dialog');
     dialog.showModal = () => { dialog.open = true; };
@@ -312,6 +322,9 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     });
     assert.match(document.querySelector('table').textContent, /158.*Honda Canada/);
     assert.match(document.querySelector('table').textContent, /130–180.*excluded from scoring/);
+    await tab('overview');
+    const performanceRow = [...document.querySelectorAll('tbody tr')].find(row => row.cells[0].textContent === 'Performance score');
+    assert.deepEqual([...performanceRow.querySelectorAll('td')].map(cell => cell.textContent), ['100 / 100', '0 / 100']);
     await tab('sources');
     assert.ok(document.querySelector('.spec-citation a[href="https://hondanews.ca/en-CA/specifications"]'));
     const attribution = document.querySelector('.search-attribution');

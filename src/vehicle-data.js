@@ -15,6 +15,13 @@ export function listingSource(car) {
   const url = !car.demo && safeUrl(car.sourceUrl);
   return url ? { url, publisher: 'eBay listing' } : undefined;
 }
+export function canFillPhotoFrame(imageWidth, imageHeight, frameWidth, frameHeight) {
+  if (![imageWidth, imageHeight, frameWidth, frameHeight].every(value => Number.isFinite(value) && value > 0)) return false;
+  const imageRatio = imageWidth / imageHeight;
+  const frameRatio = frameWidth / frameHeight;
+  // Keep at least 80% of the original photo visible along the cropped axis.
+  return Math.min(imageRatio, frameRatio) / Math.max(imageRatio, frameRatio) >= 0.8;
+}
 export function evidenceSources(evidence, car) {
   return (evidence || []).map(item => {
     if (item.type === 'vpic') return { url: VPIC_SOURCE, publisher: 'NHTSA vPIC' };

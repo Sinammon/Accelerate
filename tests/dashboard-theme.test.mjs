@@ -33,6 +33,7 @@ test('dashboard themes persist across the real import, comparison and decision w
     assert.equal(document.querySelectorAll('[aria-label="What Accelerate offers"] > div').length, 4);
     assert.equal(document.querySelectorAll('[aria-label="What Accelerate offers"] dd')[1].textContent, '5');
     assert.equal(document.querySelector('h1').textContent, "Find the Car That's Right for You.");
+    assert.equal(document.querySelector('h1 em').textContent, "That's Right for You.");
     const listingInput = document.getElementById('listing-url');
     assert.equal(listingInput.labels[0].textContent, 'eBay.ca vehicle listing link');
     assert.equal(listingInput.labels[0].classList.contains('sr-only'), false);
@@ -52,7 +53,7 @@ test('dashboard themes persist across the real import, comparison and decision w
     const count = document.querySelectorAll('.car-card').length;
     assert.ok(count > 0);
     assert.equal(window.location.hash, '#compare');
-    assert.match(document.querySelector('.comparison-table').textContent, /CAD\/year.*Comfort.*Ride.*Seats.*Practicality/s);
+    assert.match(document.querySelector('.comparison-table').textContent, /Affordability score.*Comfort.*Ride.*Seats.*Practicality.*Performance score/s);
     await act(async () => document.querySelector('.theme-switch').click());
     assert.equal(document.documentElement.dataset.theme, 'dark');
     assert.equal(document.querySelectorAll('.car-card').length, count);

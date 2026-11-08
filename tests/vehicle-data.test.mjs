@@ -1,6 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveMileage, mileageDisplay, vehicleName, specification, unknown, listedFeatures, powerHp } from '../src/vehicle-data.js';
+import { resolveMileage, mileageDisplay, vehicleName, specification, unknown, listedFeatures, powerHp, canFillPhotoFrame } from '../src/vehicle-data.js';
+
+test('photo fit allows a modest crop and contains extreme or unloaded images', () => {
+  assert.equal(canFillPhotoFrame(1200, 900, 400, 300), true);
+  assert.equal(canFillPhotoFrame(1200, 750, 400, 300), true);
+  assert.equal(canFillPhotoFrame(2400, 900, 400, 300), false);
+  assert.equal(canFillPhotoFrame(900, 1600, 400, 300), false);
+  assert.equal(canFillPhotoFrame(900, 1600, 360, 640), true);
+  assert.equal(canFillPhotoFrame(0, 0, 400, 300), false);
+});
 
 const vehicle = (description, unit = null, raw = '100000', extra = {}) => ({ description, mileage: { raw, unit }, ...extra });
 test('structured names never fall back to seller headlines; missing specifications are Unknown', () => {

@@ -29,7 +29,7 @@
     radial-gradient(ellipse 48% 24% at 75% 67%, var(--color-primary-700), transparent 78%),
     linear-gradient(to bottom, var(--background) 8%, var(--color-primary-950) 45%, var(--color-secondary-950) 85%);
 }
-.dashboard-hero .hero-headline { max-width: 18ch; font-size: clamp(40px, 5.4vw, 72px); line-height: 1.08; letter-spacing: -.03em; }
+.dashboard-hero .hero-italic { font-synthesis: style; }
 .app-shell .hero-composer { padding: 20px; border-radius: 16px; background: var(--surface); color: var(--text); box-shadow: 0 8px 24px rgb(0 0 0 / .08); }
 .app-shell .hero-composer > label { margin-bottom: 8px; font-size: 14px; font-weight: 500; }
 .app-shell .hero-composer .input-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 0; border: 0; border-radius: 0; background: transparent; }

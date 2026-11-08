@@ -74,9 +74,11 @@
 .compact-workspace .mode-card { display: inline-flex; flex-direction: row; align-items: center; gap: 8px; min-height: 44px; padding: 8px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; }
 .compact-workspace .mode-card strong { font-size: 14px; font-weight: 600; }
 .compact-workspace .mode-icon { display: none; }
-.compact-workspace .decision-match { grid-template-columns: minmax(180px,.65fr) minmax(0,1.35fr); border-color: var(--border-subtle); border-radius: 12px; align-items: start; overflow: visible; }
-.compact-workspace .decision-photo { border-radius: 12px 0 0 0; overflow: hidden; }
-.compact-workspace .decision-photo .vehicle-image { height: 220px; min-height: 0; }
+.compact-workspace .decision-match { grid-template-columns: minmax(180px,.75fr) minmax(0,1.25fr); border-color: var(--border-subtle); border-radius: 12px; align-items: start; overflow: visible; }
+.compact-workspace .decision-photo { display: flex; flex-direction: column; align-self: stretch; border-radius: 12px 0 0 0; overflow: hidden; }
+.compact-workspace .decision-photo .vehicle-image { flex: 1; height: auto; min-height: 280px; }
+.compact-workspace .decision-photo .vehicle-image img { position: absolute; inset: 0; }
+.compact-workspace .decision-photo .vehicle-image[data-fit='cover'] img { object-fit: cover; }
 .compact-workspace .view-photo { position: static; width: 100%; margin: 0; border: 0; border-radius: 0; padding: 8px; font-size: 12px; }
 .compact-workspace .decision-photo .source-pill { font-size: 12px; padding: 4px 8px; top: 8px; left: 8px; }
 .compact-workspace .decision-match-copy { padding: 16px 20px; grid-column: 2; grid-row: 1 / span 2; }
@@ -160,7 +162,7 @@
   .compact-workspace .comparison-table .evidence-link { min-height: 44px; }
   .compact-workspace .decision-match { display: flex; flex-direction: column; }
   .compact-workspace .decision-photo { width: 100%; border-radius: 12px 12px 0 0; }
-  .compact-workspace .decision-photo .vehicle-image { height: 180px; }
+  .compact-workspace .decision-photo .vehicle-image { flex: none; min-height: 0; aspect-ratio: 16 / 9; }
   .compact-workspace .decision-match-copy { width: 100%; padding: 16px; }
   .compact-workspace .match-detail-disclosure { width: 100%; padding: 0 16px; }
   .compact-workspace .contender-controls, .compact-workspace .decision-card-foot { width: 100%; }
