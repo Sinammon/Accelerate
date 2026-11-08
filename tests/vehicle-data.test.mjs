@@ -1,6 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveMileage, mileageDisplay, vehicleName, specification, unknown, listedFeatures, powerHp, canFillPhotoFrame } from '../src/vehicle-data.js';
+import { resolveMileage, mileageDisplay, vehicleName, specification, unknown, listedFeatures, powerHp, canFillPhotoFrame, priceDisplay, ratingDisplay } from '../src/vehicle-data.js';
+
+test('comparison numbers group prices and retain only meaningful rating decimals', () => {
+  for (const value of ['15000.00', '15,000.00', 15000]) {
+    assert.equal(priceDisplay({ priceCAD: { value, currency: 'CAD' } }), '15,000 CAD');
+  }
+  assert.equal(priceDisplay({ returnedPrice: { value: '12345.67', currency: 'USD' } }), '12,345.67 USD');
+  assert.equal(priceDisplay({}), 'Unknown');
+  assert.equal(ratingDisplay(2), '2');
+  assert.equal(ratingDisplay(2.5), '2.5');
+  assert.equal(ratingDisplay(2.25), '2.25');
+});
 
 test('photo fit allows a modest crop and contains extreme or unloaded images', () => {
   assert.equal(canFillPhotoFrame(1200, 900, 400, 300), true);

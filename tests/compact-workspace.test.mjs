@@ -80,6 +80,9 @@ test('compact workspace preserves tab choices and private edits across the compl
     assert.equal(window.location.hash, '#compare');
     assert.equal(document.querySelector('.comparison-table tbody').rows.length, 7);
     assert.match(document.querySelector('.comparison-table tbody tr:first-child').textContent, /Best Value match score/);
+    assert.deepEqual([...document.querySelectorAll('.comparison-table tbody th')].map(cell => cell.textContent), ['Best Value match score', 'Affordability score', 'Comfort', 'Practicality', 'Performance score', 'Asking price', 'Mileage']);
+    assert.equal(document.querySelectorAll('.comparison-factor-pair > span').length, 4);
+    assert.doesNotMatch(document.querySelector('.comparison-factor-pair').textContent, /\d\.0\/5/);
     assert.ok(document.querySelector('.comparison-table').classList.contains('comparison-single'));
     assert.equal(document.querySelector('.comparison-scroll-hint'), null);
     assert.equal(document.querySelector('.site-header .brand svg'), null);
@@ -155,6 +158,10 @@ test('compact workspace preserves tab choices and private edits across the compl
     await click('#compare-tab-specifications');
     await go('decide');
     assert.equal(document.querySelectorAll('.mode-card').length, 5);
+    assert.equal(document.querySelector('.decision-heading .back-link').textContent, 'Cost of Ownership');
+    await click('.decision-heading .back-link');
+    assert.equal(window.location.hash, '#ownership');
+    await go('decide');
     await click('[data-mode="comfort"]');
     await click('.decision-arrow.next');
     const contender = document.querySelector('.decision-match h2').textContent;

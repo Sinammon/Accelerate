@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { unknown, vehicleName, vehicleTrimLine, safeUrl, listingSource, mileageDisplay, priceDisplay, resolveMileage, canFillPhotoFrame } from './vehicle-data.js';
+import { unknown, vehicleName, vehicleTrimLine, safeUrl, listingSource, mileageDisplay, priceDisplay, ratingDisplay, resolveMileage, canFillPhotoFrame } from './vehicle-data.js';
 import { m, useReducedMotion } from 'motion/react';
 import { emptyComparisonView, reconcileComparisonView } from './comparison-view.js';
 import { extractVehicleSpecs, FIELD_LABELS } from './vehicle-specs.js';
@@ -162,17 +162,29 @@ export default function VehicleComparison({ cars, valueRanking, topValue, owners
     .map(ranking => ({ value: 'Best Value', cost: 'Affordability', performance: 'Performance' })[ranking.mode.id]);
   const overviewRows = [
     ...(valueRanking ? [['Best Value match score', car => scoreFor(valueRanking, car)]] : []),
-    ['Asking price', priceDisplay], ['Mileage', mileageDisplay],
     ['Affordability score', car => scoreFor(affordability, car)],
     ['Comfort', car => {
       const e = experiences.get(car);
-      return <><strong>Ride {e.ratings.rideQuality.rating.toFixed(1)}/5 · Seats {e.seatComfort.toFixed(1)}/5</strong><SourceLinks sources={[e.ratings.rideQuality, e.ratings.frontSeatComfort, e.ratings.rearSeatComfort].flatMap(rating => rating?.evidence || [])} /></>;
+      return <>
+        <strong className="comparison-factor-pair">
+          <span>Ride {ratingDisplay(e.ratings.rideQuality.rating)}/5</span>
+          <span>Seats {ratingDisplay(e.seatComfort)}/5</span>
+        </strong>
+        <SourceLinks sources={[e.ratings.rideQuality, e.ratings.frontSeatComfort, e.ratings.rearSeatComfort].flatMap(rating => rating?.evidence || [])} />
+      </>;
     }],
     ['Practicality', car => {
       const e = experiences.get(car);
-      return <><strong>Room {e.passengerSpace.toFixed(1)}/5 · Cargo {e.ratings.cargoSpace.rating.toFixed(1)}/5</strong><SourceLinks sources={[e.ratings.frontPassengerSpace, e.ratings.rearPassengerSpace, e.ratings.cargoSpace].flatMap(rating => rating?.evidence || [])} /></>;
+      return <>
+        <strong className="comparison-factor-pair">
+          <span>Room {ratingDisplay(e.passengerSpace)}/5</span>
+          <span>Cargo {ratingDisplay(e.ratings.cargoSpace.rating)}/5</span>
+        </strong>
+        <SourceLinks sources={[e.ratings.frontPassengerSpace, e.ratings.rearPassengerSpace, e.ratings.cargoSpace].flatMap(rating => rating?.evidence || [])} />
+      </>;
     }],
     ['Performance score', car => scoreFor(performance, car)],
+    ['Asking price', priceDisplay], ['Mileage', mileageDisplay],
   ];
   const rows = [['Asking price', priceDisplay], ['Mileage and unit', mileageDisplay],
     ...KEY_FIELDS.filter(key => !sharedGaps.includes(key)).map(key => [FIELD_LABELS[key], car => spec(car, key)]),

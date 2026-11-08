@@ -62,7 +62,7 @@ export default function DecisionDashboard({ cars, mode = 'value', setMode, scena
   const summary = decisionSummary(cars, mode, new Date().getFullYear(), scenario, ownership);
   return <section className="page-section decision-page focused-decision">
     <WorkspaceHeading className="decision-heading" title="Your recommendation" description="Choose a priority to see the points that matter.">
-      <a className="back-link" href="#compare">Back to comparison<Icon name="arrow" /></a>
+      <a className="back-link" href="#ownership">Cost of Ownership<Icon name="arrow" /></a>
     </WorkspaceHeading>
     <div className="priority-picker"><span id="priority-label">What matters most?</span><div className="mode-grid" role="group" aria-labelledby="priority-label">{PRIMARY_MODES.map(item => <button type="button" key={item.id} className={`mode-card ${summary.requested.mode.id === item.id ? 'selected' : ''}`} data-mode={item.id} aria-pressed={summary.requested.mode.id === item.id} onClick={() => setMode?.(item.id)}><strong>{item.label}</strong></button>)}</div></div>
     <div className="decision-result" aria-live="polite" aria-atomic="false">

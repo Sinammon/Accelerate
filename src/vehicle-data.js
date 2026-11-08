@@ -41,8 +41,12 @@ export function numeric(value) {
 }
 export function priceDisplay(car) {
   const price = car.priceCAD ?? car.returnedPrice;
-  return price?.value != null && price.currency ? `${unknown(price.value)} ${price.currency}` : 'Unknown';
+  if (price?.value == null || !price.currency) return 'Unknown';
+  const amount = numeric(price?.value);
+  const label = amount == null ? unknown(price.value) : amount.toLocaleString('en-CA', { maximumFractionDigits: 2 });
+  return `${label} ${price.currency}`;
 }
+export const ratingDisplay = value => value.toLocaleString('en-CA', { maximumFractionDigits: 2 });
 export function listedFeatures(car) {
   return Object.fromEntries(Object.entries(extractVehicleSpecs(car).features).map(([name, feature]) => [name, feature.value]));
 }

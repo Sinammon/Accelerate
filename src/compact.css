@@ -60,7 +60,11 @@
 .compact-workspace .comparison-table .card-warnings[open] { min-width: 0; }
 .compact-workspace .comparison-table .warning-details { padding: 8px; font-weight: 400; font-size: 12px; }
 .compact-workspace .comparison-table td > strong { font-size: 14px; font-weight: 600; }
-.compact-workspace .comparison-table td > .comparison-match-score { font-size: 18px; }
+.compact-workspace .comparison-table :is(th, td) { font-family: var(--font-sans); font-size: 14px; line-height: 1.5; font-variant-numeric: tabular-nums; text-align: left; vertical-align: top; }
+.compact-workspace .comparison-table td > .comparison-match-score { font-size: 14px; }
+.compact-workspace .comparison-match-score span { font-size: inherit; font-weight: inherit; }
+.comparison-factor-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 12px; }
+.comparison-factor-pair > span { white-space: nowrap; }
 .compact-workspace .comparison-table td > small { font-size: 12px; line-height: 1.4; }
 .compact-workspace .comparison-table .evidence-link { font-size: 12px; min-height: 44px; }
 .compact-workspace .comparison-table .spec-value { font-size: 14px; }
