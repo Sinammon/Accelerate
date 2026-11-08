@@ -292,10 +292,11 @@ test('image CSS preserves whole-image scaling, consistent frames and neutral let
   }
 });
 
-test('single-vehicle photo styles preserve the full image and the dialog is viewport-centered', async () => {
+test('single and two-car frames preserve the full image and the dialog is viewport-centered', async () => {
   const styles = await Promise.all(['styles', 'compact', 'ownership', 'decision'].map(name => readFile(`src/${name}.css`, 'utf8')));
   const dom = new JSDOM(`<style>${styles.join('\n')}</style><main class="compact-workspace">
     <div class="comparison-table comparison-single"><div class="vehicle-image"><img alt="Comparison" /></div></div>
+    <div class="comparison-table comparison-pair"><div class="vehicle-image"><img width="900" height="1600" alt="Portrait listing photo" /></div><div class="vehicle-image"><img width="1600" height="900" alt="Landscape listing photo" /></div></div>
     <ul><li class="cost-vehicle"><div class="vehicle-image"><img alt="Costs" /></div></li></ul>
     <dialog open class="decision-photo-dialog"><div class="vehicle-image"><img alt="Larger photo" /></div></dialog>
   </main>`);

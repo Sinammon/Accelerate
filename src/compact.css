@@ -1,9 +1,7 @@
 /* Compact task workspace. Existing semantic tokens remain the palette authority. */
 .compact-workspace { min-height: 100dvh; --radius-control: 8px; --radius-card: 12px; --radius-panel: 12px; }
 .compact-workspace .site-header { max-width: none; min-height: 64px; padding: 8px 24px; grid-template-columns: auto minmax(0,1fr) auto; column-gap: 24px; background: var(--surface); border-bottom: 1px solid var(--border-subtle); }
-.compact-workspace .site-header .brand { gap: 8px; font-size: 24px; }
-.brand-mark-tile { fill: var(--action); }
-.brand-mark-letter { fill: var(--ink); }
+.compact-workspace .site-header .brand { font-size: 24px; }
 .compact-workspace .site-header nav { display: flex; grid-column: 2; grid-row: 1; justify-content: flex-start; gap: 8px; padding: 0; }
 .compact-workspace .site-header .nav-link { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 16px; border-radius: 8px; color: var(--text-secondary); }
 .compact-workspace .site-header .nav-link[aria-current='page'] { background: var(--surface-hover); color: var(--accent); }
@@ -47,9 +45,10 @@
 .compact-workspace .comparison-table .vehicle-image { grid-column: 1 / -1; height: clamp(120px, 12vw, 156px); max-width: none; border-radius: 8px; margin-bottom: 8px; background: var(--photo-mat); }
 .compact-workspace .comparison-single { max-inline-size: 640px; }
 .compact-workspace .comparison-single table { min-width: 0; }
-.compact-workspace .comparison-table.comparison-single .vehicle-image { height: auto; aspect-ratio: 16 / 9; }
-.compact-workspace .comparison-single .vehicle-image img { position: absolute; inset: 0; object-fit: contain; object-position: center; }
-.compact-workspace .comparison-single .image-placeholder { position: absolute; inset: 0; }
+.compact-workspace .comparison-table:is(.comparison-single, .comparison-pair) .vehicle-image { height: auto; aspect-ratio: 16 / 9; }
+.compact-workspace .comparison-pair .vehicle-image { max-height: 280px; }
+.compact-workspace :is(.comparison-single, .comparison-pair) .vehicle-image img { position: absolute; inset: 0; object-fit: contain; object-position: center; }
+.compact-workspace :is(.comparison-single, .comparison-pair) .image-placeholder { position: absolute; inset: 0; }
 .compact-workspace .comparison-table .source-pill { display: none; }
 .compact-workspace .comparison-table .image-placeholder { font-size: 12px; flex-direction: row; gap: 4px; }
 .compact-workspace .comparison-table .image-placeholder svg { width: 18px; }

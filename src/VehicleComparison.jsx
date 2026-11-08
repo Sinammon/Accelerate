@@ -179,8 +179,9 @@ export default function VehicleComparison({ cars, valueRanking, topValue, owners
     ...(cars.some(hasEnergy) ? [fuelRow] : []), ...experienceRows];
   const reviewCars = cars.filter(car => detectWarnings(car).length);
   function table(tableRows, label) {
+    const layout = cars.length === 1 ? ' comparison-single' : cars.length === 2 ? ' comparison-pair' : '';
     return <>{cars.length > 1 && <p className="comparison-scroll-hint"><Icon name="chevron" size={14} /> Scroll sideways to see both cars</p>}
-    <div className={`table-scroll comparison-table${cars.length === 1 ? ' comparison-single' : ''}`} role="region" aria-label={label} tabIndex={0}>
+    <div className={`table-scroll comparison-table${layout}`} role="region" aria-label={label} tabIndex={0}>
       <table role="table" style={{ '--columns': cars.length, '--mobile-columns': Math.min(cars.length, 2) }}>
         <caption className="sr-only">{label}</caption>
         <thead role="rowgroup"><tr role="row">

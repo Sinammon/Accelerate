@@ -82,7 +82,8 @@ test('compact workspace preserves tab choices and private edits across the compl
     assert.match(document.querySelector('.comparison-table tbody tr:first-child').textContent, /Best Value match score/);
     assert.ok(document.querySelector('.comparison-table').classList.contains('comparison-single'));
     assert.equal(document.querySelector('.comparison-scroll-hint'), null);
-    assert.equal(document.querySelector('.site-header .brand-mark').getAttribute('aria-hidden'), 'true');
+    assert.equal(document.querySelector('.site-header .brand svg'), null);
+    assert.equal(document.querySelector('.site-header .brand').textContent, 'Accelerate');
     assert.doesNotMatch(document.querySelector('.comparison-table').textContent, /General baseline|Seller-reported/i);
     assert.ok(document.querySelector('.comparison-table a[href="https://www.ebay.ca/itm/111111111111"]'));
     await click('.compare-add');
@@ -110,7 +111,10 @@ test('compact workspace preserves tab choices and private edits across the compl
     assert.equal(window.location.hash, '#compare');
     assert.equal(document.activeElement.id, 'listing-url');
     assert.equal(document.querySelector('#listing-url').value, 'https://www.ebay.ca/itm/999999999999');
-    for (const id of ['222222222222', '333333333333', '444444444444']) await add(id);
+    await add('222222222222');
+    assert.ok(document.querySelector('.comparison-table.comparison-pair'));
+    for (const id of ['333333333333', '444444444444']) await add(id);
+    assert.equal(document.querySelector('.comparison-table.comparison-pair'), null);
     assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 4);
     document.querySelector('.car-management').open = true;
     await React.act(async () => {
