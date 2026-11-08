@@ -12,6 +12,22 @@ const round = n => Math.round(n * 100) / 100;
 const known = value => typeof value === 'number' && Number.isFinite(value);
 const criterion = (key, label, weight, extra = {}) => ({ key, label, weight, ...extra });
 
+function median(values) {
+  const sorted = [...values].sort((a, b) => a - b);
+  return (sorted[Math.floor((sorted.length - 1) / 2)] + sorted[Math.floor(sorted.length / 2)]) / 2;
+}
+
+function criterionPoints(criterion, value) {
+  const { absolute, scale, min, max, higherBetter, midpoint } = criterion;
+  if (absolute) return value * (scale ?? 1);
+  if (min === max) return 50;
+  const direction = higherBetter ? 1 : -1;
+  // Compare the size of the gap to the shortlist midpoint, keeping headroom
+  // even for very large differences. All calibrated inputs are nonnegative.
+  if (midpoint != null) return 50 + direction * 40 * (value - midpoint) / Math.max(value, midpoint, 1e-9);
+  return 100 * (higherBetter ? value - min : max - value) / (max - min);
+}
+
 // Same factors and normalization for every eligible contender. The resolver fills
 // experience gaps before scoring; other unknowns are excluded rather than zeroed.
 // Nested coverage keeps estimates separate from sourced experience information.
@@ -22,6 +38,7 @@ function scoreGroup(records, definitions, eligible) {
     const values = contenders.map(r => r.values[c.key]);
     const active = !!values.length && values.every(known) && c.weight > 0;
     return { ...c, active, min: active ? Math.min(...values) : null, max: active ? Math.max(...values) : null,
+      midpoint: active && c.calibrated ? median(values) : null,
       reason: active ? 'Same factor compared for every eligible contender.' : 'Missing or incompatible evidence; excluded from this comparison.' };
   });
   const active = criteria.filter(c => c.active);
@@ -30,7 +47,7 @@ function scoreGroup(records, definitions, eligible) {
   const entries = records.map(record => {
     const breakdown = eligible(record) && totalWeight ? active.map(c => {
       const value = record.values[c.key];
-      const points = c.absolute ? value * (c.scale ?? 1) : c.min === c.max ? 50 : 100 * (c.higherBetter ? value - c.min : c.max - value) / (c.max - c.min);
+      const points = criterionPoints(c, value);
       return { ...c, value, points, share: c.weight / totalWeight, contribution: points * c.weight / totalWeight,
         evidenceLabel: record.labels[c.key] || 'Supported comparable evidence', evidence: record.evidence[c.key] || [] };
     }) : [];
@@ -98,7 +115,9 @@ export function rankCapabilities(cars, mode, year, scenario, detectWarnings, own
   const ratioComparable = performanceContenders.length && performanceContenders.every(r => known(r.values.powerToWeight));
   const performanceWeights = accelerationMetric ? { acceleration: 50, powerToWeight: 30, torque: 20 } : ratioComparable ? { powerToWeight: 70, power: 20, torque: 10 } : { power: 70, torque: 30 };
   const performanceLabels = { acceleration: accelerationMetric === 'zeroTo100KphSeconds' ? '0–100 km/h (seconds)' : '0–60 mph (seconds)', powerToWeight: 'Power-to-weight (hp/tonne)', power: 'Supported power (hp)', torque: 'Supported torque (Nm)' };
-  const performance = scoreGroup(records, Object.entries(performanceWeights).map(([key, weight]) => criterion(key, performanceLabels[key], weight, { higherBetter: key !== 'acceleration' })), r => performanceContenders.includes(r));
+  const performance = scoreGroup(records, Object.entries(performanceWeights).map(([key, weight]) => criterion(key, performanceLabels[key], weight, {
+    higherBetter: key !== 'acceleration', calibrated: mode.id === 'performance',
+  })), r => performanceContenders.includes(r));
   // A proxy-based result cannot claim the coverage of a measured acceleration comparison.
   performance.coverage *= accelerationMetric ? 1 : ratioComparable ? 0.7 : 0.5;
 
@@ -113,7 +132,7 @@ export function rankCapabilities(cars, mode, year, scenario, detectWarnings, own
   // Balanced deliberately retains its historical price/fuel affordability subscore.
   // Only the Affordability mode uses complete running expenses.
   const affordability = scoreGroup(records, [criterion('price', 'Purchase price', 80), criterion('fuel', 'Annual fuel cost (scenario)', 20)], r => valid(r) && known(r.values.price));
-  const completeAffordability = scoreGroup(records, [criterion('price', 'Purchase price', 80), criterion('running', 'Annual running expenses', 20)], r => valid(r) && known(r.values.price));
+  const completeAffordability = scoreGroup(records, [criterion('price', 'Purchase price', 80, { calibrated: true }), criterion('running', 'Annual running expenses', 20, { calibrated: true })], r => valid(r) && known(r.values.price));
   for (const [index, record] of records.entries()) {
     record.values.capability = capability.entries[index].score;
     record.coverage.capability = capability.coverage;

@@ -82,8 +82,23 @@ test('power-to-weight can favor a lighter car over a more powerful heavy car', (
   assert.equal(result.performanceStrategy, 'power-to-weight');
   assert.equal(result.best[0].car.legacyItemId, 'light');
   assert.equal(result.best[0].values.powerToWeight, 250);
-  assert.equal(result.best[0].score, 70);
+  assert.equal(result.best[0].score, 52.95);
   assert.equal(result.provisional, true);
+});
+
+test('Performance and Affordability distinguish small gaps from large ones', () => {
+  for (const mode of ['performance', 'cost']) {
+    const leader = ratedCar('leader', 3, '200 hp.', 20000);
+    const close = ratedCar('close', 3, '199 hp.', 20100);
+    const far = ratedCar('far', 3, '100 hp.', 40000);
+    const scores = peer => rankDecisionMode([leader, peer], mode).ranked.map(entry => entry.score);
+    const [closeHigh, closeLow] = scores(close);
+    const [farHigh, farLow] = scores(far);
+    assert.ok(closeHigh > 50 && closeLow < 50 && closeHigh - closeLow < 1, mode);
+    assert.ok(farHigh > closeHigh && farLow < closeLow, mode);
+    assert.ok(farHigh < 100 && farLow > 0, mode);
+    assert.equal(rankDecisionMode([leader], mode).best[0].score, 50, mode);
+  }
 });
 
 test('same-metric, same-method acceleration takes priority; distinct metrics and methods are not merged', () => {

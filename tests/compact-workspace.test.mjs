@@ -262,7 +262,8 @@ test('compact workspace preserves tab choices and private edits across the compl
     assert.equal(document.querySelector('.scenario-fields select').value, '2', 'practical needs share the existing scenario');
     await add('666666666666');
     const affordability = [...document.querySelectorAll('.comparison-table tbody tr')].find(row => row.cells[0].textContent === 'Affordability score');
-    assert.deepEqual([...affordability.querySelectorAll('td')].map(cell => cell.textContent), ['40 / 100', '60 / 100'], 'the existing insurance override affects the Overview scores');
+    const [editedScore, defaultScore] = [...affordability.querySelectorAll('td')].map(cell => Number.parseFloat(cell.textContent));
+    assert.ok(editedScore < 50 && defaultScore > 50 && defaultScore - editedScore < 5, 'the insurance override affects the Overview scores without exaggerating the gap');
   } finally {
     await React.act(async () => root.unmount());
     await vite.close();

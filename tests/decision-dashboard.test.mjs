@@ -324,7 +324,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.match(document.querySelector('table').textContent, /130–180.*excluded from scoring/);
     await tab('overview');
     const performanceRow = [...document.querySelectorAll('tbody tr')].find(row => row.cells[0].textContent === 'Performance score');
-    assert.deepEqual([...performanceRow.querySelectorAll('td')].map(cell => cell.textContent), ['100 / 100', '0 / 100']);
+    assert.deepEqual([...performanceRow.querySelectorAll('td')].map(cell => cell.textContent), ['53.29 / 100', '46.41 / 100']);
     await tab('sources');
     assert.ok(document.querySelector('.spec-citation a[href="https://hondanews.ca/en-CA/specifications"]'));
     const attribution = document.querySelector('.search-attribution');

@@ -337,7 +337,7 @@ test('fuel estimates and mixed grades remain comparable alongside seating and bo
   const b = listing({ legacyItemId: 'B', enrichment: { fuel: { ...matchFuelEconomy(listing(), [{ ...row, combined: 6 }]) } } });
   const result = rankDecisionMode([a, b], 'cost');
   assert.equal(result.best[0].car.legacyItemId, 'B');
-  assert.equal(result.best[0].score, 60); // equal price: 50 × .8; best fuel: 100 × .2
+  assert.ok(result.best[0].score > 50 && result.best[0].score < 55);
   assert.equal(rankDecisionMode([a, listing({ legacyItemId: 'B' })], 'cost').criteria.find(c => c.key === 'running').active, true);
   assert.equal(rankDecisionMode([a, { ...b, enrichment: { fuel: { ...b.enrichment.fuel, fuel: 'Z' } } }], 'cost').criteria.find(c => c.key === 'running').active, true);
   const suv = listing({ legacyItemId: 'SUV', itemSpecifics: aspects({ 'Body type': 'SUV', Seats: '7' }) });
