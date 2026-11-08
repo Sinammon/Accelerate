@@ -79,9 +79,10 @@ test('compact workspace preserves tab choices and private edits across the compl
     await add('111111111111');
     assert.equal(window.location.hash, '#compare');
     assert.equal(document.querySelector('.comparison-table tbody').rows.length, 7);
-    assert.match(document.querySelector('.comparison-table tbody tr:first-child').textContent, /Best Value match score/);
-    assert.deepEqual([...document.querySelectorAll('.comparison-table tbody th')].map(cell => cell.textContent), ['Best Value match score', 'Affordability score', 'Comfort', 'Practicality', 'Performance score', 'Asking price', 'Mileage']);
+    assert.match(document.querySelector('.comparison-table tbody tr:first-child').textContent, /Asking price/);
+    assert.deepEqual([...document.querySelectorAll('.comparison-table tbody th')].map(cell => cell.textContent), ['Asking price', 'Mileage', 'Best Value match score', 'Affordability score', 'Performance score', 'Comfort', 'Practicality']);
     assert.equal(document.querySelectorAll('.comparison-factor-pair > span').length, 4);
+    assert.equal(document.querySelector('.comparison-match-score.is-highest'), null);
     assert.doesNotMatch(document.querySelector('.comparison-factor-pair').textContent, /\d\.0\/5/);
     assert.ok(document.querySelector('.comparison-table').classList.contains('comparison-single'));
     assert.equal(document.querySelector('.comparison-scroll-hint'), null);
@@ -158,8 +159,8 @@ test('compact workspace preserves tab choices and private edits across the compl
     await click('#compare-tab-specifications');
     await go('decide');
     assert.equal(document.querySelectorAll('.mode-card').length, 5);
-    assert.equal(document.querySelector('.decision-heading .back-link').textContent, 'Cost of Ownership');
-    await click('.decision-heading .back-link');
+    assert.equal(document.querySelector('.decision-heading .compare-decide').textContent, 'Cost of Ownership');
+    await click('.decision-heading .compare-decide');
     assert.equal(window.location.hash, '#ownership');
     await go('decide');
     await click('[data-mode="comfort"]');
@@ -270,6 +271,8 @@ test('compact workspace preserves tab choices and private edits across the compl
     await add('666666666666');
     const affordability = [...document.querySelectorAll('.comparison-table tbody tr')].find(row => row.cells[0].textContent === 'Affordability score');
     const [editedScore, defaultScore] = [...affordability.querySelectorAll('td')].map(cell => Number.parseFloat(cell.textContent));
+    assert.equal(affordability.querySelector('td:first-of-type .is-highest'), null);
+    assert.ok(affordability.querySelector('td:last-of-type .is-highest'));
     assert.ok(editedScore < 50 && defaultScore > 50 && defaultScore - editedScore < 5, 'the insurance override affects the Overview scores without exaggerating the gap');
   } finally {
     await React.act(async () => root.unmount());

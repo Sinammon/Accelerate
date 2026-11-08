@@ -36,6 +36,7 @@
 .compact-workspace .compare-toolbar { position: static; padding: 0; margin: 0 0 12px; border: 0; gap: 8px; }
 .compact-workspace .compare-tabs { margin: 0; }
 .compact-workspace .compare-decide { padding: 8px 12px; border-radius: 8px; font-size: 14px; }
+.compact-workspace a.compare-decide { min-height: 44px; border: 1px solid transparent; line-height: 1.38; white-space: nowrap; }
 .compact-workspace .comparison-management { gap: 8px; }
 .compact-workspace .comparison-management .comparison-options { z-index: 21; }
 .compact-workspace .comparison-import { margin: 0 0 16px; padding: 16px; }

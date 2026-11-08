@@ -156,13 +156,18 @@ export default function VehicleComparison({ cars, valueRanking, topValue, owners
   const performance = showScores ? rankDecisionMode(cars, 'performance', year, scenario) : null;
   const scoreFor = (ranking, car) => {
     const score = ranking?.ranked.find(entry => entry.car === car)?.score;
-    return score == null ? 'Insufficient evidence' : <strong className="comparison-match-score">{score}<span> / 100</span></strong>;
+    if (score == null) return 'Insufficient evidence';
+    const scores = ranking.ranked.map(entry => entry.score).filter(Number.isFinite);
+    const highest = scores.length > 1 && score === Math.max(...scores);
+    return <strong className={`comparison-match-score${highest ? ' is-highest' : ''}`} title={highest ? 'Highest score among comparable contenders' : undefined}>{score}<span> / 100</span></strong>;
   };
   const provisionalScores = [valueRanking, affordability, performance].filter(ranking => ranking?.provisional && ranking.best.length)
     .map(ranking => ({ value: 'Best Value', cost: 'Affordability', performance: 'Performance' })[ranking.mode.id]);
   const overviewRows = [
+    ['Asking price', priceDisplay], ['Mileage', mileageDisplay],
     ...(valueRanking ? [['Best Value match score', car => scoreFor(valueRanking, car)]] : []),
     ['Affordability score', car => scoreFor(affordability, car)],
+    ['Performance score', car => scoreFor(performance, car)],
     ['Comfort', car => {
       const e = experiences.get(car);
       return <>
@@ -183,8 +188,6 @@ export default function VehicleComparison({ cars, valueRanking, topValue, owners
         <SourceLinks sources={[e.ratings.frontPassengerSpace, e.ratings.rearPassengerSpace, e.ratings.cargoSpace].flatMap(rating => rating?.evidence || [])} />
       </>;
     }],
-    ['Performance score', car => scoreFor(performance, car)],
-    ['Asking price', priceDisplay], ['Mileage', mileageDisplay],
   ];
   const rows = [['Asking price', priceDisplay], ['Mileage and unit', mileageDisplay],
     ...KEY_FIELDS.filter(key => !sharedGaps.includes(key)).map(key => [FIELD_LABELS[key], car => spec(car, key)]),

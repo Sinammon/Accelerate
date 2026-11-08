@@ -131,7 +131,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     await tab('specifications');
     assert.equal(document.querySelector('.mode-grid'), null);
     await tab('overview');
-    assert.match(document.querySelector('table').textContent, /Affordability score.*\/ 100.*Comfort.*Ride.*Seats.*Practicality.*Performance score.*Insufficient evidence/s);
+    assert.match(document.querySelector('table').textContent, /Affordability score.*\/ 100.*Performance score.*Insufficient evidence.*Comfort.*Ride.*Seats.*Practicality/s);
     assert.doesNotMatch(document.querySelector('table').textContent, /Annual fuel \/ charging cost|Horsepower/);
     await change('.scenario-panel input', '10000');
     const costText = () => [...document.querySelectorAll('tbody tr')].find(row => row.cells[0].textContent === 'Affordability score').textContent;

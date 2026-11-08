@@ -53,7 +53,7 @@ test('dashboard themes persist across the real import, comparison and decision w
     const count = document.querySelectorAll('.car-card').length;
     assert.ok(count > 0);
     assert.equal(window.location.hash, '#compare');
-    assert.match(document.querySelector('.comparison-table').textContent, /Affordability score.*Comfort.*Ride.*Seats.*Practicality.*Performance score/s);
+    assert.match(document.querySelector('.comparison-table').textContent, /Affordability score.*Performance score.*Comfort.*Ride.*Seats.*Practicality/s);
     await act(async () => document.querySelector('.theme-switch').click());
     assert.equal(document.documentElement.dataset.theme, 'dark');
     assert.equal(document.querySelectorAll('.car-card').length, count);

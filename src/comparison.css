@@ -53,7 +53,8 @@
 .comparison-table :is(thead, tbody) th:first-child,
 .comparison-table thead { background: var(--surface); }
 .comparison-table .comparison-top-match { background: var(--surface-hover); }
-.comparison-table .comparison-match-score { color: var(--accent); font-variant-numeric: tabular-nums; }
+.comparison-table .comparison-match-score { color: var(--text); font-variant-numeric: tabular-nums; }
+.comparison-table .comparison-match-score.is-highest { color: var(--accent); }
 .comparison-match-score span { font-size: 12px; font-weight: 500; white-space: nowrap; }
 .comparison-scroll-hint { display: none; }
 #compare-panel-overview .comparison-table td { font-weight: 600; }
