@@ -17,14 +17,14 @@ export function ExperienceCost({ experience, scenario = DEFAULT_SCENARIO }) {
 export function ComfortDetail({ experience, topic }) {
   if (topic === 'seatComfort') {
     const front = experience.ratings.frontSeatComfort, rear = experience.ratings.rearSeatComfort;
-    return <><strong>{ratingDisplay(experience.seatComfort)} / 5</strong><SourceLinks sources={[...front.evidence, ...(rear?.evidence || [])]} /><p>Front: {front.rationale}{rear && <> Rear: {rear.rationale}</>}</p></>;
+    return <><strong>{ratingDisplay(experience.seatComfort)} / 5</strong><SourceLinks sources={[...front.evidence, ...(rear?.evidence || [])]} /><details><summary>Seat details</summary><p>Front: {front.rationale}{rear && <> Rear: {rear.rationale}</>}</p></details></>;
   }
   const rating = experience.ratings[topic];
-  return <><strong>{topic === 'seatHeating' ? ({ present: 'Reported present', absent: 'Absent / not working', likely: 'Likely available', unlikely: 'Unlikely available', 'trim-dependent': 'Trim-dependent' })[rating.availability] : `${ratingDisplay(rating.rating)} / 5`}</strong><SourceLinks sources={rating.evidence} /><p>{rating.rationale}</p></>;
+  return <><strong>{topic === 'seatHeating' ? ({ present: 'Reported present', absent: 'Absent / not working', likely: 'Likely available', unlikely: 'Unlikely available', 'trim-dependent': 'Trim-dependent' })[rating.availability] : `${ratingDisplay(rating.rating)} / 5`}</strong><SourceLinks sources={rating.evidence} /><details><summary>Assessment details</summary><p>{rating.rationale}</p></details></>;
 }
 
 export function PracticalitySummary({ experience }) {
-  return <div className="experience-practicality"><strong>Passenger room {ratingDisplay(experience.passengerSpace)} / 5 · Cargo {ratingDisplay(experience.ratings.cargoSpace.rating)} / 5</strong><SourceLinks sources={[experience.ratings.frontPassengerSpace, experience.ratings.rearPassengerSpace, experience.ratings.cargoSpace, experience.practicality].flatMap(rating => rating?.evidence || [])} /><p>{experience.ratings.frontPassengerSpace.rationale}{experience.ratings.rearPassengerSpace && <> {experience.ratings.rearPassengerSpace.rationale}</>} {experience.ratings.cargoSpace.rationale}</p><p>{experience.practicality.rationale}</p></div>;
+  return <div className="experience-practicality"><strong>Passenger room {ratingDisplay(experience.passengerSpace)} / 5 · Cargo {ratingDisplay(experience.ratings.cargoSpace.rating)} / 5</strong><SourceLinks sources={[experience.ratings.frontPassengerSpace, experience.ratings.rearPassengerSpace, experience.ratings.cargoSpace, experience.practicality].flatMap(rating => rating?.evidence || [])} /><details><summary>Space details</summary><p>{experience.ratings.frontPassengerSpace.rationale}{experience.ratings.rearPassengerSpace && <> {experience.ratings.rearPassengerSpace.rationale}</>} {experience.ratings.cargoSpace.rationale}</p><p>{experience.practicality.rationale}</p></details></div>;
 }
 
 export function ExperienceAssumptions({ experience }) {

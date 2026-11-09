@@ -69,7 +69,7 @@ export default function OwnershipCalculator({ cars, topValue, valueProvisional, 
   const carField = (record, name, label, hint, options = {}) => <CostField name={name} label={label} context={vehicleName(record.car)} value={record.inputs[name]} onChange={value => updateCar(record.car.legacyItemId, name, value)} hint={hint} {...options} />;
   const estimateField = (r, name, label, perKm = false) => {
     const edited = Object.hasOwn(state.vehicles[r.car.legacyItemId] || {}, name);
-    return <>{carField(r, name, label, edited ? 'Your estimate or quote; automatic updates will not replace it.' : undefined, perKm ? { step: '0.001' } : {})}
+    return <>{carField(r, name, label, undefined, perKm ? { step: '0.001' } : {})}
       {edited && <button type="button" className="text-button ownership-reset" aria-label={`Reset ${perKm ? 'maintenance' : 'insurance'} to estimate for ${vehicleName(r.car)}`} onClick={() => setState(previous => {
         const overrides = { ...previous.vehicles[r.car.legacyItemId] }; delete overrides[name];
         return { ...previous, vehicles: { ...previous.vehicles, [r.car.legacyItemId]: overrides } };
@@ -110,27 +110,27 @@ export default function OwnershipCalculator({ cars, topValue, valueProvisional, 
   const purchaseRows = [
     ['Purchase price', r => {
       const edited = Object.hasOwn(state.vehicles[r.car.legacyItemId] || {}, 'purchasePrice');
-      return <>{carField(r, 'purchasePrice', 'Purchase price (CAD)', edited ? 'Your planning amount; original listing unchanged.' : r.costs.price == null ? 'Enter a CAD price; no currency conversion assumed.' : undefined)}{!edited && <SourceLinks sources={[listingSource(r.car)]} />}</>;
+      return <>{carField(r, 'purchasePrice', 'Purchase price (CAD)', undefined)}{!edited && <SourceLinks sources={[listingSource(r.car)]} />}</>;
     }],
-    ['Estimated purchase tax', r => <>{value(r, 'tax')}<small>{r.inputs.taxOverride === '' ? `${state.taxRate}% of purchase price` : 'Your tax amount override'}</small>{carField(r, 'taxOverride', 'Tax override (CAD)', 'Optional: blank uses the shared tax rate.', { optional: true })}</>],
-    ['Purchase fees', r => carField(r, 'purchaseFees', 'Purchase fees (CAD)', Object.hasOwn(state.vehicles[r.car.legacyItemId] || {}, 'purchaseFees') ? 'Your estimate; confirm actual fees.' : 'Planning estimate; confirm registration, inspection and dealer fees.')],
+    ['Estimated purchase tax', r => <>{value(r, 'tax')}<small>{r.inputs.taxOverride === '' ? `${state.taxRate}% of purchase price` : 'Your tax amount override'}</small>{carField(r, 'taxOverride', 'Tax override (CAD)', undefined, { optional: true })}</>],
+    ['Purchase fees', r => carField(r, 'purchaseFees', 'Purchase fees (CAD)', undefined)],
     ...(finance ? [['Total purchase cost', r => value(r, 'acquisition'), true]] : []),
     ...(finance ? [
-      ['Down payment · upfront', r => carField(r, 'downPayment', 'Down payment (CAD)', Object.hasOwn(state.vehicles[r.car.legacyItemId] || {}, 'downPayment') ? 'Your amount; funded separately from monthly costs.' : 'Starting assumption: 20% of purchase price.', { error: r.costs.acquisition != null && ownershipNumber(r.inputs.downPayment, 'downPayment') > r.costs.acquisition ? 'Down payment cannot exceed total acquisition cost.' : undefined })],
-      ['Amount borrowed', r => <>{value(r, 'principal')}<small>Includes purchase tax and fees, less down payment.</small></>],
+      ['Down payment · upfront', r => carField(r, 'downPayment', 'Down payment (CAD)', undefined, { error: r.costs.acquisition != null && ownershipNumber(r.inputs.downPayment, 'downPayment') > r.costs.acquisition ? 'Down payment cannot exceed total purchase cost.' : undefined })],
+      ['Amount borrowed', r => <>{value(r, 'principal')}</>],
       ['Monthly loan payment', r => <>{value(r, 'payment')}<small>{state.apr}% annual interest · {state.termMonths} months · estimate, not a lender offer</small></>, true],
       ['Total loan interest', r => value(r, 'interest')],
-      ['Total purchase repayment', r => <>{value(r, 'totalRepayment')}<small>Includes down payment, loan principal and interest. Running costs are separate.</small></>],
-    ] : [['Cash needed to buy', r => <>{value(r, 'acquisition')}<small>Upfront purchase funding, separate from running expenses.</small></>]]),
+      ['Total purchase repayment', r => <>{value(r, 'totalRepayment')}</>],
+    ] : [['Cash needed to buy', r => <>{value(r, 'acquisition')}</>]]),
   ];
   const runningRows = [
-    ['Fuel / electricity · annual', r => <>{value(r, 'energy')}{carField(r, 'energyOverride', 'Annual energy override (CAD)', 'Optional: blank uses consumption and shared driving assumptions.', { optional: true })}<EnergySources energy={r.experience.energy} /></>],
+    ['Fuel / electricity · annual', r => <>{value(r, 'energy')}{carField(r, 'energyOverride', 'Annual energy override (CAD)', undefined, { optional: true })}<EnergySources energy={r.experience.energy} /></>],
     ['Insurance · annual', r => estimateField(r, 'insuranceAnnual', 'Annual insurance (CAD)')],
-    ['Maintenance, tyres & repairs', r => <>{value(r, 'maintenance')}<small>Annual reserve at your driving distance</small>{estimateField(r, 'maintenancePerKm', 'Reserve (CAD/km)', true)}</>],
-    ['Parking & tolls · monthly', r => carField(r, 'parkingMonthly', 'Monthly parking and tolls (CAD)', 'Starting assumption: $0. Enter your expected costs.')],
-    ['Other running costs · annual', r => carField(r, 'otherAnnual', 'Other annual costs (CAD)', 'Starting assumption: $0. Include any recurring fees or other expenses.')],
+    ['Maintenance, tyres & repairs', r => <>{value(r, 'maintenance')}{estimateField(r, 'maintenancePerKm', 'Reserve (CAD/km)', true)}</>],
+    ['Parking & tolls · monthly', r => carField(r, 'parkingMonthly', 'Monthly parking and tolls (CAD)', undefined)],
+    ['Other running costs · annual', r => carField(r, 'otherAnnual', 'Other annual costs (CAD)', undefined)],
     ['Annual running costs', r => value(r, 'annualRunning'), true],
-    ['Monthly running average', r => <>{value(r, 'monthlyRunning')}<small>Running expenses only; excludes purchase savings and loan payments.</small></>, true],
+    ['Monthly running average', r => <>{value(r, 'monthlyRunning')}</>, true],
   ];
   const rulesError = ownershipNumber(state.comfortablePercent, 'comfortablePercent') != null && ownershipNumber(state.stretchedPercent, 'stretchedPercent') != null && Number(state.stretchedPercent) <= Number(state.comfortablePercent) ? 'The stretched limit must be greater than the comfortable limit.' : undefined;
   const labels = finance ? { comfortable: 'Comfortable monthly budget', stretched: 'Stretched monthly budget', over: 'Monthly costs over budget' } : { comfortable: 'Comfortable running costs', stretched: 'Stretched running budget', over: 'Running costs over budget' };
@@ -182,13 +182,14 @@ export default function OwnershipCalculator({ cars, topValue, valueProvisional, 
         </section>
       </WorkspacePanel>
       <WorkspacePanel id="costs" value="purchase" active={tab}>
-      <section className="ownership-section" aria-labelledby="purchase-costs"><h2 id="purchase-costs">Purchase costs</h2><p>Start with the seller’s price, then adjust your acquisition estimates. Ontario private-sale tax may use wholesale value instead of purchase price; use a tax override when needed. <a href={ONTARIO} target="_blank" rel="noopener noreferrer">Ontario tax guidance</a>.</p>
+      <section className="ownership-section" aria-labelledby="purchase-costs"><h2 id="purchase-costs">Purchase costs</h2>
         {table('purchase-costs', purchaseRows, tab === 'purchase')}
+        <details className="ownership-assumptions"><summary>Purchase tax help</summary><p>Start with the seller’s price, then adjust your acquisition estimates. Ontario private-sale tax may use wholesale value instead of purchase price; use a tax override when needed. <a href={ONTARIO} target="_blank" rel="noopener noreferrer">Ontario tax guidance</a>.</p></details>
         {!finance && <details className="ownership-assumptions ownership-savings"><summary>Save toward this purchase</summary><p>This is a future purchase savings goal, not an expense after buying with cash. It is excluded from running totals and the salary assessment.</p>{settingField('savingsMonths', 'Savings period (months)', { step: '1' })}<dl>{records.map(r => <div key={r.car.legacyItemId}><dt>{vehicleName(r.car)}</dt><dd>{money(r.costs.savingsTarget)}<small>per month toward {money(r.costs.acquisition)} upfront</small></dd></div>)}</dl></details>}
       </section>
       </WorkspacePanel>
       <WorkspacePanel id="costs" value="running" active={tab}>
-      <section className="ownership-section" aria-labelledby="running-costs"><h2 id="running-costs">Running costs</h2><p>These are editable estimates, not guaranteed bills. Insurance depends on the driver and coverage; maintenance and repairs depend on condition and use. Totals include your repair reserve.</p>{table('running-costs', runningRows, tab === 'running')}<p className="ownership-note">“Incomplete” means a required amount or driving assumption needs attention. Missing costs never count as zero. Resale value and depreciation are not modeled.</p></section>
+      <section className="ownership-section" aria-labelledby="running-costs"><h2 id="running-costs">Running costs</h2>{table('running-costs', runningRows, tab === 'running')}<details className="ownership-assumptions"><summary>About running estimates</summary><p>These are editable estimates, not guaranteed bills. Insurance depends on the driver and coverage; maintenance and repairs depend on condition and use. Totals include your repair reserve.</p><p className="ownership-note">“Incomplete” means a required amount or driving assumption needs attention. Missing costs never count as zero. Resale value and depreciation are not modeled.</p></details></section>
 
       </WorkspacePanel>
       <WorkspacePanel id="costs" value="salary" active={tab}>

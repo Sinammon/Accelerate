@@ -1,8 +1,9 @@
 .wordmark {
   display: block;
   width: 200px;
+  max-width: 100%;
   height: auto;
-  aspect-ratio: 2185 / 380;
+  aspect-ratio: 2110 / 340;
   flex-shrink: 0;
   overflow: hidden;
   background: transparent;
@@ -10,3 +11,7 @@
 @media (max-width: 767px) {
   .wordmark { width: 168px; }
 }
+
+.logo-on-light { display: none; }
+[data-theme='light'] .logo-on-dark { display: none; }
+[data-theme='light'] .logo-on-light { display: inline; }

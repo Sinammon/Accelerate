@@ -64,6 +64,9 @@ test('calculator compares four cars, validates edits, preserves sources and sepa
     assert.equal([...document.querySelectorAll('#costs-panel-purchase tbody th')].filter(cell => cell.textContent === 'Cash needed to buy').length, 1);
     assert.equal(document.querySelector('.ownership-salary > h2 + p'), null);
     assert.equal(document.querySelector('.ownership-income small'), null);
+    assert.equal(document.querySelector('#purchase-costs + p'), null);
+    assert.equal(document.querySelector('#running-costs + p'), null);
+    assert.equal(document.querySelector('[data-field=parkingMonthly]').getAttribute('aria-describedby'), null);
     assert.match(document.body.textContent, /Ontario average, June 2026.*FSRA/s);
     assert.ok(document.querySelector('a[href="https://example.test/energy"]'));
     const energyAmounts = () => [...document.querySelector('#costs-panel-running table').querySelectorAll('tbody tr:first-child .ownership-amount')].map(el => el.textContent);
