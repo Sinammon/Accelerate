@@ -18,15 +18,15 @@ export default function VehicleSummary({ car, retryResearch, onViewResults, onSa
   const amenities = Object.entries(features).filter(([, item]) => item.value === true).map(([name]) => name);
   return <div className="vehicle-summary" data-research-car={car.legacyItemId} tabIndex={-1}>
     <VehicleDetailsEditor car={car} onSaveDetails={onSaveDetails} />
-    <SourceStatus car={car} retryResearch={retryResearch} onViewResults={onViewResults} />
+    <details className="source-research-status"><summary>Research status</summary><SourceStatus car={car} retryResearch={retryResearch} onViewResults={onViewResults} /></details>
     <h3>Reference specifications and your entries</h3>
-    {documented.length ? <dl className="summary-specs">{documented.map(key => <div key={key}><dt>{FIELD_LABELS[key]}</dt><dd><SpecValue spec={specs[key]} /></dd></div>)}</dl> : <p>No supported VIN, factory or government reference specifications or user entries for these key details yet.</p>}
+    {documented.length ? <dl className="summary-specs">{documented.map(key => <div key={key}><dt>{FIELD_LABELS[key]}</dt><dd><SpecValue spec={specs[key]} /></dd></div>)}</dl> : <p>No reference specifications yet.</p>}
     <h3>Listing claims</h3>
-    {seller.length ? <dl className="summary-specs">{seller.map(key => <div key={key}><dt>{FIELD_LABELS[key]}</dt><dd><SpecValue spec={specs[key]} /></dd></div>)}</dl> : <p>No uncorroborated key specification claims available.</p>}
-    <p>Amenities reported present or standard for this model: {amenities.join(', ') || 'none documented'}. Missing mentions do not mean equipment is absent.</p>
-    {!!typical.length && <><h3>Typical and estimated model specifications</h3><dl className="summary-specs">{typical.map(key => <div key={key}><dt>{FIELD_LABELS[key]}</dt><dd><SpecValue spec={specs[key]} /></dd></div>)}</dl><p>Sourced references include citations below. Unverified estimates state their assumptions. Ranges and alternatives are excluded from rankings.</p></>}
+    {seller.length ? <dl className="summary-specs">{seller.map(key => <div key={key}><dt>{FIELD_LABELS[key]}</dt><dd><SpecValue spec={specs[key]} /></dd></div>)}</dl> : <p>No listing specifications available.</p>}
+    <p>Amenities reported present or standard for this model: {amenities.join(', ') || 'none documented'}.</p>
+    {!!typical.length && <><h3>Typical and estimated model specifications</h3><dl className="summary-specs">{typical.map(key => <div key={key}><dt>{FIELD_LABELS[key]}</dt><dd><SpecValue spec={specs[key]} /></dd></div>)}</dl></>}
     <ModelAdvice car={car} /><ModelResearch car={car} /><RecallResearch key={car.legacyItemId} car={car} />
-    <h3>Still to verify on this car</h3><p>{gaps.length ? `Missing or conflicting specifications: ${gaps.map(key => FIELD_LABELS[key]).join(', ')}. ` : ''}{INDIVIDUAL_CHECKS}</p>
+    <h3>Still to verify on this car</h3><details><summary>Checks before buying</summary><p>{gaps.length ? `Missing or conflicting specifications: ${gaps.map(key => FIELD_LABELS[key]).join(', ')}. ` : ''}{INDIVIDUAL_CHECKS}</p></details>
     {gaps.some(key => ['horsepower', 'torque'].includes(key)) && <p>{specs.horsepower.reason || specs.torque.reason || 'Power specifications conflict; review the cited claims and confirm the engine with the seller.'}</p>}
     <VehicleEvidence car={car} retryResearch={retryResearch} showStatus={false} />
   </div>;

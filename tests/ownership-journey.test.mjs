@@ -60,6 +60,10 @@ test('calculator compares four cars, validates edits, preserves sources and sepa
     assert.equal(document.querySelectorAll('.ownership-results > li').length, 4);
     assert.match(document.querySelector('.ownership-results').textContent, /Gross salary for comfortable running costs.*\$49,981\/year/s);
     assert.match(document.querySelector('#costs-panel-purchase .ownership-table').textContent, /\$23,100/);
+    assert.doesNotMatch(document.querySelector('#costs-panel-purchase .ownership-table').textContent, /Total acquisition cost/);
+    assert.equal([...document.querySelectorAll('#costs-panel-purchase tbody th')].filter(cell => cell.textContent === 'Cash needed to buy').length, 1);
+    assert.equal(document.querySelector('.ownership-salary > h2 + p'), null);
+    assert.equal(document.querySelector('.ownership-income small'), null);
     assert.match(document.body.textContent, /Ontario average, June 2026.*FSRA/s);
     assert.ok(document.querySelector('a[href="https://example.test/energy"]'));
     const energyAmounts = () => [...document.querySelector('#costs-panel-running table').querySelectorAll('tbody tr:first-child .ownership-amount')].map(el => el.textContent);

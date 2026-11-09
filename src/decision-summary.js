@@ -130,14 +130,12 @@ function practicalReasons(summary, entry) {
 }
 
 function performanceReasons(summary, entry) {
-  const comparison = performanceComparison(summary, entry);
   const factors = ['acceleration', 'powerToWeight', 'power', 'torque'].flatMap(key => entry.breakdown.filter(f => f.key === key));
   for (const [key, label] of [['powerToWeight', 'Power-to-weight'], ['power', 'Horsepower'], ['torque', 'Torque']]) {
     if (!factors.some(factor => factor.key === key) && Number.isFinite(entry.values[key])) factors.push({ key, label, value: entry.values[key], evidence: entry.evidence[key], evidenceLabel: `${entry.labels[key]}; unavailable for some contenders, excluded from comparative score` });
   }
-  const candidates = comparison ? [{ ...comparison, key: 'powerToWeight', topic: 'Power-to-weight' }] : [];
+  const candidates = [];
   for (const factor of factors) {
-    if (comparison?.covers.includes(factor.key)) continue;
     const value = factor.key === 'acceleration' ? `${factor.value} s` : factor.key === 'powerToWeight' ? `${factor.value.toFixed(1)} hp/tonne` : `${number(factor.value)} ${factor.key === 'power' ? 'hp' : 'Nm'}`;
     const sources = sourcesFor([factor], entry.car);
     candidates.push({ key: factor.key, topic: factor.label, text: `${factor.label}: ${value}`, label: factor.evidenceLabel, source: sources[0], sources });
@@ -182,24 +180,6 @@ function categoryTradeoff(summary, entry) {
   }
   return null;
 }
-
-export function performanceComparison(summary, entry) {
-  const ratio = entry.values.powerToWeight;
-  if (!Number.isFinite(ratio)) return null;
-  const peer = summary.ranking.ranked.find(other => other !== entry && !other.identityMismatch && Number.isFinite(other.values.powerToWeight)
-    && entry.values.power < other.values.power && entry.specs.curbWeightKg.value < other.specs.curbWeightKg.value && ratio > other.values.powerToWeight);
-  if (!peer) return null;
-  const metric = summary.requested.criteria.find(c => c.key === 'acceleration' && c.active);
-  const quicker = metric && Number.isFinite(entry.values.acceleration) && entry.values.acceleration < peer.values.acceleration;
-  const acceleration = quicker
-    ? ` Comparable ${metric.label} figures are quicker: ${entry.values.acceleration} s versus ${peer.values.acceleration} s (${entry.specs[summary.requested.accelerationMetric].measurementMethod}).`
-    : ' Power-to-weight indicates acceleration potential; it does not establish which car is faster.';
-  const sources = [entry, peer].flatMap(record => sourcesFor([{ evidence: record.evidence.powerToWeight },
-    ...(quicker ? [{ evidence: record.evidence.acceleration }] : [])], record.car));
-  return { text: `Despite ${number(entry.values.power)} hp versus ${number(peer.values.power)} hp in the ${vehicleName(peer.car)}, its lower weight (${number(entry.specs.curbWeightKg.value)} versus ${number(peer.specs.curbWeightKg.value)} kg) gives it a higher power-to-weight ratio: ${ratio.toFixed(1)} versus ${peer.values.powerToWeight.toFixed(1)} hp/tonne.${acceleration}`,
-    label: `Derived from compatible power and curb weight · ${entry.labels.powerToWeight}`, sources, covers: ['powerToWeight', 'power', ...(quicker ? ['acceleration'] : [])] };
-}
-
 
 export function entrySummary(summary, entry) {
   const { ranking, requested, kind } = summary;

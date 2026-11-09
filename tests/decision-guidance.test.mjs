@@ -136,19 +136,21 @@ test('value retains qualified ownership context while affordability stays focuse
   assert.equal(liveResearchForCar(car).insights.length, 1, 'selected dataset scopes are validated consistently without inventing an original market');
 });
 
-test('power-to-weight explains lower output and lower weight; quicker claims require compatible measured acceleration', () => {
+test('performance shows individual figures without the redundant horsepower and weight comparison', () => {
   const light = ratedCar('light', 3, '200 hp. 300 Nm. Curb weight: 1000 kg.');
-  const heavy = { ...ratedCar('heavy', 3, '300 hp. 400 Nm. Curb weight: 2000 kg.'), model: 'Accord' };
-  const notes = () => { const summary = decisionSummary([light, heavy], 'performance', 2026); return entrySummary(summary, summary.ranking.ranked.find(e => e.car === light)); };
-  assert.match(notes().reasons[0].text, /Despite 200 hp versus 300 hp.*Accord.*1,000 versus 2,000 kg.*200.0 versus 150.0 hp\/tonne/);
-  assert.doesNotMatch(notes().reasons[0].text, /figures are quicker/);
+  const heavy = ratedCar('heavy', 3, '300 hp. 400 Nm. Curb weight: 2000 kg.');
+  const notes = () => {
+    const summary = decisionSummary([light, heavy], 'performance', 2026);
+    return entrySummary(summary, summary.ranking.ranked.find(entry => entry.car === light));
+  };
+  assert.match(JSON.stringify(notes().reasons), /200.0 hp\/tonne/);
+  assert.match(JSON.stringify(notes().reasons), /200 hp/);
+  assert.doesNotMatch(JSON.stringify(notes().reasons), /Despite|versus|lower weight/);
   addAcceleration(light, 'zeroTo100KphSeconds', 5);
   addAcceleration(heavy, 'zeroTo100KphSeconds', 6);
-  assert.match(notes().reasons[0].text, /figures are quicker: 5 s versus 6 s/);
+  assert.ok(notes().reasons.some(reason => /5 s/.test(reason.text)));
   heavy.enrichment.modelSpecs.fields.zeroTo100KphSeconds.measurementMethod = 'instrumented-test';
-  assert.doesNotMatch(notes().reasons[0].text, /figures are quicker/);
-  heavy.description = '300 hp. 400 Nm.';
-  assert.doesNotMatch(JSON.stringify(notes().reasons), /Despite 200 hp/);
+  assert.doesNotMatch(JSON.stringify(notes().reasons), /figures are quicker|faster/);
 });
 
 test('affordability explanations keep fuel, charging and plug-in assumptions visible for unscored cars too', () => {

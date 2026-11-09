@@ -6,7 +6,7 @@ export default function ModelAdvice({ car }) {
   const observations = modelAdviceSummary(car);
   return <section className="model-advice" aria-label="Model advice">
     <h3>Model advice</h3>
-    {observations.length ? <><p>Model guidance may include estimates. Confirm it against this car’s configuration and condition.</p><ul>{observations.map(note => <li key={note.text}><strong>{note.topic}</strong><p>{note.text}</p>{note.checked && <small>Checked {new Date(note.checked).toLocaleDateString('en-CA')}</small>}<SourceLinks sources={note.sources} /></li>)}</ul></>
+    {observations.length ? <><ul>{observations.map(note => <li key={note.text}><strong>{note.topic}</strong><p>{note.text}</p>{note.checked && <small>Checked {new Date(note.checked).toLocaleDateString('en-CA')}</small>}<SourceLinks sources={note.sources} /></li>)}</ul></>
       : <p>Model guidance is not available yet. Confirm service history, engine variant and condition with the seller and an independent inspection.</p>}
   </section>;
 }

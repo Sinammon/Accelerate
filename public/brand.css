@@ -1,10 +1,13 @@
-/* The name is the identity. No separate symbol or raster logo. */
 .wordmark {
-  display: inline-block;
-  padding-inline: 2px 6px;
-  font-family: 'Clash Grotesk', sans-serif;
-  font-weight: 650;
-  letter-spacing: -.04em;
-  line-height: 1.15;
-  transform: skewX(-9deg);
+  display: block;
+  width: 200px;
+  height: auto;
+  aspect-ratio: 1150 / 195;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #031831;
+}
+@media (max-width: 767px) {
+  .wordmark { width: 168px; }
 }
