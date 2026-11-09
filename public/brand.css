@@ -2,11 +2,10 @@
   display: block;
   width: 200px;
   height: auto;
-  aspect-ratio: 1150 / 195;
+  aspect-ratio: 2185 / 380;
   flex-shrink: 0;
   overflow: hidden;
-  border-radius: 6px;
-  background: #031831;
+  background: transparent;
 }
 @media (max-width: 767px) {
   .wordmark { width: 168px; }
