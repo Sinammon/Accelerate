@@ -2,7 +2,8 @@ import React, { useId } from 'react';
 
 export function Wordmark({ symbol = false }) {
   const backgroundFilter = useId();
-  return <svg className={`wordmark${symbol ? ' brand-symbol' : ''}`} viewBox={symbol ? '200 140 630 340' : '200 140 2110 340'} role="img" aria-label="Accelerate">
+  if (symbol) return <img className="wordmark brand-symbol" src="/images/accelerate-mark.svg" alt="Accelerate" width="72" height="39" />;
+  return <svg className="wordmark" viewBox="200 140 2110 340" role="img" aria-label="Accelerate">
     <title>Accelerate</title>
     <defs>
       <filter id={backgroundFilter} colorInterpolationFilters="sRGB">
