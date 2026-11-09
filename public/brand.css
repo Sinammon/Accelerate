@@ -12,6 +12,4 @@
   .wordmark { width: 168px; }
 }
 
-.logo-on-light { display: none; }
-[data-theme='light'] .logo-on-dark { display: none; }
-[data-theme='light'] .logo-on-light { display: inline; }
+.wordmark.brand-symbol { width: 72px; aspect-ratio: 630 / 340; }

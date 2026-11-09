@@ -87,9 +87,9 @@ test('compact workspace preserves tab choices and private edits across the compl
     assert.ok(document.querySelector('.comparison-table').classList.contains('comparison-single'));
     assert.equal(document.querySelector('.comparison-scroll-hint'), null);
     assert.equal(document.querySelector('.site-header .brand image').getAttribute('href'), '/images/accelerate-logo.png');
-    assert.equal(document.querySelector('.site-header .wordmark').getAttribute('viewBox'), '200 140 2110 340');
-    assert.ok(document.querySelector('.site-header .wordmark .logo-on-light'));
-    assert.ok(document.querySelector('.site-header .wordmark .logo-on-dark'));
+    assert.equal(document.querySelector('.site-header .wordmark').getAttribute('viewBox'), '200 140 630 340');
+    assert.equal(document.querySelector('.site-header .wordmark .logo-on-light'), null);
+    assert.ok(document.querySelector('.site-header .wordmark .logo-artwork'));
     assert.equal(document.querySelector('.site-header .brand').textContent, 'Accelerate');
     assert.doesNotMatch(document.querySelector('.comparison-table').textContent, /General baseline|Seller-reported/i);
     assert.ok(document.querySelector('.comparison-table a[href="https://www.ebay.ca/itm/111111111111"]'));
