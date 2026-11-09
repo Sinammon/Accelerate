@@ -106,19 +106,20 @@ export function resolveMileage(car) {
   const conflicts = resolved.some(item => item.unitConflict || (item.unit && chosen.unit ? Math.abs(km(item) - km(chosen)) > 1 : item.amount !== chosen.amount));
   if (conflicts) return { ...unknown, status: 'conflict', evidence, reason: 'The listing supplies conflicting mileage readings or units. Confirm the odometer reading and unit with the seller.' };
   return { raw: chosen.raw, originalRaw, amount: chosen.amount, unit: chosen.unit || 'km', status: 'known', source: chosen.source,
-    sellerReported: true, assumedUnit: !chosen.unit, evidence, reason: !chosen.unit ? 'The seller supplies a mileage reading without a unit. Kilometres are assumed; confirm the unit with the seller.'
+    sellerReported: true, assumedUnit: !chosen.unit, evidence, reason: !chosen.unit ? 'The seller supplies a mileage reading without a unit. The app displays it in kilometres. Confirm the unit with the seller.'
       : chosen.unitEvidence ? `Mileage selected from ${chosen.source.toLowerCase()}; the unit comes from an explicit seller mileage statement.`
       : `Mileage selected from ${chosen.source.toLowerCase()}. Seller-reported, not independently verified.` };
 }
 
-export function mileageDisplay(car) {
-  const result = resolveMileage(car);
+export function formatMileage(result) {
   if (result.status === 'conflict') return 'Conflicting mileage';
   if (result.amount == null) return 'Unknown';
-  if (!result.unit) return `${String(result.raw)} \u00b7 unit not stated`;
-  const parsed = reading(result.raw);
-  const value = parsed ? `${String(result.raw)}${parsed.unit ? '' : ` ${result.unit}`}` : `${result.amount.toLocaleString('en-CA')} ${result.unit}`;
-  return `${value}${result.assumedUnit ? ' (assumed)' : ''}${result.userEntered ? ' · User-entered' : ''}`;
+  return `${km(result).toLocaleString('en-CA', { maximumFractionDigits: 0 })} km`;
 }
 
-export const mileageEvidenceLabel = result => result.userEntered ? 'User-entered mileage' : result.assumedUnit ? 'Seller reading · kilometres assumed' : 'Seller-reported mileage';
+export function mileageDisplay(car) {
+  const result = resolveMileage(car);
+  return `${formatMileage(result)}${result.userEntered ? ' · User-entered' : ''}`;
+}
+
+export const mileageEvidenceLabel = result => result.userEntered ? 'User-entered mileage' : result.assumedUnit ? 'Seller reading · unit not stated' : 'Seller-reported mileage';

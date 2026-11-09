@@ -5,7 +5,7 @@ import { DIMENSION_LABELS, supportedPowerToWeight } from './capability-scoring.j
 import { researchGuidance, researchForCar } from './model-research.js';
 import { resolveVehicleExperience, experienceLabel } from './vehicle-experience.js';
 import { resolveMileage, numeric, vehicleName, safeUrl, listingSource, evidenceSources } from './vehicle-data.js';
-import { mileageEvidenceLabel } from './mileage.js';
+import { formatMileage, mileageEvidenceLabel } from './mileage.js';
 import { ownershipContext, sellerHistoryContext } from './ownership-context.js';
 
 export const PRIMARY_MODES = [
@@ -220,7 +220,7 @@ export function keyFacts(car, mode = 'value') {
   const engineFields = [specs.displacement, specs.cylinders].filter(s => s.value != null);
   if (engine) facts.push({ icon: 'engine', label: 'Engine', value: engine, source: engineFields.some(s => s.quality === 'estimated') ? 'Includes estimated model specs; unverified' : engineFields.some(s => s.status === 'model-reference') ? 'Includes typical model specs · cited sources' : engineFields.every(s => s.status === 'vin-record') ? 'Original VIN record' : engineFields.every(s => s.status === 'seller-reported') ? 'Seller-reported' : 'Seller / original VIN evidence' });
   const mileage = resolveMileage(car);
-  if (mileage.unit && mileage.amount != null) facts.push({ icon: 'mileage', label: 'Mileage', value: `${number(mileage.amount)} ${mileage.unit}`, source: mileageEvidenceLabel(mileage) });
+  if (mileage.unit && mileage.amount != null) facts.push({ icon: 'mileage', label: 'Mileage', value: formatMileage(mileage), source: mileageEvidenceLabel(mileage) });
   const amenities = Object.entries(features).filter(([, f]) => f.value === true).map(([label]) => label);
   if (amenities.length) facts.push({ icon: 'seat', label: 'Reported features', value: amenities.slice(0, 3).join(', '), source: amenities.some(name => features[name].status === 'model-reference') ? 'Includes typical standard equipment · confirm on this car' : 'Seller-reported · confirm on this car' });
   else if (specs.transmission.value) facts.push({ icon: 'transmission', label: 'Transmission', value: specs.transmission.value, source: specEvidenceLabel(specs.transmission) });

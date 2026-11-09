@@ -65,7 +65,7 @@ test('unitless mileage readings use an explicit kilometre assumption', () => {
     assert.equal(result.status, 'known');
     assert.equal(result.assumedUnit, true);
     assert.equal(result.evidence[0].unit, null, 'original seller evidence stays unitless');
-    assert.match(mileageDisplay(car), /km \(assumed\)/);
+    assert.equal(mileageDisplay(car), '2,000 km');
   }
   const maserati = resolveMileage({ mileage: { raw: '15819' }, description: '2016 MASERATI GT 15000 MILES CLEAN CARFAX' });
   assert.equal(maserati.amount, 15819);
@@ -83,6 +83,14 @@ test('explicit mileage-unit statements and field units can complete a supplied r
   assert.equal(resolveMileage({ mileage: { unit: 'mi' }, description: 'Odometer: 2k' }).unit, 'mi');
   assert.equal(resolveMileage({ description: 'Mileage is in KM.', mileage: { raw: '2000' } }).unit, 'km');
   assert.equal(resolveMileage({ mileage: { raw: '90000' }, itemSpecifics: [aspect('Mileage', '90k'), aspect('Mileage unit', 'km')] }).status, 'known');
+});
+
+test('mileage displays whole kilometres for both seller readings and corrections', () => {
+  assert.equal(mileageDisplay({ mileage: { raw: '75k miles' } }), '120,701 km');
+  assert.equal(mileageDisplay({ mileage: { raw: '2000', unit: 'mi' } }), '3,219 km');
+  assert.equal(mileageDisplay({ mileage: { raw: '2000.4 km' } }), '2,000 km');
+  assert.equal(mileageDisplay({ mileage: { raw: '0 miles' } }), '0 km');
+  assert.equal(mileageDisplay({ mileageOverride: { amount: 50000, unit: 'mi' } }), '80,467 km · User-entered');
 });
 
 test('conflicting structured mileage or units are not silently selected or scored', () => {

@@ -114,7 +114,7 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(window.location.hash, '#compare');
     assert.equal(document.querySelector('h1').textContent, 'Compare cars');
     assert.equal(document.querySelector('.vehicle-name').textContent, '2016 Example 1');
-    assert.match(document.querySelector('tbody').textContent, /100000 km/);
+    assert.match(document.querySelector('tbody').textContent, /100,000 km/);
     assert.doesNotMatch(document.querySelector('tbody').textContent, /Unit unknown|conflict/);
     await tab('sources');
     assert.equal(document.querySelector('.source-photo .vehicle-image img').getAttribute('src'), 'https://images.example.test/front.jpg');
@@ -173,7 +173,8 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     await tab('specifications');
     await add('222222222222', 20000, 2021, 'No heated seats.', null);
     assert.equal(document.querySelectorAll('[data-shortlist-id]').length, 2);
-    assert.match(document.querySelector('tbody').textContent, /km \(assumed\)/);
+    const mileageRow = [...document.querySelectorAll('tbody tr')].find(row => row.querySelector('th')?.textContent === 'Mileage and unit');
+    assert.deepEqual([...mileageRow.querySelectorAll('td')].map(cell => cell.textContent), ['100,000 km', '100,000 km']);
     assert.doesNotMatch(document.querySelectorAll('.car-card')[1].textContent, /Check mileage/);
     let calls = 0;
     globalThis.fetch = async () => { calls++; throw new Error('Should not fetch duplicate'); };

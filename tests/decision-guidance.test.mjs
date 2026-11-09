@@ -70,7 +70,7 @@ test('mileage corrections validate explicit units, preserve source evidence, res
   assert.equal(mileage.userEntered, true);
   assert.equal(mileage.sellerReported, false);
   assert.equal(mileage.originalEvidence[0].amount, 100000);
-  assert.match(mileageDisplay(edited), /50000 mi · User-entered/);
+  assert.match(mileageDisplay(edited), /80,467 km · User-entered/);
   const summary = decisionSummary([edited], 'value', 2026);
   assert.ok(Math.abs(summary.ranking.ranked[0].values.mileage - 80467.2) < 1e-8);
   assert.equal(summary.ranking.ranked[0].labels.mileage, 'User-entered mileage');

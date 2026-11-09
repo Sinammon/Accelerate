@@ -103,6 +103,7 @@ test('baseline-only comfort estimates tie and equal matches stay equal', () => {
 test('short facts include only actual supported claims and preserve provenance', () => {
   const facts = keyFacts(cars[0]);
   assert.deepEqual(facts.map(f => f.label), ['Engine', 'Mileage', 'Transmission']);
+  assert.equal(keyFacts({ mileage: { raw: '75k miles' } })[0].value, '120,701 km');
   assert.ok(!facts.some(f => f.label === 'Reported features'));
   assert.deepEqual(keyFacts({}), []);
   const documented = keyFacts({ ...cars[0], description: 'Heated seats. No backup camera.' });
