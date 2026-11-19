@@ -1,3 +1,4 @@
+import { LiquidButton } from './components/ui/liquid-glass-button';
 import { Wordmark } from './Brand.jsx';
 import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, m, useIsPresent, useReducedMotion } from 'motion/react';
@@ -58,13 +59,13 @@ export default function LandingPreview({ onStart }) {
   return <aside className="showcase" id="features" aria-label="Interactive, illustrative product preview">
     <div className="showcase-panel">
       <div className="showcase-header"><span className="showcase-brand"><Wordmark /></span>
-        <div className="showcase-steps" role="tablist" aria-label="Preview steps" onKeyDown={onStepKey}>{stages.map((label, index) => <button type="button" role="tab" id={`preview-step-${index}`} aria-controls={`preview-panel-${index}`} aria-selected={stage === index} tabIndex={stage === index ? 0 : -1} ref={el => { tabs.current[index] = el; }} key={label} onClick={() => go(index)}><span>{index + 1}</span>{label}</button>)}</div>
+        <div className="showcase-steps" role="tablist" aria-label="Preview steps" onKeyDown={onStepKey}>{stages.map((label, index) => <LiquidButton surfaceOnly type="button" role="tab" id={`preview-step-${index}`} aria-controls={`preview-panel-${index}`} aria-selected={stage === index} tabIndex={stage === index ? 0 : -1} ref={el => { tabs.current[index] = el; }} key={label} onClick={() => go(index)}><span>{index + 1}</span>{label}</LiquidButton>)}</div>
       </div>
       <div className="showcase-window"><AnimatePresence initial={false} custom={direction}><PreviewSlide key={stage} stage={stage} direction={direction} reduced={reduced}>
-        {stage === 0 && <div className="showcase-vehicles" aria-label="Four fictional vehicle examples">{cars.map(car => <button type="button" className={`preview-vehicle ${selected === car.id ? 'selected' : ''}`} key={car.id} aria-pressed={selected === car.id} aria-label={`Select example ${car.year} ${car.name}`} onClick={() => setSelected(car.id)}>
+        {stage === 0 && <div className="showcase-vehicles" aria-label="Four fictional vehicle examples">{cars.map(car => <LiquidButton surfaceOnly type="button" className={`preview-vehicle ${selected === car.id ? 'selected' : ''}`} key={car.id} aria-pressed={selected === car.id} aria-label={`Select example ${car.year} ${car.name}`} onClick={() => setSelected(car.id)}>
           <span className="preview-photo">{photo(car)}</span><strong>{car.year} {car.name}</strong>
           <span className="preview-vehicle-detail"><Icon name="mileage" />{car.mileage.toLocaleString('en-CA')} km</span><span className="preview-vehicle-detail"><Icon name="transmission" />{car.transmission}</span><span className="preview-vehicle-detail"><Icon name="location" />{car.city}</span>
-        </button>)}</div>}
+        </LiquidButton>)}</div>}
         {stage === 1 && <div className="showcase-comparison"><h2>Compare three fictional contenders</h2><p className="showcase-description">Asking prices, mileage and fuel use in one comparison</p>
           <table><caption className="sr-only">Fictional comparison. All prices, mileages and fuel figures are illustrative, not verified specifications.</caption><thead><tr><th scope="col"><span className="sr-only">Detail</span></th>{compared.map(car => <th scope="col" key={car.id}><span className="comparison-photo">{photo(car)}</span><small>{car.year}</small><strong>{car.name}</strong></th>)}</tr></thead><tbody>
             <tr><th scope="row">Price <small>CAD</small></th>{compared.map(car => <td key={car.id} className={car.id === 'mazda3' ? 'example-best' : ''}>{money(car.price)}</td>)}</tr>
@@ -73,14 +74,14 @@ export default function LandingPreview({ onStart }) {
             <tr><th scope="row">Gearbox</th>{compared.map(car => <td key={car.id}>{car.transmission === 'Automatic' ? 'Auto' : 'Manual'}</td>)}</tr>
             <tr className="example-highlights"><th scope="row">Highlight</th>{compared.map(car => <td key={car.id}>{car.highlight}</td>)}</tr>
           </tbody></table></div>}
-        {stage === 2 && <div className="showcase-decision"><h2>What matters most to you?</h2><div className="sample-priorities" role="group" aria-label="Illustrative decision priority">{priorities.map(item => <button key={item.id} type="button" aria-pressed={priority === item.id} onClick={() => setPriority(item.id)}>{item.label}</button>)}</div>
+        {stage === 2 && <div className="showcase-decision"><h2>What matters most to you?</h2><div className="sample-priorities" role="group" aria-label="Illustrative decision priority">{priorities.map(item => <LiquidButton surfaceOnly key={item.id} type="button" aria-pressed={priority === item.id} onClick={() => setPriority(item.id)}>{item.label}</LiquidButton>)}</div>
           <m.div className="preview-match" key={priority} initial={reduced ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: reduced ? 0 : 0.18, ease: [0.22, 1, 0.36, 1] }} aria-live="polite" aria-atomic="true">
             <div className="match-photo">{photo(choice.car)}<span>Example best match</span></div>
             <div className="match-copy"><h3>{choice.car.year} {choice.car.name}</h3><p className="match-reason">{choice.reason}</p><ul>{choice.strengths.map(strength => <li key={strength}><Icon name="check" />{strength}</li>)}</ul><p className="match-tradeoff"><b>Trade-off</b> {choice.tradeoff}</p></div>
           </m.div></div>}
       </PreviewSlide></AnimatePresence></div>
-      <button className="showcase-arrow showcase-previous" type="button" aria-label="Previous preview step" onClick={() => go((stage + 2) % 3, -1)}><Icon name="chevron" /></button><button className="showcase-arrow showcase-next" type="button" aria-label="Next preview step" onClick={() => go((stage + 1) % 3, 1)}><Icon name="chevron" /></button>
-      <div className="showcase-bottom"><button type="button" className="preview-advance" onClick={() => stage < 2 ? go(stage + 1, 1) : onStart()}>{['Compare these cars', 'Help me decide', 'Try your own cars'][stage]}<Icon name="arrow" /></button><div className="showcase-progress" role="group" aria-label="Choose preview step">{stages.map((label, index) => <button type="button" key={label} aria-label={`Preview ${label}`} aria-pressed={stage === index} onClick={() => go(index)}><span /></button>)}</div></div>
+      <LiquidButton surfaceOnly className="showcase-arrow showcase-previous" type="button" aria-label="Previous preview step" onClick={() => go((stage + 2) % 3, -1)}><Icon name="chevron" /></LiquidButton><LiquidButton surfaceOnly className="showcase-arrow showcase-next" type="button" aria-label="Next preview step" onClick={() => go((stage + 1) % 3, 1)}><Icon name="chevron" /></LiquidButton>
+      <div className="showcase-bottom"><LiquidButton surfaceOnly type="button" className="preview-advance" onClick={() => stage < 2 ? go(stage + 1, 1) : onStart()}>{['Compare these cars', 'Help me decide', 'Try your own cars'][stage]}<Icon name="arrow" /></LiquidButton><div className="showcase-progress" role="group" aria-label="Choose preview step">{stages.map((label, index) => <LiquidButton surfaceOnly type="button" key={label} aria-label={`Preview ${label}`} aria-pressed={stage === index} onClick={() => go(index)}><span /></LiquidButton>)}</div></div>
     </div>
     <p className="showcase-disclaimer">Illustrative preview · Fictional details · Model-example photos <a href="/images/preview/credits.html" target="_blank" rel="noreferrer">Photo credits</a></p>
   </aside>;

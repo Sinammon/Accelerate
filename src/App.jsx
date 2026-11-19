@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { readImportResponse } from './import-response.js';
-import { LazyMotion, domMax, m, MotionConfig, useReducedMotion } from 'motion/react';
+import { LazyMotion, domAnimation, m, MotionConfig, useReducedMotion } from 'motion/react';
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
 import DecisionDashboard from './DecisionDashboard.jsx';
 import OwnershipCalculator from './OwnershipCalculator.jsx';
@@ -8,8 +8,9 @@ import { createOwnershipState } from './ownership-calculator.js';
 import VehicleComparison from './VehicleComparison.jsx';
 import Dashboard from './Dashboard.jsx';
 import ImportComposer from './ImportComposer.jsx';
+import LiquidNavbar from './components/ui/liquid-glass-navbar';
 import ThemeSwitch from './ThemeSwitch.tsx';
-import { ThemeProvider } from './ThemeProvider.jsx';
+import { ThemeProvider, useTheme } from './ThemeProvider.jsx';
 import Icon from './Icons.jsx';
 import Brand from './Brand.jsx';
 import CarManagement from './CarManagement.jsx';
@@ -26,7 +27,14 @@ import { referenceMarket } from './reference-market.js';
 import { rankDecisionMode } from './decision-engine.js';
 
 const route = () => ['compare', 'decide', 'ownership'].includes(window.location.hash.slice(1)) ? window.location.hash.slice(1) : 'import';
+const destinations = [
+  { label: 'Compare', href: '#compare', icon: <Icon name="compare" /> },
+  { label: 'Recommendation', href: '#decide', icon: <Icon name="trophy" /> },
+  { label: 'Costs', href: '#ownership', icon: <Icon name="dollar" /> },
+];
+
 function Application() {
+  const { theme } = useTheme();
   const reduced = useReducedMotion();
   // One owner keeps the shortlist and private calculator inputs in memory across pages.
   const [cars, setCars] = useState([]);
@@ -210,20 +218,15 @@ function Application() {
   const topValue = cars.length > 1 && valueRanking?.best.length === 1 && !valueRanking.best[0].reviewRequired
     ? valueRanking.best[0].car.legacyItemId : null;
   const enter = { initial: { opacity: reduced ? 1 : 0 }, animate: { opacity: 1 }, transition: { duration: reduced ? 0 : 0.18, ease: [0.22, 1, 0.36, 1] } };
-  return <LazyMotion features={domMax} strict><MotionConfig reducedMotion="user"><div className={`site-shell app-shell ${page === 'import' ? 'landing-shell' : 'compact-workspace'}`}>
+  return <LazyMotion features={domAnimation} strict><MotionConfig reducedMotion="user"><div className={`site-shell app-shell ${page === 'import' ? 'landing-shell' : 'compact-workspace'}`}>
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); document.getElementById('main-content')?.focus(); }}>Skip to content</a>
     <header className="site-header" onKeyDown={event => { if (event.key === 'Escape' && menuOpen) { setMenuOpen(false); menuToggle.current?.focus(); } }}>
       <Brand symbol={page !== 'import'} />
-      <nav id="primary-navigation" className={menuOpen ? 'is-open' : ''} aria-label="Main navigation">
-        {[['compare', 'Compare'], ['decide', 'Recommendation'], ['ownership', 'Costs']].map(([id, label]) =>
-          <a className="nav-link" key={id} href={`#${id}`} aria-current={page === id ? 'page' : undefined} onClick={() => setMenuOpen(false)}>
-            {page === id && <m.span aria-hidden="true" className="nav-selection" layoutId="primary-selection"
-              transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 480, damping: 40 }} />}
-            <span>{label}</span>
-          </a>
-        )}
-      </nav>
-      <div className="header-actions">{page !== 'import' && <CarManagement cars={cars} onRemove={removeCar} onDetails={showSources} />}<ThemeSwitch overHero={page === 'import'} /><LiquidButton size="default" className={page === 'import' ? 'nav-button size-11 bg-white p-0 text-secondary-950 sm:h-auto sm:w-auto sm:px-4' : 'nav-button bg-primary text-primary-foreground'} aria-label="Add car" type="button" disabled={cars.length >= 4 || loading} onClick={() => { setMenuOpen(false); startImport(); }}><span className={page === 'import' ? 'hidden sm:inline' : undefined}>Add car</span><Icon name="link" /></LiquidButton><button className="nav-menu-toggle" type="button" ref={menuToggle} aria-expanded={menuOpen} aria-controls="primary-navigation" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} onClick={() => setMenuOpen(open => !open)}><Icon name={menuOpen ? 'close' : 'menu'} /></button></div>
+      <LiquidNavbar id="primary-navigation" items={destinations}
+        active={destinations.findIndex(item => item.href === `#${page}`)}
+        tone={page === 'import' ? 'dark' : theme} compact={false}
+        className={menuOpen ? 'is-open' : ''} onChange={(_, item) => { setMenuOpen(false); navigate(item.href.slice(1)); }} />
+      <div className="header-actions">{page !== 'import' && <CarManagement cars={cars} onRemove={removeCar} onDetails={showSources} />}<ThemeSwitch overHero={page === 'import'} /><LiquidButton size="default" className={page === 'import' ? 'nav-button size-11 bg-white p-0 text-secondary-950 sm:h-auto sm:w-auto sm:px-4' : 'nav-button bg-primary text-primary-foreground'} aria-label="Add car" type="button" disabled={cars.length >= 4 || loading} onClick={() => { setMenuOpen(false); startImport(); }}><span className={page === 'import' ? 'hidden sm:inline' : undefined}>Add car</span><Icon name="link" /></LiquidButton><LiquidButton surfaceOnly className="nav-menu-toggle" type="button" ref={menuToggle} aria-expanded={menuOpen} aria-controls="primary-navigation" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} onClick={() => setMenuOpen(open => !open)}><Icon name={menuOpen ? 'close' : 'menu'} /></LiquidButton></div>
     </header>
     <div className={page === 'import' ? 'dashboard-layout' : 'workspace-layout'}>
     <main id="main-content" tabIndex={-1}><m.div key={page} className="page-transition" {...enter}>

@@ -41,7 +41,9 @@ test('three-page journey preserves imports, supports all modes, removes and repl
     assert.equal(menuButton.getAttribute('aria-expanded'), 'false');
     assert.equal(document.activeElement, menuButton, 'Escape returns focus to the disclosure trigger');
     await act(async () => menuButton.click());
-    await act(async () => { document.querySelector('#primary-navigation a').click(); await new Promise(resolve => setTimeout(resolve, 20)); });
+    // Add car returns to the landing form from Recommendation. Compare opens an inline form.
+    await act(async () => document.querySelector('#primary-navigation a[href="#decide"]').click());
+    assert.equal(document.querySelector('h1').textContent, 'Your recommendation');
     await act(async () => { document.querySelector('.nav-button').click(); await new Promise(resolve => setTimeout(resolve, 20)); });
     assert.equal(menuButton.getAttribute('aria-expanded'), 'false', 'selecting navigation closes the mobile menu');
     assert.equal(document.querySelector('h1').textContent, "Find the Car That's Right for You.");

@@ -1,3 +1,4 @@
+import { LiquidButton } from './components/ui/liquid-glass-button';
 import React, { useRef } from 'react';
 
 /** Arrow keys move focus and selection together; all panels keep stable IDs. */
@@ -13,7 +14,7 @@ export default function WorkspaceTabs({ id, label, tabs, value, onChange }) {
     buttons.current[next]?.focus();
   }
   return <div className="workspace-tabs" role="tablist" aria-label={label}>{tabs.map(([key, title], index) =>
-    <button key={key} ref={element => { buttons.current[index] = element; }} type="button" id={`${id}-tab-${key}`} role="tab" aria-selected={value === key} aria-controls={`${id}-panel-${key}`} tabIndex={value === key ? 0 : -1} onClick={() => onChange(key)} onKeyDown={event => keyDown(event, index)}>{title}</button>
+    <LiquidButton surfaceOnly key={key} ref={element => { buttons.current[index] = element; }} type="button" id={`${id}-tab-${key}`} role="tab" aria-selected={value === key} aria-controls={`${id}-panel-${key}`} tabIndex={value === key ? 0 : -1} onClick={() => onChange(key)} onKeyDown={event => keyDown(event, index)}>{title}</LiquidButton>
   )}</div>;
 }
 

@@ -1,3 +1,4 @@
+import { LiquidButton } from './components/ui/liquid-glass-button';
 import React, { useRef } from 'react';
 import Icon from './Icons.jsx';
 import LandingPreview from './LandingPreview.jsx';
@@ -37,7 +38,7 @@ export default function Dashboard({ importForm, onStart, onShowCosts }) {
     <SourceStrip />
     <section id="how-it-works" className="value-section mx-auto max-w-7xl scroll-mt-28 px-5 pb-16 pt-10 sm:px-8 lg:pb-24 lg:pt-16" aria-labelledby="perspective-heading">
       <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-20">
-        <div className="pt-4"><h2 id="perspective-heading" className="mb-6 max-w-lg font-sans text-4xl font-medium leading-tight tracking-tight text-content sm:text-5xl">Compare the cars you’re considering</h2><p className="mb-6 max-w-md text-base text-subdued">Keep the asking price, everyday costs and model research together, with sources and estimates clearly labeled.</p><div className="editorial-actions"><button type="button" className="text-button" onClick={explore}>Explore the comparison<Icon name="arrow" /></button><button type="button" className="inline-button" onClick={onShowCosts}>Fuel and comfort estimates<Icon name="arrow" /></button></div></div>
+        <div className="pt-4"><h2 id="perspective-heading" className="mb-6 max-w-lg font-sans text-4xl font-medium leading-tight tracking-tight text-content sm:text-5xl">Compare the cars you’re considering</h2><p className="mb-6 max-w-md text-base text-subdued">Keep the asking price, everyday costs and model research together, with sources and estimates clearly labeled.</p><div className="editorial-actions"><LiquidButton surfaceOnly type="button" className="text-button" onClick={explore}>Explore the comparison<Icon name="arrow" /></LiquidButton><LiquidButton surfaceOnly type="button" className="inline-button" onClick={onShowCosts}>Fuel and comfort estimates<Icon name="arrow" /></LiquidButton></div></div>
         <MetricGrid />
       </div>
       <details ref={preview} className="dashboard-preview mt-16 border-t border-divider pt-4"><summary className="min-h-11 px-0 py-4 text-sm font-medium text-subdued">How it works · explore the fictional demo</summary><div className="preview-intro mb-6 mt-8"><h2>From listings to a shortlist</h2><p>Explore Import → Compare → Decide with fictional vehicles.</p></div><LandingPreview onStart={onStart} /></details>

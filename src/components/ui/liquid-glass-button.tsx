@@ -94,15 +94,20 @@ function LiquidButton({
   variant,
   size,
   asChild = false,
+  surfaceOnly = false,
   children,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof liquidbuttonVariants> & {
     asChild?: boolean
+    surfaceOnly?: boolean
   }) {
   const Comp = asChild ? Slot : "button"
 
   const filterId = React.useId()
+  if (surfaceOnly) {
+    return <Comp {...props} className={className} data-glass-control="">{children}</Comp>
+  }
 
   return (
     <>

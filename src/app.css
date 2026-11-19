@@ -3,6 +3,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 @import './theme.css' layer(base);
 @import './styles.css' layer(components);
+@import './waterline.css' layer(components);
 @import './landing.css' layer(components);
 @import './evidence.css' layer(components);
 @import './homepage.css' layer(components);
@@ -11,7 +12,7 @@
 @import './dashboard.css' layer(components);
 @import './ownership.css' layer(components);
 @import './compact.css' layer(components);
-@import './glass-controls.css' layer(components);
+@import './glass-controls.css';
 
 
 @theme inline {

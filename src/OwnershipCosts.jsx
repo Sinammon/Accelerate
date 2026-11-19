@@ -1,3 +1,4 @@
+import { LiquidButton } from './components/ui/liquid-glass-button';
 import React from 'react';
 import { resolveRunningCosts, runningScenario } from './ownership-calculator.js';
 import { experienceLabel } from './vehicle-experience.js';
@@ -10,7 +11,7 @@ export default function OwnershipCosts({ cars, scenario, ownership = {}, onAdjus
     <h2 id="ownership-costs-heading">Beyond the asking price</h2>
     <p className="ownership-scope">Affordability compares asking price (80%) and annual running expenses (20%). These planning estimates make the result provisional. Financing, purchase savings, taxes, depreciation and resale are outside this ranking.</p>
     <p>{OWNERSHIP_ASSUMPTIONS}</p>
-    <div className="ownership-scenario"><p>{Number.isFinite(scenario.annualKm) ? `${scenario.annualKm.toLocaleString('en-CA')} km/year. ` : 'Check annual driving. '}{Number.isFinite(scenario.pricePerLitre) ? `$${scenario.pricePerLitre.toFixed(2)} CAD/L. ` : 'Check fuel price. '}Uses shared driving assumptions and your running-cost edits in Costs. Missing or invalid amounts are never zero; an incomplete running total excludes that factor for every contender.</p>{onAdjustFuel && <button type="button" className="text-button" onClick={onAdjustFuel}>Adjust fuel assumptions</button>}<a className="text-button" href="#ownership">Edit all running costs</a></div>
+    <div className="ownership-scenario"><p>{Number.isFinite(scenario.annualKm) ? `${scenario.annualKm.toLocaleString('en-CA')} km/year. ` : 'Check annual driving. '}{Number.isFinite(scenario.pricePerLitre) ? `$${scenario.pricePerLitre.toFixed(2)} CAD/L. ` : 'Check fuel price. '}Uses shared driving assumptions and your running-cost edits in Costs. Missing or invalid amounts are never zero; an incomplete running total excludes that factor for every contender.</p>{onAdjustFuel && <LiquidButton surfaceOnly type="button" className="text-button" onClick={onAdjustFuel}>Adjust fuel assumptions</LiquidButton>}<a className="text-button" href="#ownership">Edit all running costs</a></div>
     <ul className="ownership-vehicles">{cars.map(car => {
       const overrides = ownership.vehicles?.[car.legacyItemId] || {};
       const r = resolveRunningCosts(car, runningScenario(scenario, ownership), overrides);

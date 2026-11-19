@@ -1,3 +1,4 @@
+import { LiquidButton } from './components/ui/liquid-glass-button';
 import { INSURANCE_REFERENCE, resolveOwnershipEstimates } from './ownership-estimates.js';
 import { OWNERSHIP_ASSUMPTIONS } from '../shared/ownership-estimates.js';
 import React, { useId, useState } from 'react';
@@ -70,10 +71,10 @@ export default function OwnershipCalculator({ cars, topValue, valueProvisional, 
   const estimateField = (r, name, label, perKm = false) => {
     const edited = Object.hasOwn(state.vehicles[r.car.legacyItemId] || {}, name);
     return <>{carField(r, name, label, undefined, perKm ? { step: '0.001' } : {})}
-      {edited && <button type="button" className="text-button ownership-reset" aria-label={`Reset ${perKm ? 'maintenance' : 'insurance'} to estimate for ${vehicleName(r.car)}`} onClick={() => setState(previous => {
+      {edited && <LiquidButton surfaceOnly type="button" className="text-button ownership-reset" aria-label={`Reset ${perKm ? 'maintenance' : 'insurance'} to estimate for ${vehicleName(r.car)}`} onClick={() => setState(previous => {
         const overrides = { ...previous.vehicles[r.car.legacyItemId] }; delete overrides[name];
         return { ...previous, vehicles: { ...previous.vehicles, [r.car.legacyItemId]: overrides } };
-      })}>Reset to estimate</button>}
+      })}>Reset to estimate</LiquidButton>}
       <EstimateDetails estimate={r.estimates[name]} perKm={perKm} /></>;
   };
   const energyField = (name, label, step = '0.01') => <CostField name={name} label={label} step={step} bounds={SCENARIO_BOUNDS[name]} value={state.energyDrafts[name] ?? scenario[name]} onChange={value => {
@@ -140,7 +141,7 @@ export default function OwnershipCalculator({ cars, topValue, valueProvisional, 
       <a className="back-link" href="#compare">Compare cars <Icon name="arrow" /></a>
     </WorkspaceHeading>
     {!cars.length ? <div className="empty-state"><h2>Add cars to compare their costs</h2><p>Import a listing or try the fictional demo to build your shortlist.</p><a className="primary-link" href="#import">Choose your cars <Icon name="arrow" /></a></div> : <>
-      <div className="ownership-toolbar"><fieldset className="ownership-method"><legend>How will you buy?</legend><div>{[['cash', 'Cash'], ['finance', 'Finance']].map(([method, label]) => <button key={method} type="button" aria-pressed={state.method === method} onClick={() => update('method', method)}>{label}</button>)}</div></fieldset><p>Ontario starting scenario · CAD<br /><span>Every assumption is editable.</span></p></div>
+      <div className="ownership-toolbar"><fieldset className="ownership-method"><legend>How will you buy?</legend><div>{[['cash', 'Cash'], ['finance', 'Finance']].map(([method, label]) => <LiquidButton surfaceOnly key={method} type="button" aria-pressed={state.method === method} onClick={() => update('method', method)}>{label}</LiquidButton>)}</div></fieldset><p>Ontario starting scenario · CAD<br /><span>Every assumption is editable.</span></p></div>
       {cars.some(car => car.demo) && <p className="decision-demo-note">Fictional demo listings · These costs are planning estimates, not offers.</p>}
       <WorkspaceTabs id="costs" label="Cost views" tabs={[["summary", "Summary"], ["purchase", "Purchase"], ["running", "Running costs"], ["salary", "Salary guide"]]} value={tab} onChange={setTab} />
       <details className="ownership-assumptions"><summary>Adjust driving, tax{finance ? ' & financing' : ''} assumptions</summary><div className="ownership-fields">
@@ -177,7 +178,7 @@ export default function OwnershipCalculator({ cars, topValue, valueProvisional, 
           </ul>
           {topValue && <p className="ownership-note">The Best Value ranking considers asking price and vehicle capabilities.{valueProvisional && ' The ranking is provisional.'}</p>}
           <p className="ownership-note">Running expenses include fuel or charging, insurance, a maintenance and repair reserve, parking, and other costs. Cash purchase savings are excluded from the monthly budget.</p>
-          <div className="cost-summary-actions"><button type="button" onClick={() => openTab('purchase')}>Edit purchase estimates</button><button type="button" className="text-button" onClick={() => openTab('running')}>Edit running costs</button><button type="button" className="text-button" onClick={() => openTab('salary')}>Check your salary</button></div>
+          <div className="cost-summary-actions"><LiquidButton surfaceOnly type="button" onClick={() => openTab('purchase')}>Edit purchase estimates</LiquidButton><LiquidButton surfaceOnly type="button" className="text-button" onClick={() => openTab('running')}>Edit running costs</LiquidButton><LiquidButton surfaceOnly type="button" className="text-button" onClick={() => openTab('salary')}>Check your salary</LiquidButton></div>
           {records.some(r => r.costs.monthlyBudget == null) && <p role="status" className="ownership-error">Incomplete totals need attention. Check Purchase, Running costs, and the shared assumptions above. Missing amounts never count as zero.</p>}
         </section>
       </WorkspacePanel>

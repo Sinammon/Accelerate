@@ -1,3 +1,4 @@
+import { LiquidButton } from './components/ui/liquid-glass-button';
 import React, { useState } from 'react';
 import { extractVehicleSpecs, FIELD_LABELS } from './vehicle-specs.js';
 import { ESSENTIAL_SPEC_FIELDS } from './spec-applicability.js';
@@ -54,7 +55,7 @@ export default function VehicleDetailsEditor({ car, onSaveDetails }) {
         return <div key={field}><label htmlFor={id}>{FIELD_LABELS[field]}</label>{options[field] ? <select id={id} value={draft[field] ?? ''} onChange={event => changeDetail(field, event.target.value)}><option value="">Keep current: {hint}</option>{options[field].map(value => <option key={value}>{value}</option>)}</select> : <input id={id} type={numeric[field] ? 'number' : 'text'} min={numeric[field]?.[0]} max={numeric[field]?.[1]} step={numeric[field]?.[2]} maxLength={100} placeholder={hint} value={draft[field] ?? ''} onChange={event => changeDetail(field, event.target.value)} />}</div>;
       })}</div>
       {error && <p role="alert">{error}</p>}
-      <div className="details-actions"><button type="submit" className="primary-button">Save details &amp; find specifications</button><button type="button" className="text-button" onClick={() => { const original = resolveMileage({ ...car, mileageOverride: undefined }); setDraft({}); setSelection(''); setMarket(''); setAmount(original.amount == null ? '' : String(original.amount)); setUnit(original.assumedUnit ? '' : original.unit || ''); setMileageDirty(false); setError(''); onSaveDetails(car, {}, undefined, {}); }}>Reset to original import</button></div>
+      <div className="details-actions"><LiquidButton surfaceOnly type="submit" className="primary-button">Save details &amp; find specifications</LiquidButton><LiquidButton surfaceOnly type="button" className="text-button" onClick={() => { const original = resolveMileage({ ...car, mileageOverride: undefined }); setDraft({}); setSelection(''); setMarket(''); setAmount(original.amount == null ? '' : String(original.amount)); setUnit(original.assumedUnit ? '' : original.unit || ''); setMileageDirty(false); setError(''); onSaveDetails(car, {}, undefined, {}); }}>Reset to original import</LiquidButton></div>
       <p><small>Edited values are labeled User-entered. Verify units before saving. We never estimate mileage, accident history or installed options.</small></p>
     </form>
   </div></details>;
