@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { readImportResponse } from './import-response.js';
 import { LazyMotion, domMax, m, MotionConfig, useReducedMotion } from 'motion/react';
+import { LiquidButton } from '@/components/ui/liquid-glass-button';
 import DecisionDashboard from './DecisionDashboard.jsx';
 import OwnershipCalculator from './OwnershipCalculator.jsx';
 import { createOwnershipState } from './ownership-calculator.js';
@@ -222,7 +223,7 @@ function Application() {
           </a>
         )}
       </nav>
-      <div className="header-actions">{page !== 'import' && <CarManagement cars={cars} onRemove={removeCar} onDetails={showSources} />}<ThemeSwitch overHero={page === 'import'} /><button className={page === 'import' ? 'nav-button size-11 p-0 sm:h-auto sm:w-auto sm:px-4' : 'nav-button'} aria-label="Add car" type="button" disabled={cars.length >= 4 || loading} onClick={() => { setMenuOpen(false); startImport(); }}><span className={page === 'import' ? 'hidden sm:inline' : undefined}>Add car</span><Icon name="link" /></button><button className="nav-menu-toggle" type="button" ref={menuToggle} aria-expanded={menuOpen} aria-controls="primary-navigation" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} onClick={() => setMenuOpen(open => !open)}><Icon name={menuOpen ? 'close' : 'menu'} /></button></div>
+      <div className="header-actions">{page !== 'import' && <CarManagement cars={cars} onRemove={removeCar} onDetails={showSources} />}<ThemeSwitch overHero={page === 'import'} /><LiquidButton size="default" className={page === 'import' ? 'nav-button size-11 bg-white p-0 text-secondary-950 sm:h-auto sm:w-auto sm:px-4' : 'nav-button bg-primary text-primary-foreground'} aria-label="Add car" type="button" disabled={cars.length >= 4 || loading} onClick={() => { setMenuOpen(false); startImport(); }}><span className={page === 'import' ? 'hidden sm:inline' : undefined}>Add car</span><Icon name="link" /></LiquidButton><button className="nav-menu-toggle" type="button" ref={menuToggle} aria-expanded={menuOpen} aria-controls="primary-navigation" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} onClick={() => setMenuOpen(open => !open)}><Icon name={menuOpen ? 'close' : 'menu'} /></button></div>
     </header>
     <div className={page === 'import' ? 'dashboard-layout' : 'workspace-layout'}>
     <main id="main-content" tabIndex={-1}><m.div key={page} className="page-transition" {...enter}>

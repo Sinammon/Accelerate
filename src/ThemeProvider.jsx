@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { applyTheme, initialTheme, storedTheme, systemTheme, THEMES, THEME_STORAGE_KEY } from './theme.js';
 
-const ThemeContext = createContext(null);
+const ThemeContext = createContext(/** @type {{ theme: string, toggleTheme: () => void } | null} */ (null));
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(initialTheme);
   useEffect(() => applyTheme(theme), [theme]);
