@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { readImportResponse } from './import-response.js';
-import { LazyMotion, domAnimation, m, MotionConfig, useReducedMotion } from 'motion/react';
+import { LazyMotion, domMax, m, MotionConfig, useReducedMotion } from 'motion/react';
 import DecisionDashboard from './DecisionDashboard.jsx';
 import OwnershipCalculator from './OwnershipCalculator.jsx';
 import { createOwnershipState } from './ownership-calculator.js';
@@ -209,11 +209,19 @@ function Application() {
   const topValue = cars.length > 1 && valueRanking?.best.length === 1 && !valueRanking.best[0].reviewRequired
     ? valueRanking.best[0].car.legacyItemId : null;
   const enter = { initial: { opacity: reduced ? 1 : 0 }, animate: { opacity: 1 }, transition: { duration: reduced ? 0 : 0.18, ease: [0.22, 1, 0.36, 1] } };
-  return <LazyMotion features={domAnimation} strict><MotionConfig reducedMotion="user"><div className={`site-shell app-shell ${page === 'import' ? 'landing-shell' : 'compact-workspace'}`}>
+  return <LazyMotion features={domMax} strict><MotionConfig reducedMotion="user"><div className={`site-shell app-shell ${page === 'import' ? 'landing-shell' : 'compact-workspace'}`}>
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); document.getElementById('main-content')?.focus(); }}>Skip to content</a>
     <header className="site-header" onKeyDown={event => { if (event.key === 'Escape' && menuOpen) { setMenuOpen(false); menuToggle.current?.focus(); } }}>
       <Brand symbol={page !== 'import'} />
-      <nav id="primary-navigation" className={menuOpen ? 'is-open' : ''} aria-label="Main navigation">{[['compare', 'Compare'], ['decide', 'Recommendation'], ['ownership', 'Costs']].map(([id, label]) => <a className="nav-link" key={id} href={`#${id}`} aria-current={page === id ? 'page' : undefined} onClick={() => setMenuOpen(false)}>{label}</a>)}</nav>
+      <nav id="primary-navigation" className={menuOpen ? 'is-open' : ''} aria-label="Main navigation">
+        {[['compare', 'Compare'], ['decide', 'Recommendation'], ['ownership', 'Costs']].map(([id, label]) =>
+          <a className="nav-link" key={id} href={`#${id}`} aria-current={page === id ? 'page' : undefined} onClick={() => setMenuOpen(false)}>
+            {page === id && <m.span aria-hidden="true" className="nav-selection" layoutId="primary-selection"
+              transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 480, damping: 40 }} />}
+            <span>{label}</span>
+          </a>
+        )}
+      </nav>
       <div className="header-actions">{page !== 'import' && <CarManagement cars={cars} onRemove={removeCar} onDetails={showSources} />}<ThemeSwitch overHero={page === 'import'} /><button className={page === 'import' ? 'nav-button size-11 p-0 sm:h-auto sm:w-auto sm:px-4' : 'nav-button'} aria-label="Add car" type="button" disabled={cars.length >= 4 || loading} onClick={() => { setMenuOpen(false); startImport(); }}><span className={page === 'import' ? 'hidden sm:inline' : undefined}>Add car</span><Icon name="link" /></button><button className="nav-menu-toggle" type="button" ref={menuToggle} aria-expanded={menuOpen} aria-controls="primary-navigation" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} onClick={() => setMenuOpen(open => !open)}><Icon name={menuOpen ? 'close' : 'menu'} /></button></div>
     </header>
     <div className={page === 'import' ? 'dashboard-layout' : 'workspace-layout'}>

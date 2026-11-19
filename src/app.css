@@ -11,3 +11,4 @@
 @import './dashboard.css' layer(components);
 @import './ownership.css' layer(components);
 @import './compact.css' layer(components);
+@import './glass-controls.css' layer(components);
